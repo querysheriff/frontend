@@ -92,7 +92,8 @@ export const docContent: Record<string, DocEntry> = {
 					'Because PostgreSQL does not store the duration of every individual query run, the backend estimates the percentiles. It calculates an average time for each query and gives more weight to queries that ran more often.',
 					'For example, when a query runs 20 times with an average time of 400 ms, the calculation treats this as 20 query runs of 400 ms.',
 					'The chart groups these results into equal time intervals and calculates the estimated p90, p95, and p99 values for each interval.',
-					'Lower percentiles such as p75 are not shown. In PostgreSQL, many queries are very fast and run frequently, such as `BEGIN` and `COMMIT` for transactions. These fast queries would dominate lower percentiles and make them less useful, so higher percentiles are used to better highlight slower queries.'
+					'Utility statements such as `BEGIN`, `COMMIT`, and `SET` are excluded from these percentiles. They run extremely often and finish almost instantly, so counting them would pull the numbers down and hide the real speed of read and write queries.',
+					'Lower percentiles such as p75 are also not shown, so the chart stays focused on the slower queries that matter most.'
 				]
 			}
 		]
