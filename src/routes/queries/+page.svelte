@@ -3,7 +3,8 @@
 	import { page } from '$app/state';
 	import { timestampFromDate, timestampDate } from '@bufbuild/protobuf/wkt';
 	import type {
-		StatementMetrics,
+		QueryStatementCallsSeriesResponse,
+		QueryStatementPercentileSeriesResponse,
 		StatementMetric,
 		StatementStat
 	} from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/statement_pb';
@@ -46,7 +47,9 @@
 	let tableError = $state<string | null>(null);
 	let sort = $state<{ col: StatementSortCol; dir: 'asc' | 'desc' }>({ col: 'pctTime', dir: 'desc' });
 
-	let metrics = $state<StatementMetrics | undefined>(undefined);
+	// Fetched separately so the volume chart can paint without waiting on percentiles.
+	let callsSeries = $state<QueryStatementCallsSeriesResponse | undefined>(undefined);
+	let percentileSeries = $state<QueryStatementPercentileSeriesResponse | undefined>(undefined);
 	let chartRange = $state<{ from: Date; to: Date } | null>(null);
 	let chartLoading = $state(true);
 	let chartError = $state<string | null>(null);
@@ -94,7 +97,8 @@
 		if (!ctx.server) {
 			chartLoading = !serversState.loaded;
 			if (serversState.loaded) {
-				metrics = undefined;
+				callsSeries = undefined;
+				percentileSeries = undefined;
 				chartError = null;
 			}
 			return;
@@ -105,29 +109,31 @@
 		const ac = chartAc;
 		chartLoading = true;
 		chartError = null;
-		metrics = undefined;
+		callsSeries = undefined;
+		percentileSeries = undefined;
 
-		statementClient
-			.queryStatementMetrics(
-				{
-					serverName: ctx.server,
-					databaseName: ctx.db,
-					from: timestampFromDate(from),
-					to: timestampFromDate(to)
-				},
-				{ signal: ac.signal }
-			)
-			.then((res) => {
-				if (gen === chartGen) metrics = res.metrics;
-			})
-			.catch((e: unknown) => {
-				if (gen !== chartGen) return;
-				chartError = errMsg(e);
-				metrics = undefined;
-			})
-			.finally(() => {
-				if (gen === chartGen) chartLoading = false;
-			});
+		const scope = {
+			serverName: ctx.server,
+			databaseName: ctx.db,
+			from: timestampFromDate(from),
+			to: timestampFromDate(to)
+		};
+
+		const calls = statementClient.queryStatementCallsSeries({ scope }, { signal: ac.signal }).then((res) => {
+			if (gen === chartGen) callsSeries = res;
+		});
+
+		const percentiles = statementClient.queryStatementPercentileSeries({ scope }, { signal: ac.signal }).then((res) => {
+			if (gen === chartGen) percentileSeries = res;
+		});
+
+		// Each chart paints as its own request lands.
+		Promise.allSettled([calls, percentiles]).then((results) => {
+			if (gen !== chartGen) return;
+			const failed = results.find((r) => r.status === 'rejected');
+			chartError = failed ? errMsg((failed as PromiseRejectedResult).reason) : null;
+			chartLoading = false;
+		});
 	});
 
 	function tableRequest(offset: number) {
@@ -209,17 +215,17 @@
 		return (m?.series ?? []).flatMap((p) => (p.at ? [{ at: timestampDate(p.at), value: p.value }] : []));
 	}
 
-	const bucketMs = $derived(Number(metrics?.bucketMs ?? 0n));
-	const callsPoints = $derived(toPoints(metrics?.calls));
+	const bucketMs = $derived(Number(callsSeries?.bucketMs ?? percentileSeries?.bucketMs ?? 0n));
+	const callsPoints = $derived(toPoints(callsSeries?.calls));
 	const volumeDescription = $derived(
 		callsPoints.length > 0
 			? `How many times queries ran · ${fmtBucketSize(bucketMs)} buckets`
 			: 'How many times queries ran'
 	);
 	const latency = $derived([
-		{ label: 'p90', color: 'var(--color-steel)', points: toPoints(metrics?.p90) },
-		{ label: 'p95', color: 'var(--color-warn)', points: toPoints(metrics?.p95) },
-		{ label: 'p99', color: 'var(--color-danger)', points: toPoints(metrics?.p99) }
+		{ label: 'p90', color: 'var(--color-steel)', points: toPoints(percentileSeries?.p90) },
+		{ label: 'p95', color: 'var(--color-warn)', points: toPoints(percentileSeries?.p95) },
+		{ label: 'p99', color: 'var(--color-danger)', points: toPoints(percentileSeries?.p99) }
 	]);
 
 	// The tag sits inside a row that navigates on click.

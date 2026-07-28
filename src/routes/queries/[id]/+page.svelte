@@ -3,8 +3,9 @@
 	import { page } from '$app/state';
 	import { timestampFromDate, timestampDate } from '@bufbuild/protobuf/wkt';
 	import type {
+		QueryStatementCallsSeriesResponse,
 		QueryStatementDetailResponse,
-		StatementMetrics,
+		QueryStatementTimingSeriesResponse,
 		StatementMetric,
 		StatementSample
 	} from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/statement_pb';
@@ -33,7 +34,9 @@
 	let metaLoading = $state(true);
 	let metaError = $state<string | null>(null);
 
-	let metrics = $state<StatementMetrics | undefined>(undefined);
+	// Split so the volume chart paints without waiting on the timing chart.
+	let callsSeries = $state<QueryStatementCallsSeriesResponse | undefined>(undefined);
+	let timingSeries = $state<QueryStatementTimingSeriesResponse | undefined>(undefined);
 	let chartRange = $state<{ from: Date; to: Date } | null>(null);
 	let chartLoading = $state(true);
 	let chartError = $state<string | null>(null);
@@ -107,31 +110,36 @@
 
 		if (!validId) {
 			chartError = 'Invalid query id';
-			metrics = undefined;
+			callsSeries = undefined;
+			timingSeries = undefined;
 			chartLoading = false;
 			return;
 		}
 
 		chartLoading = true;
 		chartError = null;
-		metrics = undefined;
+		callsSeries = undefined;
+		timingSeries = undefined;
 
-		statementClient
-			.queryStatementDetailMetrics(
-				{
-					id: BigInt(statementId),
-					from: timestampFromDate(from),
-					to: timestampFromDate(to)
-				},
-				{ signal: ac.signal }
-			)
-			.then((res) => {
-				if (gen === chartGen) metrics = res.metrics;
-			})
-			.catch((e: unknown) => {
+		const scope = {
+			statementId: BigInt(statementId),
+			from: timestampFromDate(from),
+			to: timestampFromDate(to)
+		};
+
+		const calls = statementClient.queryStatementCallsSeries({ scope }, { signal: ac.signal }).then((res) => {
+			if (gen === chartGen) callsSeries = res;
+		});
+
+		const timings = statementClient.queryStatementTimingSeries({ scope }, { signal: ac.signal }).then((res) => {
+			if (gen === chartGen) timingSeries = res;
+		});
+
+		Promise.allSettled([calls, timings])
+			.then((results) => {
 				if (gen !== chartGen) return;
-				chartError = errMsg(e);
-				metrics = undefined;
+				const failed = results.find((r) => r.status === 'rejected');
+				chartError = failed ? errMsg((failed as PromiseRejectedResult).reason) : null;
 			})
 			.finally(() => {
 				if (gen === chartGen) chartLoading = false;
@@ -255,16 +263,16 @@
 		return (m?.series ?? []).flatMap((p) => (p.at ? [{ at: timestampDate(p.at), value: p.value }] : []));
 	}
 
-	const bucketMs = $derived(Number(metrics?.bucketMs ?? 0n));
-	const callsPoints = $derived(toPoints(metrics?.calls));
+	const bucketMs = $derived(Number(callsSeries?.bucketMs ?? timingSeries?.bucketMs ?? 0n));
+	const callsPoints = $derived(toPoints(callsSeries?.calls));
 	const volumeDescription = $derived(
 		callsPoints.length > 0
 			? `How many times this query ran · ${fmtBucketSize(bucketMs)} buckets`
 			: 'How many times this query ran'
 	);
 	const timing = $derived([
-		{ label: 'avg total', color: 'var(--color-command)', points: toPoints(metrics?.avg) },
-		{ label: 'avg IO', color: 'var(--color-teal)', points: toPoints(metrics?.avgIo) }
+		{ label: 'avg total', color: 'var(--color-command)', points: toPoints(timingSeries?.avg) },
+		{ label: 'avg IO', color: 'var(--color-teal)', points: toPoints(timingSeries?.avgIo) }
 	]);
 </script>
 
