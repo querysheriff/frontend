@@ -20,6 +20,7 @@
 	import { ArrowUpIcon, ArrowDownIcon, ArrowUpDownIcon } from '@lucide/svelte';
 	import { fmtDuration, fmtCount, sevText } from '$lib/format';
 	import type { SqlPopoverState } from '$lib/sqlPopover.svelte';
+	import LoadingOverlay from '$lib/components/LoadingOverlay.svelte';
 	import Tag from '$lib/components/Tag.svelte';
 
 	let {
@@ -27,14 +28,18 @@
 		sort = $bindable(),
 		sql,
 		href,
-		onFilterTag
+		onFilterTag,
+		loading = false
 	}: {
 		rows: StatementRow[];
 		sort: { col: StatementSortCol; dir: 'asc' | 'desc' };
 		sql: SqlPopoverState;
 		href: (id: string) => string;
 		onFilterTag: (e: MouseEvent, text: string) => void;
+		loading?: boolean;
 	} = $props();
+
+	let headHeight = $state(0);
 
 	const headDef: { key: StatementSortCol; label: string; align: 'left' | 'right'; width?: string; hide?: string }[] = [
 		{ key: 'query', label: 'Query', align: 'left' },
@@ -56,9 +61,9 @@
 	}
 </script>
 
-<div class="overflow-x-auto">
+<div class="relative overflow-x-auto">
 	<table class="w-full min-w-[30rem] table-fixed border-collapse font-sans">
-		<thead>
+		<thead bind:clientHeight={headHeight}>
 			<tr class="bg-hover-soft">
 				{#each headDef as h (h.key)}
 					<th
@@ -168,4 +173,8 @@
 			{/each}
 		</tbody>
 	</table>
+
+	{#if loading}
+		<LoadingOverlay message="Loading…" offsetTop={headHeight} />
+	{/if}
 </div>

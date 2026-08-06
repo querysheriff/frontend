@@ -14,6 +14,7 @@
 	import { ArrowUpIcon, ExternalLinkIcon } from '@lucide/svelte';
 	import { sevText } from '$lib/format';
 	import type { SqlPopoverState } from '$lib/sqlPopover.svelte';
+	import LoadingOverlay from '$lib/components/LoadingOverlay.svelte';
 	import Tag from '$lib/components/Tag.svelte';
 
 	let {
@@ -21,22 +22,26 @@
 		sql,
 		id,
 		hasBaseTags,
-		extraTags
+		extraTags,
+		loading = false
 	}: {
 		samples: SampleRow[];
 		sql: SqlPopoverState;
 		id: string;
 		hasBaseTags: boolean;
 		extraTags: (tags: Record<string, string>) => string[];
+		loading?: boolean;
 	} = $props();
+
+	let headHeight = $state(0);
 
 	const thBase =
 		'border-b border-line px-4 py-2.5 font-condensed text-xs font-semibold tracking-[0.7px] text-ink/70 uppercase';
 </script>
 
-<div class="overflow-x-auto">
+<div class="relative overflow-x-auto">
 	<table class="w-full min-w-[26.25rem] table-fixed border-collapse">
-		<thead>
+		<thead bind:clientHeight={headHeight}>
 			<tr class="bg-hover-soft">
 				<th scope="col" class="{thBase} hidden w-[11.25rem] text-left sm:table-cell">At</th>
 				<th scope="col" class="{thBase} text-left">Query</th>
@@ -101,4 +106,8 @@
 			{/each}
 		</tbody>
 	</table>
+
+	{#if loading}
+		<LoadingOverlay message="Loading…" offsetTop={headHeight} />
+	{/if}
 </div>

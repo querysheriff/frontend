@@ -188,8 +188,6 @@
 
 		samplesLoading = true;
 		samplesError = null;
-		samples = [];
-		hasMore = false;
 
 		statementClient
 			.queryStatementSamples(request, { signal: ac.signal })
@@ -351,9 +349,9 @@
 		/>
 	</div>
 
-	<SamplesTable {samples} {sql} {id} {hasBaseTags} {extraTags} />
+	<SamplesTable {samples} {sql} {id} {hasBaseTags} {extraTags} loading={samplesLoading && samples.length > 0} />
 
-	{#if samplesLoading}
+	{#if samplesLoading && samples.length === 0}
 		<StateBlock class="px-4 py-6" message="Loading…" />
 	{:else if samplesError}
 		<StateBlock kind="error" class="px-4 py-6" message={samplesError} />

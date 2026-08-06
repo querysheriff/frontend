@@ -271,14 +271,21 @@
 	</header>
 	<TagFilterBar bind:searchText={search} tags={filters} />
 
-	<StatementTable {rows} bind:sort {sql} href={(id) => `/queries/${id}`} onFilterTag={filterByTag} />
+	<StatementTable
+		{rows}
+		bind:sort
+		{sql}
+		href={(id) => `/queries/${id}`}
+		onFilterTag={filterByTag}
+		loading={tableLoading && rows.length > 0}
+	/>
 
 	{#if tableLoading && rows.length === 0}
 		<StateBlock class="px-4 py-7" message="Loading…" />
 	{:else if tableError}
 		<StateBlock kind="error" class="px-4 py-7" message={tableError} />
 	{:else if rows.length === 0}
-		<StateBlock class="px-4 py-7" message="No statements found" />
+		<StateBlock class="px-4 py-7" message="No queries found" />
 	{:else if hasMore}
 		<div class="border-t border-line-soft p-3 text-center">
 			<Button variant="ghost" onclick={loadMore} disabled={loadingMore}>
