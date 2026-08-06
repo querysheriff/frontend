@@ -79,8 +79,7 @@
 							type="button"
 							onclick={() => sortBy(h.key)}
 							class={clsx(
-								'group/sort block w-full cursor-pointer py-2.5 pr-4 uppercase select-none focus-visible:text-command',
-								h.key === 'query' ? 'pl-8' : 'pl-4',
+								'group/sort block w-full cursor-pointer px-4 py-2.5 uppercase select-none focus-visible:text-command',
 								h.align === 'right' ? 'text-right' : 'text-left'
 							)}
 						>
@@ -118,35 +117,32 @@
 			{#each rows as q (q.id)}
 				<tr class="group relative transition-colors hover:bg-hover">
 					<td class="border-b border-line-soft px-4 py-3 align-top">
-						<div class="flex items-start gap-2">
-							<span class="mt-1.5 h-2 w-2 flex-none rounded-full" style:background={q.sev}></span>
-							<div class="min-w-0 flex-1">
-								<a
-									href={href(q.id)}
-									onfocus={(e) => e.currentTarget.matches(':focus-visible') && sql.showLazy(BigInt(q.id), e)}
-									onblur={sql.hide}
-									class="group/link inline-block max-w-full align-top after:absolute after:inset-0 focus-visible:outline-none"
+						<div class="min-w-0">
+							<a
+								href={href(q.id)}
+								onfocus={(e) => e.currentTarget.matches(':focus-visible') && sql.showLazy(BigInt(q.id), e)}
+								onblur={sql.hide}
+								class="group/link inline-block max-w-full align-top after:absolute after:inset-0 focus-visible:outline-none"
+							>
+								<code
+									onmouseenter={(e) => sql.showLazy(BigInt(q.id), e)}
+									onmouseleave={sql.hide}
+									class="relative z-[1] inline-block max-w-full overflow-hidden align-top font-mono text-sm leading-[20px] text-ellipsis whitespace-nowrap text-ink transition-colors hover:text-command group-focus-visible/link:text-command"
+									>{q.query}</code
 								>
-									<code
-										onmouseenter={(e) => sql.showLazy(BigInt(q.id), e)}
-										onmouseleave={sql.hide}
-										class="relative z-[1] inline-block max-w-full overflow-hidden align-top font-mono text-sm leading-[20px] text-ellipsis whitespace-nowrap text-ink transition-colors hover:text-command group-focus-visible/link:text-command"
-										>{q.query}</code
-									>
-								</a>
-								{#if q.tags.length > 0}
-									<div class="pointer-events-none relative z-[1] mt-1 flex flex-wrap gap-1.5">
-										{#each q.tags as t (t)}
-											<Tag
-												text={t}
-												title="Filter by {t}"
-												onclick={(e) => onFilterTag(e, t)}
-												class="pointer-events-auto"
-											/>
-										{/each}
-									</div>
-								{/if}
-							</div>
+							</a>
+							{#if q.tags.length > 0}
+								<div class="pointer-events-none relative z-[1] mt-1 flex flex-wrap gap-1.5">
+									{#each q.tags as t (t)}
+										<Tag
+											text={t}
+											title="Filter by {t}"
+											onclick={(e) => onFilterTag(e, t)}
+											class="pointer-events-auto"
+										/>
+									{/each}
+								</div>
+							{/if}
 						</div>
 					</td>
 					<td
