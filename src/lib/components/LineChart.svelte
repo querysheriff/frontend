@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Axis, Chart, Grid, Highlight, Spline, Svg, Tooltip } from 'layerchart';
 	import { scaleTime } from 'd3-scale';
-	import { curveMonotoneX } from 'd3-shape';
+	import { curveLinear } from 'd3-shape';
 	import { fmtAxisTime, fmtClockMinute } from '$lib/format';
 	import ChartFrame from '$lib/components/ChartFrame.svelte';
 	import GapBands from '$lib/components/GapBands.svelte';
@@ -77,7 +77,7 @@
 				<Spline
 					y={(d: MetricSeriesRow) => d.values[i]}
 					defined={(d: MetricSeriesRow) => d.values[i] != null}
-					curve={curveMonotoneX}
+					curve={curveLinear}
 					stroke={s.color}
 					stroke-width={2}
 				/>
