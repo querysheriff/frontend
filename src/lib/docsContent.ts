@@ -206,6 +206,25 @@ export const docContent: Record<string, DocEntry> = {
 		]
 	},
 
+	'qd-query': {
+		title: 'Query',
+		sections: [
+			{
+				heading: 'What this shows',
+				body: [
+					'The normalized query: one entry stands for every run of the same shape, with the real values replaced by placeholders like `$1`.',
+					'That is why this text has no values in it. The captured samples below show real runs.'
+				]
+			},
+			{
+				heading: 'Why this matters',
+				body: [
+					'Normalizing is what lets PostgreSQL group thousands of runs into one row, so the totals and averages on this page describe the query as a whole rather than one execution.'
+				]
+			}
+		]
+	},
+
 	'qd-samples': {
 		title: 'Captured samples',
 		sections: [

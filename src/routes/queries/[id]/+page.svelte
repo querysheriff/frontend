@@ -268,7 +268,7 @@
 	<ArrowLeftIcon class="size-3.5" /><span>Back</span>
 </a>
 
-<div class="border border-line-card bg-card px-4 pt-3.5 pb-4">
+<DocCard id="qd-query" class="px-4 pt-3.5 pb-4">
 	<header class="pr-9">
 		<SectionHeader title="Query" description="The normalized query — each captured run below fills in real values" />
 	</header>
@@ -284,7 +284,7 @@
 			{/each}
 		</div>
 	{/if}
-</div>
+</DocCard>
 
 <div class="mt-4 grid gap-4">
 	<ChartPanel docId="qd-volume" title="Query volume over time" description={volumeDescription}>
