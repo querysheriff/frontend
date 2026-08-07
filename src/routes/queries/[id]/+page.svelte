@@ -9,6 +9,7 @@
 		StatementMetric,
 		StatementSample
 	} from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/statement_pb';
+	import { SampleSortColumn } from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/statement_pb';
 	import { statementClient } from '$lib/connect';
 	import StateBlock from '$lib/components/StateBlock.svelte';
 	import { ctx, scopeLock } from '$lib/state.svelte';
@@ -24,10 +25,16 @@
 	import SectionHeader from '$lib/components/SectionHeader.svelte';
 	import SqlPopover from '$lib/components/SqlPopover.svelte';
 	import { SqlPopoverState } from '$lib/sqlPopover.svelte';
-	import SamplesTable, { type SampleRow } from '$lib/components/SamplesTable.svelte';
+	import SamplesTable, { type SampleRow, type SampleSortCol } from '$lib/components/SamplesTable.svelte';
 	import Tag from '$lib/components/Tag.svelte';
 
 	const PAGE_SIZE = 50;
+
+	const sampleSortProto: Record<SampleSortCol, SampleSortColumn> = {
+		at: SampleSortColumn.AT,
+		plan: SampleSortColumn.PLAN,
+		dur: SampleSortColumn.DURATION
+	};
 
 	let detail = $state<QueryStatementDetailResponse | undefined>(undefined);
 	let metaLoading = $state(true);
@@ -45,6 +52,7 @@
 	let samplesLoading = $state(true);
 	let loadingMore = $state(false);
 	let samplesError = $state<string | null>(null);
+	let sampleSort = $state<{ col: SampleSortCol; dir: 'asc' | 'desc' }>({ col: 'at', dir: 'desc' });
 
 	const sql = new SqlPopoverState((sampleId) =>
 		statementClient.getStatementSampleText({ sampleId }).then((r) => r.query)
@@ -151,6 +159,8 @@
 			id: BigInt(id),
 			from: timestampFromDate(from),
 			to: timestampFromDate(to),
+			sortColumn: sampleSortProto[sampleSort.col],
+			sortDesc: sampleSort.dir === 'desc',
 			limit: PAGE_SIZE,
 			offset
 		};
@@ -323,7 +333,15 @@
 		/>
 	</div>
 
-	<SamplesTable {samples} {sql} {id} {hasBaseTags} {extraTags} loading={samplesLoading && samples.length > 0} />
+	<SamplesTable
+		{samples}
+		bind:sort={sampleSort}
+		{sql}
+		{id}
+		{hasBaseTags}
+		{extraTags}
+		loading={samplesLoading && samples.length > 0}
+	/>
 
 	{#if samplesLoading && samples.length === 0}
 		<StateBlock class="px-4 py-6" message="Loading…" />

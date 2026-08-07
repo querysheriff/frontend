@@ -1,6 +1,6 @@
 <script module lang="ts">
 	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import SamplesTable, { type SampleRow } from './SamplesTable.svelte';
+	import SamplesTable, { type SampleRow, type SampleSortCol } from './SamplesTable.svelte';
 
 	const { Story } = defineMeta({
 		title: 'Queries/SamplesTable',
@@ -45,12 +45,14 @@
 	];
 
 	const extraTags = (t: Record<string, string>) => Object.entries(t).map(([k, v]) => `${k}=${v}`);
+
+	let sort = $state<{ col: SampleSortCol; dir: 'asc' | 'desc' }>({ col: 'at', dir: 'desc' });
 </script>
 
 <Story name="Default">
 	{#snippet template()}
 		<div class="border border-line-card bg-card">
-			<SamplesTable {samples} {sql} id="1" hasBaseTags={true} {extraTags} />
+			<SamplesTable {samples} bind:sort {sql} id="1" hasBaseTags={true} {extraTags} />
 		</div>
 	{/snippet}
 </Story>
@@ -58,7 +60,7 @@
 <Story name="Empty">
 	{#snippet template()}
 		<div class="border border-line-card bg-card">
-			<SamplesTable samples={[]} {sql} id="1" hasBaseTags={false} {extraTags} />
+			<SamplesTable samples={[]} bind:sort {sql} id="1" hasBaseTags={false} {extraTags} />
 		</div>
 	{/snippet}
 </Story>

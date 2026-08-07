@@ -8,10 +8,13 @@
 		durFmt: string;
 		sev: string;
 	};
+
+	export type SampleSortCol = 'at' | 'plan' | 'dur';
 </script>
 
 <script lang="ts">
-	import { ArrowUpIcon, ExternalLinkIcon } from '@lucide/svelte';
+	import { clsx } from 'clsx';
+	import { ArrowUpIcon, ArrowDownIcon, ArrowUpDownIcon, ExternalLinkIcon } from '@lucide/svelte';
 	import { sevText } from '$lib/format';
 	import type { SqlPopoverState } from '$lib/sqlPopover.svelte';
 	import LoadingOverlay from '$lib/components/LoadingOverlay.svelte';
@@ -19,6 +22,7 @@
 
 	let {
 		samples,
+		sort = $bindable(),
 		sql,
 		id,
 		hasBaseTags,
@@ -26,6 +30,7 @@
 		loading = false
 	}: {
 		samples: SampleRow[];
+		sort: { col: SampleSortCol; dir: 'asc' | 'desc' };
 		sql: SqlPopoverState;
 		id: string;
 		hasBaseTags: boolean;
@@ -35,18 +40,76 @@
 
 	let headHeight = $state(0);
 
-	const thBase =
-		'border-b border-line px-4 py-2.5 font-condensed text-xs font-semibold tracking-[0.7px] text-ink/70 uppercase';
+	// Query has no `key`: every row here is the same query shape, so ordering by
+	// the concretized text sorts by whichever literals happened to be captured.
+	const headDef: {
+		key?: SampleSortCol;
+		label: string;
+		align: 'left' | 'right';
+		cls: string;
+	}[] = [
+		{ key: 'at', label: 'At', align: 'left', cls: 'hidden w-[11.25rem] sm:table-cell' },
+		{ label: 'Query', align: 'left', cls: '' },
+		{ key: 'plan', label: 'Plan', align: 'left', cls: 'w-[7rem]' },
+		{ key: 'dur', label: 'Duration', align: 'right', cls: 'w-[6.875rem]' }
+	];
+
+	const thBase = 'border-b border-line font-condensed text-xs font-semibold tracking-[0.7px] text-ink/70 uppercase';
+
+	// Every sortable column here is temporal or numeric, so a fresh column always
+	// opens on its most useful end: newest, has-a-plan, slowest.
+	function sortBy(key: SampleSortCol) {
+		if (sort.col === key) sort = { col: key, dir: sort.dir === 'asc' ? 'desc' : 'asc' };
+		else sort = { col: key, dir: 'desc' };
+	}
 </script>
 
 <div class="relative overflow-x-auto">
 	<table class="w-full min-w-[26.25rem] table-fixed border-collapse">
 		<thead bind:clientHeight={headHeight}>
 			<tr class="bg-hover-soft">
-				<th scope="col" class="{thBase} hidden w-[11.25rem] text-left sm:table-cell">At</th>
-				<th scope="col" class="{thBase} text-left">Query</th>
-				<th scope="col" class="{thBase} w-[7rem] text-left">Plan</th>
-				<th scope="col" class="{thBase} w-[6.875rem] text-right">Duration</th>
+				{#each headDef as h (h.label)}
+					{@const pad = clsx('block px-4 py-2.5', h.align === 'right' ? 'text-right' : 'text-left')}
+					<th
+						scope="col"
+						aria-sort={h.key && sort.col === h.key ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+						class={clsx(thBase, h.cls)}
+					>
+						{#if h.key}
+							{@const key = h.key}
+							<button
+								type="button"
+								onclick={() => sortBy(key)}
+								class="{pad} group/sort w-full cursor-pointer uppercase select-none focus-visible:text-command"
+							>
+								<span class="relative inline-flex items-center align-middle">
+									<span>{h.label}</span>
+									<span
+										class={clsx(
+											'pointer-events-none absolute inset-y-0 flex items-center',
+											h.align === 'right' ? 'right-full pr-1' : 'left-full pl-1'
+										)}
+									>
+										{#if sort.col === h.key}
+											{#if sort.dir === 'asc'}
+												<ArrowUpIcon class="size-3 flex-none text-command" />
+											{:else}
+												<ArrowDownIcon class="size-3 flex-none text-command" />
+											{/if}
+										{:else}
+											<ArrowUpDownIcon
+												class="size-3 flex-none text-ink/35 opacity-0 transition-opacity group-hover/sort:opacity-100 group-focus-visible/sort:opacity-100"
+											/>
+										{/if}
+									</span>
+								</span>
+							</button>
+						{:else}
+							<!-- Padding matches the sortable buttons' so all four labels share a baseline. -->
+							<span class={pad}>{h.label}</span>
+						{/if}
+					</th>
+				{/each}
 			</tr>
 		</thead>
 		<tbody>
