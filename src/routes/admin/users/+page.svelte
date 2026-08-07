@@ -28,6 +28,9 @@
 	let userError = $state<string | null>(null);
 	let saving = $state(false);
 
+	const rowAction =
+		'inline-flex cursor-pointer items-center gap-1.5 font-condensed text-xs leading-none font-bold tracking-[0.6px] uppercase';
+
 	async function load() {
 		loading = true;
 		error = null;
@@ -174,21 +177,13 @@
 							</td>
 							<td class="border-b border-line-soft px-5 py-3.5 text-right align-top">
 								<div class="inline-flex items-center justify-end gap-4">
-									<button
-										type="button"
-										onclick={() => openEdit(u)}
-										class="inline-flex cursor-pointer items-center gap-1.5 font-condensed text-xs font-bold tracking-[0.6px] text-command uppercase hover:text-danger"
-									>
-										<SquarePenIcon class="size-3.5" />
+									<button type="button" onclick={() => openEdit(u)} class="{rowAction} text-command hover:text-danger">
+										<SquarePenIcon class="size-3.5 shrink-0" />
 										<span>Edit</span>
 									</button>
 									{#if !u.isSuperAdmin}
-										<button
-											type="button"
-											onclick={() => remove(u)}
-											class="inline-flex cursor-pointer items-center gap-1.5 font-condensed text-xs font-bold tracking-[0.6px] text-ink/70 uppercase hover:text-danger"
-										>
-											<Trash2Icon class="size-3.5" />
+										<button type="button" onclick={() => remove(u)} class="{rowAction} text-ink/70 hover:text-danger">
+											<Trash2Icon class="size-3.5 shrink-0" />
 											<span>Delete</span>
 										</button>
 									{/if}

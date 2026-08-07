@@ -25,6 +25,9 @@
 	let newTokenServer = $state('');
 	let copied = $state(false);
 
+	const rowAction =
+		'inline-flex cursor-pointer items-center gap-1.5 font-condensed text-xs leading-none font-bold tracking-[0.6px] uppercase';
+
 	async function load() {
 		loading = true;
 		error = null;
@@ -133,12 +136,8 @@
 								{created(token)}
 							</td>
 							<td class="border-b border-line-soft px-5 py-3.5 text-right">
-								<button
-									type="button"
-									onclick={() => remove(token)}
-									class="inline-flex cursor-pointer items-center gap-1.5 font-condensed text-xs font-bold tracking-[0.6px] text-ink/70 uppercase hover:text-danger"
-								>
-									<Trash2Icon class="size-3.5" />
+								<button type="button" onclick={() => remove(token)} class="{rowAction} text-ink/70 hover:text-danger">
+									<Trash2Icon class="size-3.5 shrink-0" />
 									<span>Delete</span>
 								</button>
 							</td>
