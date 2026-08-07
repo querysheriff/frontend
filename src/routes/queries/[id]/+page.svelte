@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ArrowLeftIcon, SparklesIcon } from '@lucide/svelte';
+	import { ArrowLeftIcon } from '@lucide/svelte';
 	import { page } from '$app/state';
 	import { timestampFromDate, timestampDate } from '@bufbuild/protobuf/wkt';
 	import type {
@@ -12,7 +12,6 @@
 	import { statementClient } from '$lib/connect';
 	import StateBlock from '$lib/components/StateBlock.svelte';
 	import { ctx, scopeLock } from '$lib/state.svelte';
-	import { format } from 'sql-formatter';
 	import { fmtDuration, fmtBucketSize, sevByDuration, fmtTs, kvTags, errMsg } from '$lib/format';
 	import type { MetricSeriesPoint } from '$lib/metricChart';
 	import Button from '$lib/components/Button.svelte';
@@ -245,18 +244,6 @@
 		return kvTags(Object.fromEntries(Object.entries(tagMap).filter(([k, v]) => baseTags[k] !== v)));
 	}
 
-	// Raw normalized query by default; the Prettify toggle pretty-prints it.
-	let prettified = $state(false);
-	const queryText = $derived.by(() => {
-		const q = detail?.query ?? '';
-		if (!q || !prettified) return q;
-		try {
-			return format(q, { language: 'postgresql' });
-		} catch {
-			return q;
-		}
-	});
-
 	function toPoints(m?: StatementMetric): MetricSeriesPoint[] {
 		return (m?.series ?? []).flatMap((p) => (p.at ? [{ at: timestampDate(p.at), value: p.value }] : []));
 	}
@@ -282,25 +269,12 @@
 </a>
 
 <div class="border border-line-card bg-card px-4 pt-3.5 pb-4">
-	<header class="flex items-start justify-between gap-3">
-		<div class="min-w-0">
-			<SectionHeader title="Query" description="The normalized query — each captured run below fills in real values" />
-		</div>
-		{#if detail}
-			<button
-				type="button"
-				onclick={() => (prettified = !prettified)}
-				class="inline-flex flex-none cursor-pointer items-center gap-1.5 border px-2.5 py-1 font-condensed text-2xs font-semibold tracking-[0.7px] uppercase transition-colors {prettified
-					? 'border-command bg-command text-paper'
-					: 'border-line-strong text-ink/70 hover:border-line-boldest hover:text-ink'}"
-			>
-				<SparklesIcon class="size-3.5" /><span>Format</span>
-			</button>
-		{/if}
+	<header class="pr-9">
+		<SectionHeader title="Query" description="The normalized query — each captured run below fills in real values" />
 	</header>
 
 	<div class="mt-3.5">
-		<QueryTextBlock text={detail ? queryText : undefined} placeholder={metaLoading ? 'Loading…' : (metaError ?? '')} />
+		<QueryTextBlock text={detail?.query} placeholder={metaLoading ? 'Loading…' : (metaError ?? '')} />
 	</div>
 
 	{#if tags.length > 0}
