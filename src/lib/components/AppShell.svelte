@@ -25,7 +25,7 @@
 	const allowed = $derived(session.isAuthenticated && (!requireSuperAdmin || session.isSuperAdmin));
 
 	// Wait until the session loads, then redirect anyone not allowed here.
-	const superAdminOnlyPath = /^\/(transactions|blocking|logs|alerts)(\/|$)/;
+	const superAdminOnlyPath = /^\/(locks|transactions|logs|alerts)(\/|$)/;
 
 	$effect(() => {
 		if (!session.loaded) return;

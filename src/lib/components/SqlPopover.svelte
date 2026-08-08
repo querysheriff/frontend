@@ -46,6 +46,17 @@
 					</button>
 				{/if}
 			</div>
+			{#if state.pop.context}
+				{@const c = state.pop.context}
+				<!-- Which session ran this, so a wait or a long transaction can be traced
+				     back to a process and an application without leaving the table. -->
+				<div
+					class="flex flex-none flex-wrap items-center gap-x-3 gap-y-1 border-b border-paper/14 px-3 py-2 font-mono text-xs leading-[1.4]"
+				>
+					<span class="text-paper">pid {c.pid}</span>
+					{#if c.app}<span class="text-paper/70">{c.app}</span>{/if}
+				</div>
+			{/if}
 			{#if state.pop.loading}
 				<div class="flex-1 px-3.5 py-3.5 font-mono text-sm text-paper/55">Loading…</div>
 			{:else}

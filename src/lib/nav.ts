@@ -7,8 +7,8 @@ export interface NavItem {
 // `query-detail` is a sub-view of Queries (reached by clicking a row), so it is not listed here.
 export const navItems: NavItem[] = [
 	{ key: 'slow-queries', label: 'QUERIES', href: '/queries' },
+	{ key: 'locks', label: 'LOCKS', href: '/locks' },
 	{ key: 'transactions', label: 'TRANSACTIONS', href: '/transactions' },
-	{ key: 'blocking', label: 'BLOCKING', href: '/blocking' },
 	{ key: 'logs', label: 'LOGS', href: '/logs' },
 	{ key: 'alerts', label: 'ALERTS', href: '/alerts' }
 ];
@@ -27,13 +27,13 @@ export const screenMeta: Record<string, { title: string; description: string }> 
 		title: 'QUERY DETAIL',
 		description: 'How often this query ran, how long it took, and real samples'
 	},
+	locks: {
+		title: 'LOCKS',
+		description: 'How much time queries spent stuck waiting, and what was holding them up'
+	},
 	transactions: {
 		title: 'TRANSACTIONS',
-		description: 'Transactions in flight, with the statements and wait events behind each one'
-	},
-	blocking: {
-		title: 'BLOCKING',
-		description: 'Sessions blocked by locks, and the transactions holding them'
+		description: 'How long transactions stayed open, and what they were doing all that time'
 	},
 	logs: {
 		title: 'LOGS',
@@ -55,8 +55,8 @@ export const screenMeta: Record<string, { title: string; description: string }> 
 
 export function screenKeyForPath(pathname: string): string {
 	if (pathname.startsWith('/queries/')) return 'query-detail';
+	if (pathname.startsWith('/locks')) return 'locks';
 	if (pathname.startsWith('/transactions')) return 'transactions';
-	if (pathname.startsWith('/blocking')) return 'blocking';
 	if (pathname.startsWith('/logs')) return 'logs';
 	if (pathname.startsWith('/alerts')) return 'alerts';
 	if (pathname.startsWith('/admin/collectors')) return 'admin-collectors';

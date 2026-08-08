@@ -16,12 +16,12 @@
 </script>
 
 <script lang="ts">
-	import { clsx } from 'clsx';
-	import { ArrowUpIcon, ArrowDownIcon, ArrowUpDownIcon } from '@lucide/svelte';
 	import { fmtDuration, fmtCount, sevText } from '$lib/format';
 	import type { SqlPopoverState } from '$lib/sqlPopover.svelte';
 	import LoadingOverlay from '$lib/components/LoadingOverlay.svelte';
+	import SortHeader from '$lib/components/SortHeader.svelte';
 	import Tag from '$lib/components/Tag.svelte';
+	import TagRow from '$lib/components/TagRow.svelte';
 
 	let {
 		rows,
@@ -41,14 +41,14 @@
 
 	let headHeight = $state(0);
 
-	const headDef: { key: StatementSortCol; label: string; align: 'left' | 'right'; width?: string; hide?: string }[] = [
-		{ key: 'query', label: 'Query', align: 'left' },
-		{ key: 'usr', label: 'User', align: 'left', width: '7.5rem', hide: 'hidden sm:table-cell' },
-		{ key: 'meanMs', label: 'Avg', align: 'right', width: '5.625rem' },
-		{ key: 'calls', label: 'Calls', align: 'right', width: '5.625rem' },
-		{ key: 'rowsPerCall', label: 'Rows/Call', align: 'right', width: '6.75rem', hide: 'hidden lg:table-cell' },
-		{ key: 'pctIo', label: '% IO', align: 'right', width: '4.875rem', hide: 'hidden lg:table-cell' },
-		{ key: 'pctTime', label: '% Time', align: 'right', width: '5.25rem', hide: 'hidden lg:table-cell' }
+	const headDef: { key: StatementSortCol; label: string; align: 'left' | 'right'; cls: string }[] = [
+		{ key: 'query', label: 'Query', align: 'left', cls: '' },
+		{ key: 'usr', label: 'User', align: 'left', cls: 'hidden w-[7.5rem] sm:table-cell' },
+		{ key: 'meanMs', label: 'Avg', align: 'right', cls: 'w-[5.625rem]' },
+		{ key: 'calls', label: 'Calls', align: 'right', cls: 'w-[5.625rem]' },
+		{ key: 'rowsPerCall', label: 'Rows/Call', align: 'right', cls: 'hidden w-[6.75rem] lg:table-cell' },
+		{ key: 'pctIo', label: '% IO', align: 'right', cls: 'hidden w-[4.875rem] lg:table-cell' },
+		{ key: 'pctTime', label: '% Time', align: 'right', cls: 'hidden w-[5.25rem] lg:table-cell' }
 	];
 
 	// Numeric/text cells never truncate — only the query text (the <code>) does.
@@ -66,50 +66,13 @@
 		<thead bind:clientHeight={headHeight}>
 			<tr class="bg-hover-soft">
 				{#each headDef as h (h.key)}
-					<th
-						scope="col"
-						aria-sort={sort.col === h.key ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
-						style:width={h.width}
-						class={clsx(
-							'border-b border-line font-condensed text-xs font-semibold tracking-[0.7px] whitespace-nowrap text-ink/70 uppercase',
-							h.hide
-						)}
-					>
-						<button
-							type="button"
-							onclick={() => sortBy(h.key)}
-							class={clsx(
-								'group/sort block w-full cursor-pointer px-4 py-2.5 uppercase select-none focus-visible:text-command',
-								h.align === 'right' ? 'text-right' : 'text-left'
-							)}
-						>
-							<!-- The sort icon is absolutely positioned beside the label so it never
-							     consumes layout width — the label stays flush with the column's
-							     values even when the column is too narrow to fit both. It sits left
-							     of the label on right-aligned columns, right of it otherwise. -->
-							<span class="relative inline-flex items-center align-middle">
-								<span>{h.label}</span>
-								<span
-									class={clsx(
-										'pointer-events-none absolute inset-y-0 flex items-center',
-										h.align === 'right' ? 'right-full pr-1' : 'left-full pl-1'
-									)}
-								>
-									{#if sort.col === h.key}
-										{#if sort.dir === 'asc'}
-											<ArrowUpIcon class="size-3 flex-none text-command" />
-										{:else}
-											<ArrowDownIcon class="size-3 flex-none text-command" />
-										{/if}
-									{:else}
-										<ArrowUpDownIcon
-											class="size-3 flex-none text-ink/35 opacity-0 transition-opacity group-hover/sort:opacity-100 group-focus-visible/sort:opacity-100"
-										/>
-									{/if}
-								</span>
-							</span>
-						</button>
-					</th>
+					<SortHeader
+						label={h.label}
+						align={h.align}
+						class={h.cls}
+						dir={sort.col === h.key ? sort.dir : null}
+						onsort={() => sortBy(h.key)}
+					/>
 				{/each}
 			</tr>
 		</thead>
@@ -132,7 +95,7 @@
 								>
 							</a>
 							{#if q.tags.length > 0}
-								<div class="pointer-events-none relative z-[1] mt-1 flex flex-wrap gap-1.5">
+								<TagRow class="pointer-events-none relative z-[1] mt-1">
 									{#each q.tags as t (t)}
 										<Tag
 											text={t}
@@ -141,7 +104,7 @@
 											class="pointer-events-auto"
 										/>
 									{/each}
-								</div>
+								</TagRow>
 							{/if}
 						</div>
 					</td>

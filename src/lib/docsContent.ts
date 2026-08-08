@@ -225,6 +225,142 @@ export const docContent: Record<string, DocEntry> = {
 		]
 	},
 
+	'l-wait-time': {
+		title: 'Lock wait time',
+		sections: [
+			{
+				heading: 'What this chart shows',
+				body: [
+					'This chart shows how much time queries spent waiting for locks instead of running.',
+					'When a query changes a row, PostgreSQL locks it until the transaction finishes. Any other query that needs the same row must wait. This chart adds up that waiting time.'
+				]
+			},
+			{
+				heading: 'Why this matters',
+				body: [
+					'A spike means your application spent time blocked instead of doing work.',
+					'This can explain "everything froze" incidents that other sections may miss. A blocked query is not necessarily slow — it is waiting.',
+					'Ideally, this chart should stay close to zero. If you see a spike, check the table below to find the blocker.'
+				]
+			},
+			{
+				heading: 'How the chart works',
+				body: [
+					'The collector checks once per second which queries are waiting and which queries are blocking them.',
+					'Waits shorter than about one second may be missed between checks.'
+				]
+			}
+		]
+	},
+
+	'l-waits': {
+		title: 'Lock waits',
+		sections: [
+			{
+				heading: 'What this table shows',
+				body: [
+					'Each row shows one query that was blocked, together with the query that was blocking it. The longest waits are shown first.',
+					'The columns are:',
+					{
+						list: [
+							'**Started**: When the wait began.',
+							'**Waited**: How long the query was blocked.',
+							'**Waiting query**: The query that could not continue.',
+							'**Blocking query**: The query that was blocking it.',
+							'**Lock**: The type of lock it was waiting for.'
+						]
+					},
+					'Hover over either query to see the full captured text (which may be truncated depending on the `track_activity_query_size` setting), PID, and application name.'
+				]
+			},
+			{
+				heading: 'Why this matters',
+				body: [
+					'Each row shows the whole problem: which query was blocked, what blocked it, and for how long.',
+					'Usually, the blocking query is the one to investigate. The waiting query often did nothing wrong — it just arrived while another transaction was holding the lock.',
+					'If the same blocking query appears in many rows, that is a strong signal that one query is holding up multiple others.'
+				]
+			},
+			{
+				heading: 'How the table works',
+				body: [
+					'`pg_stat_activity` is sampled once per second. Repeated samples of the same wait are combined into a single row.',
+					'PostgreSQL does not record which exact query originally acquired a lock, so the blocking query shown is the query that session was running when the wait started. It is usually, but not always, the query responsible.',
+					'`not captured` means the blocking session was never seen by the collector. Only client connections are collected, so background processes such as autovacuum may block queries without appearing here.'
+				]
+			}
+		]
+	},
+
+	't-age': {
+		title: 'Oldest open transaction',
+		sections: [
+			{
+				heading: 'What this chart shows',
+				body: [
+					'This chart shows how old the longest-running open transaction was at each moment.',
+					'A transaction is a group of statements PostgreSQL treats as one unit, between `BEGIN` and `COMMIT`. The line shows how long the transaction has been open.',
+					'A rising line usually means the oldest open transaction is getting older. A sharp drop means it finished, leaving a younger transaction as the oldest.'
+				]
+			},
+			{
+				heading: 'Why this matters',
+				body: [
+					'A long-running transaction can keep locks for a long time, potentially blocking other queries.',
+					'It can also prevent PostgreSQL from cleaning up old row versions created by updates and deletes, even in tables the transaction never touched. Over time, this can cause table and index bloat and increase database overhead.',
+					'A healthy line should generally stay low. Transactions open for minutes are usually worth investigating. Find the spike here, then check the table below to see which transaction caused it.'
+				]
+			},
+			{
+				heading: 'How the chart works',
+				body: [
+					'Once per second, the collector looks at all open transactions and records the age of the oldest one.',
+					'For example, if the oldest transaction has been open for 12 seconds, the chart records `12s` for that moment. One second later, if it is still open, it records about `13s`.',
+					'When that transaction finishes, the line drops to the age of the next-oldest transaction, or to zero if no transactions are open.'
+				]
+			}
+		]
+	},
+
+	't-longest': {
+		title: 'Long transactions',
+		sections: [
+			{
+				heading: 'What this table shows',
+				body: [
+					'Each row shows one transaction that stayed open during the selected range, with the longest first.',
+					'The columns are:',
+					{
+						list: [
+							'**Started**: When the transaction began.',
+							'**Open**: How long it stayed open.',
+							'**PID**: The PostgreSQL process running it.',
+							'**Application**: The application name reported by the client.'
+						]
+					},
+					'Click a row to see the transaction step by step: which statements ran, how long each step lasted, whether it was `ACTIVE`, `IDLE`, or `ABORTED`, and what it was waiting for.',
+					'Only transactions open for at least 5 seconds are shown.'
+				]
+			},
+			{
+				heading: 'Why this matters',
+				body: [
+					'Open a long transaction and check its steps to see what kept it open.',
+					'Long `IDLE` steps usually mean PostgreSQL was waiting for the application, often with `ClientRead`. This can happen when the application performs unrelated work, such as an HTTP request or queue operation, inside a transaction. Move that work outside the transaction or consider `idle_in_transaction_session_timeout`.',
+					'If a transaction stays `ACTIVE`, it was running a query. Check the Queries section to investigate its performance.',
+					'`ABORTED` means a statement failed but the transaction was left open instead of being rolled back.'
+				]
+			},
+			{
+				heading: 'How the table works',
+				body: [
+					'The collector checks transaction activity once per second and groups matching samples into steps.',
+					'Because this is sample-based, short-lived queries, states, or other activity between checks may not be captured.'
+				]
+			}
+		]
+	},
+
 	'qd-samples': {
 		title: 'Captured samples',
 		sections: [

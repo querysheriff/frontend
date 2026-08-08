@@ -15,13 +15,18 @@
 		from,
 		to,
 		bucketMs,
-		format
+		format,
+		// A series that is genuinely all zeros would otherwise be drawn against a
+		// domain of 0–1, labelling the axis in fractions of the unit. Callers whose
+		// series can legitimately flatline set a floor to keep the scale readable.
+		minYMax = 0
 	}: {
 		series: Series[];
 		from: Date;
 		to: Date;
 		bucketMs: number;
 		format: (value: number) => string;
+		minYMax?: number;
 	} = $props();
 
 	const model = $derived(
@@ -34,7 +39,7 @@
 	);
 
 	const yMax = $derived.by(() => {
-		let m = 0;
+		let m = minYMax;
 		for (const s of series) {
 			for (const p of s.points) {
 				if (p.value != null && p.value > m) m = p.value;
@@ -42,6 +47,11 @@
 		}
 		return m;
 	});
+
+	// The y-axis labels are mono text-2xs (12px, 0.6em advance). A fixed gutter fits
+	// "800K" or "12s" but not "8.33min", which then overruns the card. Size it from
+	// the widest label the formatter will actually produce.
+	const padLeft = $derived(Math.max(36, Math.ceil(format(yMax || 1).length * 7.2) + 12));
 </script>
 
 <ChartFrame legend={series.map((s) => ({ label: s.label, color: s.color }))}>
@@ -53,7 +63,7 @@
 		y={() => 0}
 		yDomain={[0, yMax || 1]}
 		yNice
-		padding={{ left: 36, right: 16, bottom: 24 }}
+		padding={{ left: padLeft, right: 16, bottom: 24 }}
 		tooltipContext={{ mode: 'bisect-x' }}
 	>
 		<Svg>

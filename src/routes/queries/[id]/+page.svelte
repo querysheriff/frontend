@@ -27,6 +27,7 @@
 	import { SqlPopoverState } from '$lib/sqlPopover.svelte';
 	import SamplesTable, { type SampleRow, type SampleSortCol } from '$lib/components/SamplesTable.svelte';
 	import Tag from '$lib/components/Tag.svelte';
+	import TagRow from '$lib/components/TagRow.svelte';
 
 	const PAGE_SIZE = 50;
 
@@ -288,11 +289,11 @@
 	</div>
 
 	{#if tags.length > 0}
-		<div class="mt-3 flex flex-wrap gap-1.5">
+		<TagRow class="mt-3">
 			{#each tags as t (t)}
-				<Tag text={t} size="md" />
+				<Tag text={t} title={t} size="md" />
 			{/each}
-		</div>
+		</TagRow>
 	{/if}
 </DocCard>
 

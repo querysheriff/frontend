@@ -19,6 +19,7 @@
 	import type { SqlPopoverState } from '$lib/sqlPopover.svelte';
 	import LoadingOverlay from '$lib/components/LoadingOverlay.svelte';
 	import Tag from '$lib/components/Tag.svelte';
+	import TagRow from '$lib/components/TagRow.svelte';
 
 	let {
 		samples,
@@ -105,8 +106,12 @@
 								</span>
 							</button>
 						{:else}
-							<!-- Padding matches the sortable buttons' so all four labels share a baseline. -->
-							<span class={pad}>{h.label}</span>
+							<!-- Mirrors the sortable button's inner box exactly. That wrapper is
+							     vertical-align: middle, so a bare text label lands on a different
+							     line than its sortable neighbours. -->
+							<span class={pad}>
+								<span class="relative inline-flex items-center align-middle">{h.label}</span>
+							</span>
 						{/if}
 					</th>
 				{/each}
@@ -131,19 +136,19 @@
 							>{s.short}</button
 						>
 						{#if hasBaseTags || extra.length > 0}
-							<div class="mt-1 flex flex-wrap items-center gap-1.5">
+							<TagRow class="mt-1">
 								{#if hasBaseTags}
 									<span
 										title="Also carries the base tags shown at the top"
-										class="inline-flex items-center gap-1 border border-line px-1.5 py-px font-mono text-xs text-ink/70"
+										class="inline-flex items-center gap-1 border border-line px-1.5 py-px font-mono text-xs whitespace-nowrap text-ink/70"
 									>
 										<ArrowUpIcon class="size-2.5" />base tags
 									</span>
 								{/if}
 								{#each extra as t (t)}
-									<Tag text={t} />
+									<Tag text={t} title={t} />
 								{/each}
-							</div>
+							</TagRow>
 						{/if}
 					</td>
 					<td class="border-b border-line-soft px-4 py-3 align-top">

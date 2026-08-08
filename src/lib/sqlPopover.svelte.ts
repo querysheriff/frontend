@@ -11,9 +11,15 @@ const MIN_HEIGHT = 140;
 const MAX_HEIGHT = 440;
 const FLIP_THRESHOLD = 360;
 
+/** Extra identity shown above the SQL. The Locks and Transactions screens set it
+ *  so a query can be traced back to the session that ran it; other screens leave
+ *  it off. */
+export type SqlContext = { pid: number; app: string };
+
 type Placement = {
 	text: string;
 	loading: boolean;
+	context: SqlContext | null;
 	left: number;
 	top: number | null;
 	bottom: number | null;
@@ -32,6 +38,7 @@ export class SqlPopoverState {
 	#loader: Loader | null;
 	#cache = new SvelteMap<string, string>();
 	#activeKey: string | null = null;
+	#context: SqlContext | null = null;
 
 	constructor(loader?: Loader) {
 		this.#loader = loader ?? null;
@@ -54,10 +61,11 @@ export class SqlPopoverState {
 	// The trigger is a table row you cross constantly while scanning, so opening
 	// costs a deliberate pause. Once one is open the next is instant: moving
 	// between rows is then reading, not passing through.
-	show(text: string, e: MouseEvent | FocusEvent) {
+	show(text: string, e: MouseEvent | FocusEvent, context?: SqlContext) {
 		this.#clearShow();
 		this.#clearHide();
 		this.#activeKey = null;
+		this.#context = context ?? null;
 
 		// currentTarget is nulled once the event finishes dispatching, so hold the
 		// element and measure it when the timer fires.
@@ -78,6 +86,7 @@ export class SqlPopoverState {
 	// row is hovered and cached for repeat hovers.
 	showLazy(id: bigint, e: MouseEvent | FocusEvent) {
 		this.#clearShow();
+		this.#context = null;
 		this.#clearHide();
 
 		const key = String(id);
@@ -139,9 +148,10 @@ export class SqlPopoverState {
 		const maxHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, openUp ? spaceAbove : spaceBelow));
 
 		this.#trigger = trigger;
+		const context = this.#context;
 		this.pop = openUp
-			? { text, loading, left, top: null, bottom: window.innerHeight - r.top + GAP, maxHeight }
-			: { text, loading, left, top: r.bottom + GAP, bottom: null, maxHeight };
+			? { text, loading, context, left, top: null, bottom: window.innerHeight - r.top + GAP, maxHeight }
+			: { text, loading, context, left, top: r.bottom + GAP, bottom: null, maxHeight };
 
 		if (fresh) this.copied = false;
 	}
@@ -151,6 +161,7 @@ export class SqlPopoverState {
 		this.copied = false;
 		this.#trigger = null;
 		this.#activeKey = null;
+		this.#context = null;
 	}
 
 	// The popover is position:fixed, so it does not travel with its row. Re-anchor

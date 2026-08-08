@@ -86,9 +86,15 @@ export function fmtAxisTime(value: Date | number): string {
 	return `${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
+/** Keys like `process_id` or `request_id` are high-cardinality identifiers: useful
+ *  once you have found the row, useless for scanning. The tag strip is a single
+ *  line that clips, so they sort last and the meaningful tag is the one that
+ *  survives the clip. */
+const isIdTag = (key: string): boolean => key.endsWith('_id');
+
 export function kvTags(tags: Record<string, string>): string[] {
 	return Object.entries(tags)
-		.sort(([a], [b]) => a.localeCompare(b))
+		.sort(([a], [b]) => Number(isIdTag(a)) - Number(isIdTag(b)) || a.localeCompare(b))
 		.map(([k, v]) => `${k}=${v}`);
 }
 
