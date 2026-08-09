@@ -4,7 +4,7 @@
 	import { page } from '$app/state';
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	import ContextBar from '$lib/components/ContextBar.svelte';
-	import { serversState } from '$lib/state.svelte';
+	import { ctx, serversState } from '$lib/state.svelte';
 	import { urlSync } from '$lib/urlState.svelte';
 	import { session } from '$lib/session.svelte';
 
@@ -23,6 +23,12 @@
 	const REFRESH_MS = 30_000;
 
 	const allowed = $derived(session.isAuthenticated && (!requireSuperAdmin || session.isSuperAdmin));
+
+	// Declared before the query-string effect so `db` is already out of scope by the
+	// time the URL is rebuilt on a screen that does not use it.
+	$effect(() => {
+		ctx.dbScoped = dbSwitch;
+	});
 
 	// Wait until the session loads, then redirect anyone not allowed here.
 	const superAdminOnlyPath = /^\/(locks|transactions|logs|alerts)(\/|$)/;

@@ -7,6 +7,7 @@
 	import MetricArea from '$lib/components/MetricArea.svelte';
 	import SeriesPoints from '$lib/components/SeriesPoints.svelte';
 	import { buildMetricMultiChartModel, type MetricSeriesPoint, type MetricSeriesRow } from '$lib/metricChart';
+	import { createTimeBrush } from '$lib/chartBrush.svelte';
 
 	let {
 		data,
@@ -59,6 +60,8 @@
 	// "800K" or "12s" but not "8.33min", which then overruns the card. Size it from
 	// the widest label the formatter will actually produce.
 	const padLeft = $derived(Math.max(36, Math.ceil(format(yMax || 1).length * 7.2) + 12));
+
+	const brush = createTimeBrush(() => model.step);
 </script>
 
 <ChartFrame legend={[{ label, color: fill, opacity: lineOpacity }]}>
@@ -72,6 +75,7 @@
 		yNice
 		padding={{ left: padLeft, right: 16, bottom: 24 }}
 		tooltipContext={{ mode: 'bisect-x' }}
+		brush={brush.props}
 	>
 		<Svg>
 			<Grid y={{ class: 'stroke-ink/10' }} />
@@ -104,30 +108,34 @@
 					/>
 				{/snippet}
 			</LinearGradient>
-			<Highlight lines motion="none" />
-			<SeriesPoints colors={[fill]} values={(d: MetricSeriesRow) => d.values} />
+			{#if !brush.brushing}
+				<Highlight lines motion="none" />
+				<SeriesPoints colors={[fill]} values={(d: MetricSeriesRow) => d.values} />
+			{/if}
 		</Svg>
-		<Tooltip.Root
-			x="data"
-			y="pointer"
-			anchor="top-left"
-			xOffset={18}
-			yOffset={10}
-			variant="none"
-			class="border border-line-card bg-card px-3 py-2 shadow-chart"
-		>
-			{#snippet children({ data: point }: { data: MetricSeriesRow })}
-				{@const value = point.values[0]}
-				<div class="flex flex-col gap-1 font-mono text-xs leading-[1.4] whitespace-nowrap">
-					<div class="text-ink/70">{fmtBucketRange(point.at, model.step)}</div>
-					{#if value == null}
-						<div class="text-ink/70">No data</div>
-					{:else}
-						<div class="font-semibold text-ink">{formatFull(value)}{unit ? ` ${unit}` : ''}</div>
-					{/if}
-				</div>
-			{/snippet}
-		</Tooltip.Root>
+		{#if !brush.brushing}
+			<Tooltip.Root
+				x="data"
+				y="pointer"
+				anchor="top-left"
+				xOffset={18}
+				yOffset={10}
+				variant="none"
+				class="border border-line-card bg-card px-3 py-2 shadow-chart"
+			>
+				{#snippet children({ data: point }: { data: MetricSeriesRow })}
+					{@const value = point.values[0]}
+					<div class="flex flex-col gap-1 font-mono text-xs leading-[1.4] whitespace-nowrap">
+						<div class="text-ink/70">{fmtBucketRange(point.at, model.step)}</div>
+						{#if value == null}
+							<div class="text-ink/70">No data</div>
+						{:else}
+							<div class="font-semibold text-ink">{formatFull(value)}{unit ? ` ${unit}` : ''}</div>
+						{/if}
+					</div>
+				{/snippet}
+			</Tooltip.Root>
+		{/if}
 	</Chart>
 </ChartFrame>
 

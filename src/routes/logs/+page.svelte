@@ -1,260 +1,402 @@
 <script lang="ts">
-	import { SearchIcon, XIcon, ChevronDownIcon, CheckIcon } from '@lucide/svelte';
+	import { onDestroy } from 'svelte';
+	import { page } from '$app/state';
 	import { timestampFromDate, timestampDate } from '@bufbuild/protobuf/wkt';
 	import {
-		LogEvent_LogLevel,
 		LogEvent_LogClassification,
-		type QueryLogsResponse
+		LogFacetField,
+		LogSortColumn,
+		type LogFacet,
+		type LogHistogram,
+		type LogRecord
 	} from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/log_pb';
 	import { logClient } from '$lib/connect';
-	import StateBlock from '$lib/components/StateBlock.svelte';
-	import LogsTable from '$lib/components/LogsTable.svelte';
 	import { ctx, serversState } from '$lib/state.svelte';
-	import { fmtCount, errMsg } from '$lib/format';
-	import { levelLabel, levelColor, levelChip, LEVEL_ORDER, classificationLabel, ALL_CLASSIFICATIONS } from '$lib/logs';
-	import LogHistogram from '$lib/components/LogHistogram.svelte';
+	import { urlSync } from '$lib/urlState.svelte';
+	import { LogFilterState } from '$lib/logFilter.svelte';
+	import { fmtBucketSize, errMsg } from '$lib/format';
+	import {
+		CATEGORY_ORDER,
+		LEVEL_ROWS,
+		categoryColor,
+		categoryLabel,
+		classificationLabel,
+		levelColor,
+		levelLabel
+	} from '$lib/logs';
+	import Button from '$lib/components/Button.svelte';
+	import ChartPanel from '$lib/components/ChartPanel.svelte';
+	import DocCard from '$lib/components/DocCard.svelte';
+	import LogTimelineHeatmap, { heatmapLabelWidth, type HeatmapDetail } from '$lib/components/LogTimelineHeatmap.svelte';
+	import { type HeatmapRow } from '$lib/components/HeatmapCells.svelte';
+	import LogFilterBar from '$lib/components/LogFilterBar.svelte';
+	import LogsTable, { type LogPivot, type LogSort, type LogSortCol } from '$lib/components/LogsTable.svelte';
+	import SectionHeader from '$lib/components/SectionHeader.svelte';
+	import StateBlock from '$lib/components/StateBlock.svelte';
 
-	let resp = $state<QueryLogsResponse | undefined>(undefined);
-	let loading = $state(true);
-	let error = $state<string | null>(null);
-	let search = $state('');
-	let filter = $state('');
+	const PAGE_SIZE = 50;
 
-	// Empty selection means "all"; chips keep counts from level_totals so they stay togglable.
-	let selectedLevels = $state<LogEvent_LogLevel[]>([]);
-	let selectedClasses = $state<LogEvent_LogClassification[]>([]);
+	const filters = new LogFilterState();
 
-	let menu = $state<'class' | null>(null);
+	// Registration must happen during init, not in a $effect: AppShell rebuilds the whole query
+	// string from the registered providers, and its effect would otherwise run first and strip
+	// the filter params off a deep link before we appear.
+	filters.applyQuery(new URLSearchParams(page.url.search));
+	onDestroy(urlSync.register(filters));
 
-	$effect(() => {
-		if (ctx.server) {
-			selectedLevels = [];
-			selectedClasses = [];
-		}
-	});
+	let search = $state(filters.text);
+
+	// Page-local rather than in the URL, matching QUERIES: the filters say what you are looking
+	// at and belong in a shared link; the ordering is a viewing preference.
+	let sort = $state<LogSort>({ col: 'at', dir: 'desc' });
+
+	const sortColumnProto: Record<LogSortCol, LogSortColumn> = {
+		at: LogSortColumn.AT,
+		level: LogSortColumn.LEVEL,
+		event: LogSortColumn.EVENT,
+		category: LogSortColumn.CATEGORY,
+		database: LogSortColumn.DATABASE,
+		user: LogSortColumn.USERNAME
+	};
+
+	let records = $state<LogRecord[]>([]);
+	let hasMore = $state(false);
+	let tableLoading = $state(true);
+	let loadingMore = $state(false);
+	let tableError = $state<string | null>(null);
+
+	// Fetched from its own RPC on scope alone, so nothing the table does redraws the charts.
+	let histogram = $state<LogHistogram | undefined>(undefined);
+	let chartLoading = $state(true);
+	let chartError = $state<string | null>(null);
+	// Seeded rather than null: the first render reads it before the effect below has run, and a
+	// null would collapse the cards for a frame.
+	let range = $state(ctx.timeRange());
+
+	let facets = $state<LogFacet[] | undefined>(undefined);
+	let facetsLoading = $state(true);
 
 	$effect(() => {
 		const term = search;
 		const id = setTimeout(() => {
-			filter = term.trim();
+			filters.text = term.trim();
 		}, 250);
+
 		return () => clearTimeout(id);
 	});
 
-	$effect(() => {
+	function scope() {
 		const { from, to } = ctx.timeRange();
-		const request = {
+
+		return {
 			serverName: ctx.server,
 			from: timestampFromDate(from),
 			to: timestampFromDate(to),
-			filter,
-			logLevels: [...selectedLevels],
-			classifications: [...selectedClasses]
+			filter: filters.text
 		};
+	}
+
+	let chartGen = 0;
+	let chartAc: AbortController | null = null;
+
+	// Server and time range only. Riding along in the table's response meant every sort
+	// recomputed it, and a preset range ending at "now" shifted the bucket grid each time.
+	$effect(() => {
+		const { from, to } = ctx.timeRange();
+		range = { from, to };
+
+		const request = { serverName: ctx.server, from: timestampFromDate(from), to: timestampFromDate(to) };
 
 		if (!ctx.server) {
-			loading = !serversState.loaded;
+			chartLoading = !serversState.loaded;
 			if (serversState.loaded) {
-				resp = undefined;
-				error = null;
+				histogram = undefined;
+				chartError = null;
 			}
+
 			return;
 		}
 
-		let cancelled = false;
-		const ac = new AbortController();
-		loading = true;
-		error = null;
-		resp = undefined;
+		const mine = ++chartGen;
+		chartAc?.abort();
+		chartAc = new AbortController();
+		const signal = chartAc.signal;
+		chartLoading = true;
+		chartError = null;
+
+		logClient
+			.queryLogSeries(request, { signal })
+			.then((res) => {
+				if (mine === chartGen) histogram = res.histogram;
+			})
+			.catch((e: unknown) => {
+				if (mine !== chartGen) return;
+				chartError = errMsg(e);
+				histogram = undefined;
+			})
+			.finally(() => {
+				if (mine === chartGen) chartLoading = false;
+			});
+	});
+
+	function logsRequest(offset: number) {
+		return {
+			...scope(),
+			...filters.toRequest(),
+			sortColumn: sortColumnProto[sort.col],
+			sortDesc: sort.dir === 'desc',
+			limit: PAGE_SIZE,
+			offset
+		};
+	}
+
+	let tableGen = 0;
+	let tableAc: AbortController | null = null;
+
+	$effect(() => {
+		// Built before the early return so every filter it reads stays tracked.
+		const request = logsRequest(0);
+
+		if (!ctx.server) {
+			tableLoading = !serversState.loaded;
+			if (serversState.loaded) {
+				records = [];
+				hasMore = false;
+				tableError = null;
+			}
+
+			return;
+		}
+
+		const gen = ++tableGen;
+		tableAc?.abort();
+		tableAc = new AbortController();
+		const ac = tableAc;
+		tableLoading = true;
+		tableError = null;
+		// Rows stay on screen while re-fetching and are swapped in atomically — clearing here
+		// would collapse the table and jump the layout. LoadingOverlay signals the refresh.
 
 		logClient
 			.queryLogs(request, { signal: ac.signal })
 			.then((res) => {
-				if (cancelled) return;
-				resp = res;
+				if (gen !== tableGen) return;
+				records = res.records;
+				hasMore = res.hasMore;
 			})
 			.catch((e: unknown) => {
-				if (cancelled) return;
-				error = errMsg(e);
-				resp = undefined;
+				if (gen !== tableGen) return;
+				tableError = errMsg(e);
+				records = [];
+				hasMore = false;
 			})
 			.finally(() => {
-				if (!cancelled) loading = false;
+				if (gen === tableGen) tableLoading = false;
 			});
-
-		return () => {
-			cancelled = true;
-			ac.abort();
-		};
 	});
 
-	const records = $derived(resp?.records ?? []);
-	const buckets = $derived(resp?.histogram?.buckets ?? []);
-	const levelTotals = $derived(resp?.histogram?.levelTotals ?? []);
+	let facetGen = 0;
+	let facetAc: AbortController | null = null;
 
-	const levelActive = (level: LogEvent_LogLevel): boolean =>
-		selectedLevels.length === 0 || selectedLevels.includes(level);
+	// Fetched separately so the counts and the table never wait on each other.
+	$effect(() => {
+		const request = { ...scope(), ...filters.toFacetRequest() };
 
-	const chips = $derived.by(() => {
-		const counts = new Map(levelTotals.map((c) => [c.level, Number(c.count)]));
-		return LEVEL_ORDER.filter((l) => counts.has(l)).map((l) => ({
-			level: l,
-			label: levelLabel(l),
-			count: counts.get(l) ?? 0,
-			active: levelActive(l)
+		if (!ctx.server) {
+			facetsLoading = !serversState.loaded;
+			if (serversState.loaded) facets = undefined;
+
+			return;
+		}
+
+		const mine = ++facetGen;
+		facetAc?.abort();
+		facetAc = new AbortController();
+		const signal = facetAc.signal;
+		facetsLoading = true;
+
+		logClient
+			.listLogFacets(request, { signal })
+			.then((res) => {
+				if (mine === facetGen) facets = res.facets;
+			})
+			.catch(() => {
+				// The picker degrades to categories with no counts; the table reports the error.
+				if (mine === facetGen) facets = undefined;
+			})
+			.finally(() => {
+				if (mine === facetGen) facetsLoading = false;
+			});
+	});
+
+	async function loadMore() {
+		if (loadingMore || tableLoading || !hasMore) return;
+
+		const gen = tableGen;
+		loadingMore = true;
+
+		try {
+			const res = await logClient.queryLogs(logsRequest(records.length), { signal: tableAc?.signal });
+			if (gen !== tableGen) return;
+
+			// A live-tail range keeps moving, so an offset page can repeat a row already shown.
+			const seen = new Set(records.map((r) => r.id));
+			records = [...records, ...res.records.filter((r) => !seen.has(r.id))];
+			hasMore = res.hasMore;
+		} catch (e: unknown) {
+			if (gen === tableGen) tableError = errMsg(e);
+		} finally {
+			loadingMore = false;
+		}
+	}
+
+	const buckets = $derived(histogram?.buckets ?? []);
+	const bucketMs = $derived(Number(histogram?.bucketMs ?? 0n));
+	const levelTotals = $derived(histogram?.levelTotals ?? []);
+
+	const bucketDates = $derived(buckets.map((b) => (b.bucketStart ? timestampDate(b.bucketStart) : new Date(0))));
+
+	// Every severity gets a row whether or not it occurred: a stable row set is what makes two
+	// windows comparable, and an empty PANIC row is worth seeing.
+	const severityRows = $derived.by((): HeatmapRow[] => {
+		const totals = new Map(levelTotals.map((c) => [c.level, Number(c.count)]));
+
+		return LEVEL_ROWS.map((level) => ({
+			key: String(level),
+			label: levelLabel(level),
+			color: levelColor(level),
+			total: totals.get(level) ?? 0,
+			values: buckets.map((b) => Number(b.counts.find((c) => c.level === level)?.count ?? 0))
 		}));
 	});
 
-	const totalEvents = $derived(levelTotals.reduce((sum, c) => (levelActive(c.level) ? sum + Number(c.count) : sum), 0));
+	// Every category gets a row too, Uncategorized included: showing it conditionally would
+	// resize the card the moment the collector failed to classify something.
+	const categoryRows = $derived.by((): HeatmapRow[] => {
+		// A plain record rather than a Map, which the Svelte lint rules reserve for state.
+		const totals: Record<number, number> = {};
+		for (const bucket of buckets) {
+			for (const entry of bucket.categories) {
+				totals[entry.category] = (totals[entry.category] ?? 0) + Number(entry.count);
+			}
+		}
 
-	const STACK_ORDER = [...LEVEL_ORDER].reverse();
-	const chartData = $derived(
-		buckets.map((b) => {
-			const counts = new Map(b.counts.map((c) => [c.level, Number(c.count)]));
-			const segments = STACK_ORDER.filter(levelActive).map((level) => ({
-				label: levelLabel(level),
-				color: levelColor(level),
-				value: counts.get(level) ?? 0
-			}));
-			return { at: b.bucketStart ? timestampDate(b.bucketStart) : new Date(0), segments };
-		})
-	);
+		return CATEGORY_ORDER.map((category) => ({
+			key: String(category),
+			label: categoryLabel(category),
+			color: categoryColor(category),
+			total: totals[category] ?? 0,
+			values: buckets.map((b) => Number(b.categories.find((c) => c.category === category)?.count ?? 0))
+		}));
+	});
 
-	const filterActive = $derived(selectedLevels.length > 0 || selectedClasses.length > 0 || filter.length > 0);
+	// The event types behind one category cell, which is why the histogram nests them.
+	function categoryDetail(rowKey: string, bucketIndex: number): HeatmapDetail[] {
+		const bucket = buckets[bucketIndex];
+		if (!bucket) return [];
 
-	const classLabel = $derived(
-		selectedClasses.length === 0
-			? 'All'
-			: selectedClasses.length === 1
-				? classificationLabel(selectedClasses[0])
-				: `${selectedClasses.length} selected`
-	);
+		const entry = bucket.categories.find((c) => String(c.category) === rowKey);
 
-	function toggle<T>(list: T[], value: T): T[] {
-		return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
+		return (
+			(entry?.classifications ?? [])
+				// The unrecognised classification has no name, and the "Uncategorized" row label
+				// already says what it is.
+				.filter((c) => c.classification !== LogEvent_LogClassification.UNSPECIFIED)
+				.map((c) => ({ label: classificationLabel(c.classification), count: Number(c.count) }))
+		);
 	}
-	const toggleLevel = (l: LogEvent_LogLevel) => (selectedLevels = toggle(selectedLevels, l));
-	const toggleClass = (c: LogEvent_LogClassification) => (selectedClasses = toggle(selectedClasses, c));
 
-	function reset() {
-		selectedLevels = [];
-		selectedClasses = [];
-		search = '';
-		filter = '';
+	// One gutter across both charts, so their plots start at the same x and the two time axes
+	// line up column for column.
+	const labelWidth = $derived(heatmapLabelWidth([...severityRows, ...categoryRows].map((row) => row.label)));
+
+	// Rendered inside the chart rather than instead of it, so the cards keep their height and
+	// nothing below them moves — as ChartEmpty does inside ChartFrame on QUERIES.
+	const chartMessage = $derived.by(() => {
+		if (buckets.length > 0 && levelTotals.length > 0) return null;
+		if (chartLoading) return 'Loading…';
+
+		return chartError ?? 'No log events';
+	});
+
+	const bucketNote = $derived(bucketMs > 0 ? ` · ${fmtBucketSize(bucketMs)} buckets` : '');
+
+	function applyPivot(pivot: LogPivot) {
+		if (pivot.kind === 'search') {
+			search = pivot.value;
+			filters.text = pivot.value;
+
+			return;
+		}
+
+		if (pivot.field === LogFacetField.LEVEL) {
+			filters.toggleLevel(Number(pivot.value));
+
+			return;
+		}
+
+		filters.add(pivot.field, pivot.value);
 	}
 </script>
 
-<div class="mb-4 border border-line-card bg-card px-5 pt-5 pb-3.5">
-	<div class="mb-4 flex flex-wrap items-start justify-between gap-5">
-		<div class="flex items-baseline gap-2.5">
-			<span class="font-mono text-[30px] leading-none font-semibold tracking-[-0.5px] text-ink">
-				{fmtCount(totalEvents)}
-			</span>
-			<span class="font-condensed text-sm font-semibold tracking-[0.8px] text-ink/70 uppercase">log events</span>
-		</div>
+<div class="mb-6 grid gap-4">
+	<ChartPanel
+		docId="lg-severity"
+		title="Log severity over time"
+		description={`When each severity was logged${bucketNote}`}
+	>
+		<LogTimelineHeatmap
+			rows={severityRows}
+			buckets={bucketDates}
+			from={range.from}
+			to={range.to}
+			{bucketMs}
+			{labelWidth}
+			message={chartMessage}
+		/>
+	</ChartPanel>
 
-		<div class="flex flex-nowrap items-center justify-end gap-2">
-			{#each chips as chip (chip.level)}
-				{@const cs = levelChip(chip.level, chip.active)}
-				<button
-					type="button"
-					onclick={() => toggleLevel(chip.level)}
-					class="flex shrink-0 cursor-pointer items-center gap-1.5 px-2.5 py-1 font-condensed text-xs font-semibold tracking-[0.6px] uppercase transition-colors"
-					style:color={cs.color}
-					style:background={cs.background}
-					style:border={cs.border}
-				>
-					<span>{chip.label}</span>
-					<span class="font-mono">{fmtCount(chip.count)}</span>
-				</button>
-			{/each}
-			{#if filterActive}
-				<button
-					type="button"
-					onclick={reset}
-					class="shrink-0 cursor-pointer font-condensed text-xs font-bold tracking-[0.6px] text-command uppercase hover:text-danger"
-				>
-					Reset
-				</button>
-			{/if}
-		</div>
-	</div>
-
-	{#if chartData.length > 0}
-		<LogHistogram data={chartData} />
-	{/if}
+	<ChartPanel
+		docId="lg-categories"
+		title="Log categories over time"
+		description={`When each category of event was logged${bucketNote}`}
+	>
+		<LogTimelineHeatmap
+			rows={categoryRows}
+			buckets={bucketDates}
+			from={range.from}
+			to={range.to}
+			{bucketMs}
+			{labelWidth}
+			message={chartMessage}
+			detail={categoryDetail}
+		/>
+	</ChartPanel>
 </div>
 
-{#if menu !== null}
-	<button
-		type="button"
-		aria-label="Close menu"
-		onclick={() => (menu = null)}
-		class="fixed inset-0 z-[20] cursor-default bg-transparent"
-	></button>
-{/if}
+<DocCard id="lg-table">
+	<header class="pt-3.5 pr-11 pb-0 pl-4">
+		<SectionHeader
+			title="Log events"
+			description="Every message PostgreSQL wrote, newest first — expand one for the full text"
+		/>
+	</header>
 
-<div class="border border-line-card bg-card">
-	<div class="flex flex-wrap items-center gap-2.5 border-b border-line p-3 px-3.5">
-		<div
-			class="flex h-10 min-w-[15rem] flex-1 items-center gap-2.5 border border-line-strong bg-paper px-3 focus-within:border-command"
-		>
-			<SearchIcon class="size-3.5 flex-none text-ink/55" />
-			<input
-				type="text"
-				bind:value={search}
-				placeholder="Search log text or PID, e.g. deadlock"
-				spellcheck="false"
-				class="min-w-0 flex-1 border-none bg-transparent font-mono text-md text-ink outline-none"
-			/>
-			{#if search}
-				<button
-					type="button"
-					title="Clear"
-					onclick={() => (search = '')}
-					class="cursor-pointer text-ink/55 hover:text-danger"><XIcon class="size-3.5" /></button
-				>
-			{/if}
-		</div>
+	<LogFilterBar {filters} {facets} loading={facetsLoading} bind:searchText={search} />
 
-		<div class="relative z-[21]">
-			<button
-				type="button"
-				onclick={() => (menu = menu === 'class' ? null : 'class')}
-				aria-haspopup="menu"
-				aria-expanded={menu === 'class'}
-				class="flex h-10 cursor-pointer items-center gap-2.5 border border-line-strong bg-paper px-3 hover:bg-hover-soft"
-			>
-				<span class="font-condensed text-2xs font-semibold tracking-[0.8px] text-ink/70 uppercase">Class</span>
-				<span class="font-mono text-sm font-medium whitespace-nowrap text-ink">{classLabel}</span>
-				<ChevronDownIcon class="size-3.5 text-ink/55" />
-			</button>
-			{#if menu === 'class'}
-				<div
-					class="absolute top-[calc(100%+6px)] right-0 z-[22] max-h-[21.25rem] min-w-[18.75rem] overflow-auto border border-line-strong bg-card p-1.5 shadow-popover"
-				>
-					{#each ALL_CLASSIFICATIONS as c (c)}
-						<button
-							type="button"
-							onclick={() => toggleClass(c)}
-							class="flex w-full cursor-pointer items-center justify-between gap-2.5 px-2.5 py-2 text-left font-sans text-sm text-ink hover:bg-hover"
-						>
-							<span>{classificationLabel(c)}</span>
-							{#if selectedClasses.includes(c)}<CheckIcon class="size-3.5 flex-none text-command" />{/if}
-						</button>
-					{/each}
-				</div>
-			{/if}
-		</div>
-	</div>
+	<LogsTable {records} bind:sort loading={tableLoading && records.length > 0} onPivot={applyPivot} />
 
-	<LogsTable {records} />
-
-	{#if loading}
+	{#if tableLoading && records.length === 0}
 		<StateBlock class="px-4 py-7" message="Loading…" />
-	{:else if error}
-		<StateBlock kind="error" class="px-4 py-7" message={error} />
+	{:else if tableError}
+		<StateBlock kind="error" class="px-4 py-7" message={tableError} />
 	{:else if records.length === 0}
-		<StateBlock class="px-10 py-10" message="No log events match the current filters" />
+		<StateBlock class="px-4 py-7" message="No log events match the current filters" />
+	{:else if hasMore}
+		<div class="border-t border-line-soft p-3 text-center">
+			<Button variant="ghost" onclick={loadMore} disabled={loadingMore}>
+				{loadingMore ? 'Loading…' : 'Load more'}
+			</Button>
+		</div>
 	{/if}
-</div>
+</DocCard>

@@ -120,9 +120,12 @@
 					aria-expanded={open}
 					class={clsx(
 						'cursor-pointer transition-colors',
-						// An open row is tinted with the accent and loses its bottom rule, so it
-						// reads as one piece with the panel it opened rather than a stray row.
-						open ? 'bg-accent [&>td]:border-b-transparent' : 'hover:bg-hover'
+						// An open row is tinted and loses its bottom rule, so it reads as one piece
+						// with the panel it opened rather than a stray row. The tint is a neutral ink
+						// one, not the terracotta accent: an expanded row is selected, not in trouble,
+						// and a red wash reads as "something is wrong here". Twice the weight of the
+						// hover tint, so open still stands out from hovered.
+						open ? 'bg-hover-strong [&>td]:border-b-transparent' : 'hover:bg-hover'
 					)}
 				>
 					<!-- The chevron sits in the gutter rather than in the flow, so the date
@@ -160,7 +163,7 @@
 						<td colspan={headDef.length} class="border-b border-line p-0">
 							<!-- Every sampled stretch, in order: the statements the transaction ran
 							     and what it was doing between them. -->
-							<div class="border-l-2 border-accent-line bg-hover-soft px-5 py-4 md:pl-12">
+							<div class="border-l-2 border-line-bold bg-hover-soft px-5 py-4 md:pl-12">
 								{#each groupEvents(r.events) as g (g.key)}
 									<div class="mt-5 first:mt-0">
 										<div class="leading-[18px]">

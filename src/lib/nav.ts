@@ -37,7 +37,7 @@ export const screenMeta: Record<string, { title: string; description: string }> 
 	},
 	logs: {
 		title: 'LOGS',
-		description: 'Log events collected from this server, by level and classification'
+		description: 'What PostgreSQL logged on this server, by severity and category'
 	},
 	alerts: {
 		title: 'ALERTS',

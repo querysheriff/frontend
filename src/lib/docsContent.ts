@@ -395,5 +395,96 @@ export const docContent: Record<string, DocEntry> = {
 				]
 			}
 		]
+	},
+	'lg-severity': {
+		title: 'Log severity over time',
+		sections: [
+			{
+				heading: 'What this chart shows',
+				body: [
+					'Each row is one log severity, with the most serious at the top. Each cell represents a time interval.',
+					'An empty cell means no events of that severity occurred. A darker cell means more events occurred. Hover a cell to see the exact count.',
+					'Each row has its own intensity scale, so rare but important events like `FATAL` or `PANIC` stay visible even when routine logs are much more common.'
+				]
+			},
+			{
+				heading: 'Why this matters',
+				body: [
+					'The chart shows when important database events happened.',
+					'`ERROR` usually means a query failed. `FATAL` means a connection was terminated. `PANIC` means PostgreSQL had to stop.',
+					'Look for spikes in the more serious rows, then check the logs below to see what happened.'
+				]
+			}
+		]
+	},
+
+	'lg-categories': {
+		title: 'Log categories over time',
+		sections: [
+			{
+				heading: 'What this chart shows',
+				body: [
+					'This chart groups log events by what they were about instead of how serious they were.',
+					'Each row is one category, and each cell represents a time interval. Darker cells mean more events occurred.',
+					'Hover a cell to see the total and a breakdown by event type.'
+				]
+			},
+			{
+				heading: 'Why this matters',
+				body: [
+					'Severity tells you how serious an event was. Category tells you what part of the database it came from.',
+					{
+						list: [
+							'**Server** — starts, shutdowns, crashes, memory issues, and temp files.',
+							'**Connection** — connections, authentication failures, and connection limits.',
+							'**WAL & Checkpoint** — checkpoints, restartpoints, and WAL archiving.',
+							'**Autovacuum** — vacuum, analyze, and transaction ID wraparound warnings.',
+							'**Lock** — lock waits, lock timeouts, and deadlocks.',
+							'**Statement** — slow queries, cancelled statements, and EXPLAIN plans.',
+							'**Standby Server** — replication and recovery events.',
+							'**Constraint Violation** — unique, foreign key, not-null, check, and exclusion violations.',
+							'**Application Error** — syntax errors, missing objects, permission errors, and similar application mistakes.'
+						]
+					}
+				]
+			},
+			{
+				heading: 'How the chart works',
+				body: [
+					'Each log message is matched to a known event type, and each event type belongs to one category.',
+					'Like the severity chart, each row has its own intensity scale.'
+				]
+			}
+		]
+	},
+
+	'lg-table': {
+		title: 'Log events',
+		sections: [
+			{
+				heading: 'What this table shows',
+				body: [
+					'This table shows PostgreSQL log events from the selected time range, newest first.',
+					'The **Event** column gives each message a simple name based on what happened. Click a row to see the full message and other details.',
+					'Slow-query events also show the query duration and link to the query and execution plan when available.'
+				]
+			},
+			{
+				heading: 'Why this matters',
+				body: [
+					'Some problems only appear in PostgreSQL logs, such as deadlocks, failed connections, constraint violations, and checkpoint warnings.',
+					'Most values can be clicked to filter the table, making it easy to find related events.',
+					'The expanded row also shows the **SQLSTATE** error code when PostgreSQL provides one.'
+				]
+			},
+			{
+				heading: 'How the table works',
+				body: [
+					'PostgreSQL only records events enabled by its logging configuration, so an empty table does not always mean nothing happened.',
+					'The collector reads PostgreSQL logs and sends new entries to QuerySheriff shortly after they are written.',
+					'Logs cover the whole PostgreSQL server, not just one database, so the database selector is disabled on this page.'
+				]
+			}
+		]
 	}
 };

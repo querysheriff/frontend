@@ -130,7 +130,7 @@
 								class="{triggerCls} {dbSwitch ? '' : 'cursor-not-allowed opacity-40'}"
 							>
 								<DatabaseIcon class="size-3.5 flex-none text-steel" />
-								<span class="font-mono text-sm font-medium text-ink">{ctx.db || '—'}</span>
+								<span class="font-mono text-sm font-medium text-ink">{dbSwitch ? ctx.db || '—' : '—'}</span>
 								<ChevronDownIcon class="size-3.5 text-ink/55" />
 							</button>
 						{/snippet}

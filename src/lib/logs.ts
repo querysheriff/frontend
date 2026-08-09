@@ -1,6 +1,10 @@
 import {
 	LogEvent_LogLevel,
-	LogEvent_LogClassification
+	LogEvent_LogClassification,
+	LogEvent_LogCategory,
+	LogFacetField,
+	type LogFacet,
+	type LogFacetValue
 } from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/log_pb';
 
 export type LevelTier = 'info' | 'warn' | 'severe';
@@ -27,43 +31,68 @@ export function levelLabel(level: LogEvent_LogLevel): string {
 	return LogEvent_LogLevel[level] ?? 'UNKNOWN';
 }
 
-/** Levels most-severe first, using Postgres' log_min_messages ordering where
- *  LOG ranks just below FATAL (…ERROR < LOG < FATAL < PANIC). */
-export const LEVEL_ORDER: LogEvent_LogLevel[] = [
-	LogEvent_LogLevel.PANIC,
-	LogEvent_LogLevel.FATAL,
-	LogEvent_LogLevel.LOG,
-	LogEvent_LogLevel.ERROR,
-	LogEvent_LogLevel.WARNING,
-	LogEvent_LogLevel.NOTICE,
-	LogEvent_LogLevel.INFO,
-	LogEvent_LogLevel.DEBUG
-];
-
 function tint(color: string, pct: number): string {
 	return `color-mix(in oklab, ${color} ${pct}%, transparent)`;
 }
 
-export type PillStyle = { color: string; background: string; border: string };
+type PillStyle = {
+	color: string;
+	background: string;
+	border: string;
+	hoverColor: string;
+	hoverBackground: string;
+	hoverBorder: string;
+};
 
-export function levelChip(level: LogEvent_LogLevel, active: boolean): PillStyle {
-	const m = META[level] ?? { tier: 'info', color: 'var(--color-steel)' };
-	if (!active) {
-		return {
-			color: tint('var(--color-ink)', 40),
-			background: 'transparent',
-			border: '1px solid var(--color-line-strong)'
-		};
-	}
-	if (m.tier === 'severe') return { color: 'var(--color-paper)', background: m.color, border: `1px solid ${m.color}` };
-	if (m.tier === 'warn') {
-		return { color: 'var(--color-warn-text)', background: tint(m.color, 16), border: `1px solid ${tint(m.color, 50)}` };
-	}
-	return { color: m.color, background: tint(m.color, 10), border: `1px solid ${tint(m.color, 45)}` };
+function deepen(color: string): string {
+	return `color-mix(in oklab, ${color} 80%, var(--color-ink))`;
 }
 
+/** `Tag`'s hover, verbatim — border to the accent line, label to command red, fill unchanged —
+ *  so a clickable pill highlights the same way wherever it appears. */
+function tagHover(background: string) {
+	return {
+		hoverColor: 'var(--color-command)',
+		hoverBackground: background,
+		hoverBorder: '1px solid var(--color-accent-line)'
+	};
+}
+
+/** Severe levels are filled solid, and hover deepens that fill instead of taking the accent
+ *  tint: they are already command/danger/panic, so the tint would only wash them out. */
 export function levelBadge(level: LogEvent_LogLevel): PillStyle {
-	return levelChip(level, true);
+	const m = META[level] ?? META[LogEvent_LogLevel.LOG];
+
+	if (m.tier === 'severe') {
+		return {
+			color: 'var(--color-paper)',
+			background: m.color,
+			border: `1px solid ${m.color}`,
+			hoverColor: 'var(--color-paper)',
+			hoverBackground: deepen(m.color),
+			hoverBorder: `1px solid ${deepen(m.color)}`
+		};
+	}
+
+	if (m.tier === 'warn') {
+		const background = tint(m.color, 16);
+
+		return {
+			color: 'var(--color-warn-text)',
+			background,
+			border: `1px solid ${tint(m.color, 50)}`,
+			...tagHover(background)
+		};
+	}
+
+	const background = tint(m.color, 10);
+
+	return {
+		color: m.color,
+		background,
+		border: `1px solid ${tint(m.color, 45)}`,
+		...tagHover(background)
+	};
 }
 
 export function classificationLabel(c: LogEvent_LogClassification): string {
@@ -73,10 +102,123 @@ export function classificationLabel(c: LogEvent_LogClassification): string {
 	return words.map((w, i) => (i === 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w)).join(' ');
 }
 
+/** Whether this event's `message` is machine output the statement sample replaces: both are
+ *  logged as "duration: N ms …" plus the SQL or the EXPLAIN output. The backend blanks the
+ *  message once it has extracted a sample; when extraction failed the leftover text is a
+ *  corrupted multi-megabyte plan, so it is not worth rendering either way. */
+export function messageIsSampleText(c: LogEvent_LogClassification): boolean {
+	return c === LogEvent_LogClassification.STATEMENT_DURATION || c === LogEvent_LogClassification.STATEMENT_AUTO_EXPLAIN;
+}
+
 export function classificationCode(c: LogEvent_LogClassification): string {
 	return LogEvent_LogClassification[c] ?? '';
 }
 
-export const ALL_CLASSIFICATIONS: LogEvent_LogClassification[] = Object.values(LogEvent_LogClassification)
-	.filter((v): v is LogEvent_LogClassification => typeof v === 'number' && v !== LogEvent_LogClassification.UNSPECIFIED)
-	.sort((a, b) => classificationLabel(a).localeCompare(classificationLabel(b)));
+/** Nine categories against eight data colours, so one is the darker sibling of a hue. Mixed
+ *  here rather than added as a token, keeping `layout.css` the source of the hues. */
+function shade(token: string): string {
+	return `color-mix(in oklab, ${token} 62%, var(--color-ink))`;
+}
+
+/** pganalyze's Log Insights categories, in their order — their taxonomy rather than one of
+ *  ours, so their per-code docs explain what any classification means. Their trailing
+ *  "events" ("Server events") is dropped: every chart row and picker row would repeat it.
+ *  The classification -> category mapping itself lives in the backend. */
+const CATEGORY_META: { category: LogEvent_LogCategory; label: string; color: string }[] = [
+	{ category: LogEvent_LogCategory.SERVER, label: 'Server', color: 'var(--color-panic)' },
+	{ category: LogEvent_LogCategory.CONNECTION, label: 'Connection', color: 'var(--color-teal)' },
+	{ category: LogEvent_LogCategory.WAL_CHECKPOINT, label: 'WAL & Checkpoint', color: 'var(--color-taupe)' },
+	{ category: LogEvent_LogCategory.AUTOVACUUM, label: 'Autovacuum', color: 'var(--color-ok)' },
+	{ category: LogEvent_LogCategory.LOCK, label: 'Lock', color: 'var(--color-danger)' },
+	{ category: LogEvent_LogCategory.STATEMENT, label: 'Statement', color: 'var(--color-steel)' },
+	{ category: LogEvent_LogCategory.STANDBY, label: 'Standby Server', color: shade('var(--color-ok)') },
+	{
+		category: LogEvent_LogCategory.CONSTRAINT_VIOLATION,
+		label: 'Constraint Violation',
+		color: 'var(--color-warn)'
+	},
+	{
+		category: LogEvent_LogCategory.APPLICATION_ERROR,
+		label: 'Application Error',
+		color: 'var(--color-command)'
+	},
+	// The collector matched no rule — worth surfacing, since an unrecognised message is often
+	// the interesting one.
+	{ category: LogEvent_LogCategory.UNSPECIFIED, label: 'Uncategorized', color: 'var(--color-line-boldest)' }
+];
+
+export const CATEGORY_ORDER: LogEvent_LogCategory[] = CATEGORY_META.map((m) => m.category);
+
+const CATEGORY_BY_VALUE = new Map(CATEGORY_META.map((m) => [m.category, m]));
+
+export function categoryLabel(category: LogEvent_LogCategory): string {
+	return CATEGORY_BY_VALUE.get(category)?.label ?? 'Uncategorized';
+}
+
+export function categoryColor(category: LogEvent_LogCategory): string {
+	return CATEGORY_BY_VALUE.get(category)?.color ?? 'var(--color-steel)';
+}
+
+export function categoryBadge(category: LogEvent_LogCategory): PillStyle {
+	const color = categoryColor(category);
+	const background = tint(color, 10);
+
+	return {
+		color,
+		background,
+		border: `1px solid ${tint(color, 40)}`,
+		...tagHover(background)
+	};
+}
+
+/** Severity rows for the heatmap, most serious first. Not `log_min_messages` order, which
+ *  ranks LOG above ERROR: read as a chart, LOG is routine chatter and belongs lower. */
+export const LEVEL_ROWS: LogEvent_LogLevel[] = [
+	LogEvent_LogLevel.PANIC,
+	LogEvent_LogLevel.FATAL,
+	LogEvent_LogLevel.ERROR,
+	LogEvent_LogLevel.WARNING,
+	LogEvent_LogLevel.NOTICE,
+	LogEvent_LogLevel.LOG,
+	LogEvent_LogLevel.INFO,
+	LogEvent_LogLevel.DEBUG
+];
+
+type FacetMeta = { field: LogFacetField; label: string; urlKey: string; pickable: boolean };
+
+/** Every filterable field, with the query-string key it round-trips through. Keys are
+ *  `f`-prefixed because `ctx` already owns `server`, `db` and `range` in the same flat
+ *  namespace. Category and event are not `pickable`: the category picker owns both, being
+ *  the one place that drills from a category into its event types. */
+export const FACET_FIELDS: FacetMeta[] = [
+	{ field: LogFacetField.CATEGORY, label: 'Category', urlKey: 'fcat', pickable: false },
+	{ field: LogFacetField.CLASSIFICATION, label: 'Event', urlKey: 'fevent', pickable: false },
+	{ field: LogFacetField.LEVEL, label: 'Severity', urlKey: 'lvl', pickable: true },
+	{ field: LogFacetField.DATABASE, label: 'Database', urlKey: 'fdb', pickable: true },
+	{ field: LogFacetField.USERNAME, label: 'User', urlKey: 'fuser', pickable: true },
+	{ field: LogFacetField.APPLICATION_NAME, label: 'Application', urlKey: 'fapp', pickable: true },
+	{ field: LogFacetField.BACKEND_TYPE, label: 'Backend', urlKey: 'fbackend', pickable: true }
+];
+
+export const PICKABLE_FACETS: FacetMeta[] = FACET_FIELDS.filter((f) => f.pickable);
+
+// Background workers (checkpointer, autovacuum launcher, walwriter) have no session, so they
+// have no database, user or application. The backend reports that as the empty string.
+const NO_VALUE_LABEL = '(none)';
+
+export function facetValues(facets: LogFacet[] | undefined, field: LogFacetField): LogFacetValue[] {
+	return facets?.find((f) => f.field === field)?.values ?? [];
+}
+
+export function facetTruncated(facets: LogFacet[] | undefined, field: LogFacetField): boolean {
+	return facets?.find((f) => f.field === field)?.truncated ?? false;
+}
+
+export function facetValueLabel(field: LogFacetField, value: string): string {
+	if (value === '') return NO_VALUE_LABEL;
+	if (field === LogFacetField.CATEGORY) return categoryLabel(Number(value));
+	if (field === LogFacetField.LEVEL) return levelLabel(Number(value));
+	if (field === LogFacetField.CLASSIFICATION) return classificationLabel(Number(value));
+
+	return value;
+}

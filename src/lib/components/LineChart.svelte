@@ -7,6 +7,7 @@
 	import GapBands from '$lib/components/GapBands.svelte';
 	import SeriesPoints from '$lib/components/SeriesPoints.svelte';
 	import { buildMetricMultiChartModel, type MetricSeriesPoint, type MetricSeriesRow } from '$lib/metricChart';
+	import { createTimeBrush } from '$lib/chartBrush.svelte';
 
 	type Series = { label: string; color: string; points: MetricSeriesPoint[] };
 
@@ -52,6 +53,8 @@
 	// "800K" or "12s" but not "8.33min", which then overruns the card. Size it from
 	// the widest label the formatter will actually produce.
 	const padLeft = $derived(Math.max(36, Math.ceil(format(yMax || 1).length * 7.2) + 12));
+
+	const brush = createTimeBrush(() => model.step);
 </script>
 
 <ChartFrame legend={series.map((s) => ({ label: s.label, color: s.color }))}>
@@ -65,6 +68,7 @@
 		yNice
 		padding={{ left: padLeft, right: 16, bottom: 24 }}
 		tooltipContext={{ mode: 'bisect-x' }}
+		brush={brush.props}
 	>
 		<Svg>
 			<Grid y={{ class: 'stroke-ink/10' }} />
@@ -92,34 +96,38 @@
 					stroke-width={2}
 				/>
 			{/each}
-			<Highlight lines motion="none" />
-			<SeriesPoints colors={series.map((s) => s.color)} values={(d: MetricSeriesRow) => d.values} />
+			{#if !brush.brushing}
+				<Highlight lines motion="none" />
+				<SeriesPoints colors={series.map((s) => s.color)} values={(d: MetricSeriesRow) => d.values} />
+			{/if}
 		</Svg>
-		<Tooltip.Root
-			x="data"
-			y="pointer"
-			anchor="top-left"
-			xOffset={18}
-			yOffset={10}
-			variant="none"
-			class="border border-line-card bg-card px-3 py-2 shadow-chart"
-		>
-			{#snippet children({ data: point }: { data: MetricSeriesRow })}
-				<div class="flex flex-col gap-1 font-mono text-xs leading-[1.4] whitespace-nowrap">
-					<div class="text-ink/70">{fmtClockMinute(point.at)}</div>
-					{#each series as s, i (s.label)}
-						<div class="flex items-center justify-between gap-3.5">
-							<span class="flex items-center gap-1.5 text-ink/70">
-								<span class="h-0.5 w-3" style:background={s.color}></span>{s.label}
-							</span>
-							<span class="font-semibold text-ink"
-								>{point.values[i] == null ? '—' : format(point.values[i] as number)}</span
-							>
-						</div>
-					{/each}
-				</div>
-			{/snippet}
-		</Tooltip.Root>
+		{#if !brush.brushing}
+			<Tooltip.Root
+				x="data"
+				y="pointer"
+				anchor="top-left"
+				xOffset={18}
+				yOffset={10}
+				variant="none"
+				class="border border-line-card bg-card px-3 py-2 shadow-chart"
+			>
+				{#snippet children({ data: point }: { data: MetricSeriesRow })}
+					<div class="flex flex-col gap-1 font-mono text-xs leading-[1.4] whitespace-nowrap">
+						<div class="text-ink/70">{fmtClockMinute(point.at)}</div>
+						{#each series as s, i (s.label)}
+							<div class="flex items-center justify-between gap-3.5">
+								<span class="flex items-center gap-1.5 text-ink/70">
+									<span class="h-0.5 w-3" style:background={s.color}></span>{s.label}
+								</span>
+								<span class="font-semibold text-ink"
+									>{point.values[i] == null ? '—' : format(point.values[i] as number)}</span
+								>
+							</div>
+						{/each}
+					</div>
+				{/snippet}
+			</Tooltip.Root>
+		{/if}
 	</Chart>
 </ChartFrame>
 

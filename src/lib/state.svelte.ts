@@ -56,6 +56,10 @@ class ContextState {
 	range = $state(DEFAULT_RANGE);
 	customFrom = $state(todayAt('00:00:00'));
 	customTo = $state(todayAt('23:59:59'));
+	// False on screens whose data is server-wide (LOGS). `db` keeps its value so
+	// leaving the screen restores the selection, but it is neither shown nor
+	// written to the URL while it means nothing.
+	dbScoped = $state(true);
 
 	get isCustom(): boolean {
 		return this.range === 'custom';
@@ -71,6 +75,15 @@ class ContextState {
 
 	get customToLabel(): string {
 		return fmtClock(this.customTo);
+	}
+
+	/** Narrow the window to an absolute range, as dragging across a chart does. Lives here
+	 *  rather than in each page so every chart's brush lands on the same behaviour, and so the
+	 *  selection is shareable through the range params `writeQuery` already emits. */
+	zoomTo(from: Date, to: Date): void {
+		this.customFrom = toInputStr(from);
+		this.customTo = toInputStr(to);
+		this.range = 'custom';
 	}
 
 	timeRange(): { from: Date; to: Date } {
@@ -107,7 +120,7 @@ class ContextState {
 
 	writeQuery(params: URLSearchParams): void {
 		if (this.server) params.set('server', this.server);
-		if (this.db) params.set('db', this.db);
+		if (this.db && this.dbScoped) params.set('db', this.db);
 		if (this.range === 'custom') {
 			const { from, to } = this.timeRange();
 			params.set('from', String(from.getTime()));

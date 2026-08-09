@@ -5,8 +5,9 @@
 	import DocsDrawer from '$lib/components/DocsDrawer.svelte';
 	import { docs } from '$lib/docs.svelte';
 
-	// The shell for a section whose cards carry docs.
-	let { children }: { children: Snippet } = $props();
+	// The shell for a section whose cards carry docs. `dbSwitch` is forwarded because a
+	// section can have docs and still be server-wide, as LOGS is.
+	let { children, dbSwitch = true }: { children: Snippet; dbSwitch?: boolean } = $props();
 
 	// `docs` is a module singleton, so a panel left open would follow you to the
 	// next screen and show that card's entry beside cards that never had one.
@@ -14,7 +15,7 @@
 	afterNavigate(() => docs.close());
 </script>
 
-<AppShell>
+<AppShell {dbSwitch}>
 	{#snippet rightPanel()}
 		<DocsDrawer />
 	{/snippet}

@@ -48,7 +48,7 @@
 		"vite": "^8.0.16"
 	},
 	"dependencies": {
-		"@buf/querysheriff_backend.bufbuild_es": "^2.13.0-20260808180232-5f0c4456cb0e.1",
+		"@buf/querysheriff_backend.bufbuild_es": "^2.13.0-20260809164136-f4841a22aee8.1",
 		"@bufbuild/protobuf": "^2.13.0",
 		"@connectrpc/connect": "^2.1.1",
 		"@connectrpc/connect-web": "^2.1.1",
