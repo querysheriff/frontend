@@ -254,7 +254,9 @@
 	const bucketMs = $derived(Number(histogram?.bucketMs ?? 0n));
 	const levelTotals = $derived(histogram?.levelTotals ?? []);
 
-	const bucketDates = $derived(buckets.map((b) => (b.bucketStart ? timestampDate(b.bucketStart) : new Date(0))));
+	// Bucket ends: HeatmapCells draws each cell across (at - step, at], and the tooltip labels
+	// the same span, so the value has to be the end.
+	const bucketDates = $derived(buckets.map((b) => (b.bucketEnd ? timestampDate(b.bucketEnd) : new Date(0))));
 
 	// Every severity gets a row whether or not it occurred: a stable row set is what makes two
 	// windows comparable, and an empty PANIC row is worth seeing.

@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	import ContextBar from '$lib/components/ContextBar.svelte';
+	import { isSuperAdminOnlyPath } from '$lib/nav';
 	import { ctx, serversState } from '$lib/state.svelte';
 	import { urlSync } from '$lib/urlState.svelte';
 	import { session } from '$lib/session.svelte';
@@ -31,13 +32,11 @@
 	});
 
 	// Wait until the session loads, then redirect anyone not allowed here.
-	const superAdminOnlyPath = /^\/(locks|transactions|logs|alerts)(\/|$)/;
-
 	$effect(() => {
 		if (!session.loaded) return;
 		if (!session.isAuthenticated) goto('/login');
 		else if (requireSuperAdmin && !session.isSuperAdmin) goto('/queries');
-		else if (!session.isSuperAdmin && superAdminOnlyPath.test(page.url.pathname)) goto('/queries');
+		else if (!session.isSuperAdmin && isSuperAdminOnlyPath(page.url.pathname)) goto('/queries');
 	});
 
 	$effect(() => {

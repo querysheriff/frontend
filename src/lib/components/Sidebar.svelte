@@ -10,7 +10,7 @@
 	import { sidebar } from '$lib/sidebar.svelte';
 	import QuerySheriffMark from '$lib/icons/QuerySheriffMark.svelte';
 
-	const visibleNav = $derived(session.isSuperAdmin ? navItems : navItems.filter((i) => i.key === 'slow-queries'));
+	const visibleNav = $derived(navItems.filter((i) => !i.superAdminOnly || session.isSuperAdmin));
 
 	const navClass = (active: boolean): string =>
 		clsx(
