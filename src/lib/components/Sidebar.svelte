@@ -10,8 +10,6 @@
 	import { sidebar } from '$lib/sidebar.svelte';
 	import QuerySheriffMark from '$lib/icons/QuerySheriffMark.svelte';
 
-	const visibleNav = $derived(navItems.filter((i) => !i.superAdminOnly || session.isSuperAdmin));
-
 	const navClass = (active: boolean): string =>
 		clsx(
 			'flex flex-col gap-0.5 border-l-[3px] py-2.5 pr-3 pl-3.5 transition-colors',
@@ -51,7 +49,7 @@
 	</div>
 
 	<nav class="flex flex-col gap-0.5 px-2 py-2.5">
-		{#each visibleNav as item (item.key)}
+		{#each navItems as item (item.key)}
 			<a href={item.href} title={item.label} class={navClass(isNavActive(item, page.url.pathname))}>
 				<span class="font-condensed text-lg font-semibold tracking-[0.4px] uppercase">{item.label}</span>
 			</a>

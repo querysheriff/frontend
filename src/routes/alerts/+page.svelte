@@ -2,14 +2,17 @@
 	import { onMount } from 'svelte';
 	import { LinkIcon, InfoIcon, XIcon } from '@lucide/svelte';
 	import Alert from '$lib/components/Alert.svelte';
+	import AlertsTable from '$lib/components/AlertsTable.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import DocCard from '$lib/components/DocCard.svelte';
 	import FormLabel from '$lib/components/FormLabel.svelte';
-	import { AlertLevel } from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/alert_pb';
 	import type {
 		ServerAlertSettings,
 		AlertSetting
 	} from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/alert_pb';
 	import { alertClient } from '$lib/connect';
 	import StateBlock from '$lib/components/StateBlock.svelte';
+	import { DOC_ID_SEP } from '$lib/docsContent';
 	import { errMsg } from '$lib/format';
 	import PageBar from '$lib/components/PageBar.svelte';
 
@@ -73,13 +76,6 @@
 			error = errMsg(e);
 		}
 	}
-
-	const sev: Record<AlertLevel, { label: string; chip: string }> = {
-		[AlertLevel.CRITICAL]: { label: 'Critical', chip: 'border-danger/34 bg-danger/10 text-danger' },
-		[AlertLevel.WARNING]: { label: 'Warning', chip: 'border-warn/34 bg-warn/10 text-warn-text' },
-		[AlertLevel.INFO]: { label: 'Info', chip: 'border-steel/34 bg-steel/10 text-steel-text' },
-		[AlertLevel.UNSPECIFIED]: { label: 'Info', chip: 'border-steel/34 bg-steel/10 text-steel-text' }
-	};
 </script>
 
 <PageBar />
@@ -98,9 +94,9 @@
 	{:else}
 		<div class="flex flex-col gap-6">
 			{#each servers as s (s.serverName)}
-				<div class="border border-line-card bg-card">
-					<div class="border-b border-line px-5 py-3.5">
-						<span class="font-mono text-lg font-semibold text-ink">{s.serverName}</span>
+				<DocCard id={`a-alerts${DOC_ID_SEP}${s.serverName}`}>
+					<div class="border-b border-line py-3.5 pr-11 pl-5">
+						<h2 class="font-mono text-lg font-semibold text-ink">{s.serverName}</h2>
 					</div>
 
 					<div class="border-b border-line-soft px-5 py-4">
@@ -130,18 +126,7 @@
 									</button>
 								{/if}
 							</div>
-							<button
-								type="button"
-								onclick={() => saveWebhook(s)}
-								disabled={!isDirty(s)}
-								class="h-[2.625rem] shrink-0 border px-5 font-condensed text-sm font-bold tracking-[0.8px] uppercase {isDirty(
-									s
-								)
-									? 'cursor-pointer border-command bg-command text-paper hover:bg-danger'
-									: 'cursor-default border-line-soft bg-hover-strong text-ink/38'}"
-							>
-								Save
-							</button>
+							<Button class="shrink-0 px-5" disabled={!isDirty(s)} onclick={() => saveWebhook(s)}>Save</Button>
 						</div>
 						{#if s.slackWebhookUrl.trim() === ''}
 							<div class="mt-3 flex items-center gap-2 font-sans text-sm text-ink/70">
@@ -152,53 +137,9 @@
 					</div>
 
 					{#if s.slackWebhookUrl.trim() !== ''}
-						<div>
-							{#each s.alerts as alert (alert.key)}
-								<div class="flex items-center gap-3.5 border-b border-line-soft px-5 py-3.5 last:border-b-0">
-									<span
-										class="inline-flex w-[4.625rem] shrink-0 items-center justify-center border px-1.5 py-1 font-condensed text-2xs font-bold tracking-[0.7px] uppercase {sev[
-											alert.level
-										].chip}"
-									>
-										{sev[alert.level].label}
-									</span>
-									<div class="min-w-0 flex-1">
-										<span class="group relative inline-flex items-center gap-2">
-											<span class="font-sans text-lg font-semibold text-ink">{alert.title}</span>
-											<span class="inline-flex shrink-0 text-ink/32 transition-colors group-hover:text-command">
-												<InfoIcon class="size-4" />
-											</span>
-											<span
-												role="tooltip"
-												class="pointer-events-none invisible absolute bottom-[calc(100%+9px)] left-[-8px] z-40 w-[15.75rem] translate-y-[3px] bg-ink px-3 py-2.5 font-sans text-sm leading-[1.5] text-paper opacity-0 shadow-tooltip transition duration-[130ms] group-hover:visible group-hover:translate-y-0 group-hover:opacity-100"
-											>
-												{alert.description}
-												<span class="absolute top-full left-5 h-0 w-0 border-[6px] border-transparent border-t-ink"
-												></span>
-											</span>
-										</span>
-									</div>
-									<button
-										type="button"
-										role="switch"
-										aria-checked={alert.enabled}
-										aria-label={`Toggle ${alert.title}`}
-										onclick={() => toggleAlert(s, alert)}
-										class="relative h-6 w-10 shrink-0 cursor-pointer rounded-full transition-colors {alert.enabled
-											? 'bg-command'
-											: 'bg-ink/22'}"
-									>
-										<span
-											class="absolute top-0.5 h-5 w-5 rounded-full bg-card shadow-knob transition-[left] {alert.enabled
-												? 'left-5'
-												: 'left-0.5'}"
-										></span>
-									</button>
-								</div>
-							{/each}
-						</div>
+						<AlertsTable serverName={s.serverName} alerts={s.alerts} onToggle={(alert) => toggleAlert(s, alert)} />
 					{/if}
-				</div>
+				</DocCard>
 			{/each}
 		</div>
 	{/if}

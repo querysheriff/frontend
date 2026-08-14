@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { XIcon, ExternalLinkIcon } from '@lucide/svelte';
 	import { docs } from '$lib/docs.svelte';
-	import { docContent } from '$lib/docsContent';
+	import { docEntry } from '$lib/docsContent';
 
-	const entry = $derived(docs.activeId ? docContent[docs.activeId] : null);
+	const entry = $derived(docs.activeId ? docEntry(docs.activeId) : null);
 
 	function onKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape' && docs.activeId) docs.close();

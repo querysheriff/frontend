@@ -9,7 +9,7 @@ export type DocBlock = string | { list: string[] };
 export type DocSection = { heading: string; body: DocBlock[]; link?: DocLink };
 export type DocEntry = { title: string; sections: DocSection[] };
 
-export const docContent: Record<string, DocEntry> = {
+const docContent: Record<string, DocEntry> = {
 	'q-volume': {
 		title: 'Query volume over time',
 		sections: [
@@ -486,5 +486,46 @@ export const docContent: Record<string, DocEntry> = {
 				]
 			}
 		]
+	},
+
+	// Mirrors the alert catalog in backend/internal/alerts/catalog.go.
+	'a-alerts': {
+		title: 'Alerts',
+		sections: [
+			{
+				heading: 'What this table shows',
+				body: [
+					'This table lists every alert QuerySheriff can send to Slack for this server, and whether each one is switched on.',
+					'Five of them fire the moment something goes wrong:',
+					{
+						list: [
+							'**Monitoring stopped**: nothing has arrived from this server for 10 minutes',
+							'**Database crashed**: PostgreSQL logged a `PANIC`, ended every session and restarted',
+							'**Query blocked by a lock**: a query has waited 10 seconds for a lock another transaction holds',
+							'**Query running too long**: a query has been running for a minute without finishing',
+							'**Transaction open too long**: a transaction has been open for 10 minutes, busy or idle'
+						]
+					},
+					'The other two arrive on a schedule:',
+					{
+						list: [
+							'**Daily slow query report**: at 08:00 UTC, the queries that ran at least 10 times in the last day averaging a second or more',
+							'**Weekly report**: on Monday at 08:00 UTC, p99 query time, queries run and errors logged against the week before, plus the busiest queries'
+						]
+					},
+					'Both reports link back to each query here. The daily one is skipped on a day with nothing slow to show.'
+				]
+			}
+		]
 	}
 };
+
+/** A card repeated per server takes a `<base>#<instance>` id, so only the clicked one
+ *  highlights while they all share one entry. */
+export const DOC_ID_SEP = '#';
+
+export function docEntry(id: string): DocEntry | undefined {
+	const sep = id.indexOf(DOC_ID_SEP);
+
+	return docContent[sep === -1 ? id : id.slice(0, sep)];
+}

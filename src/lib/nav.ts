@@ -2,8 +2,6 @@ export interface NavItem {
 	key: string;
 	label: string;
 	href: string;
-	/** Hidden from the sidebar for everyone else, and its routes redirect them away. */
-	superAdminOnly?: boolean;
 }
 
 // `query-detail` is a sub-view of Queries (reached by clicking a row), so it is not listed here.
@@ -12,7 +10,7 @@ export const navItems: NavItem[] = [
 	{ key: 'locks', label: 'LOCKS', href: '/locks' },
 	{ key: 'transactions', label: 'TRANSACTIONS', href: '/transactions' },
 	{ key: 'logs', label: 'LOGS', href: '/logs' },
-	{ key: 'alerts', label: 'ALERTS', href: '/alerts', superAdminOnly: true }
+	{ key: 'alerts', label: 'ALERTS', href: '/alerts' }
 ];
 
 export const adminItems: NavItem[] = [
@@ -77,10 +75,4 @@ export function screenDescription(pathname: string): string {
 export function isNavActive(item: NavItem, pathname: string): boolean {
 	if (item.key === 'slow-queries') return pathname === '/' || pathname.startsWith('/queries');
 	return pathname.startsWith(item.href);
-}
-
-/** Whether `pathname` belongs to a super-admin-only section. Derived from `navItems` rather
- *  than listed again, so the sidebar and the route guard cannot disagree about who sees what. */
-export function isSuperAdminOnlyPath(pathname: string): boolean {
-	return navItems.some((item) => item.superAdminOnly && isNavActive(item, pathname));
 }

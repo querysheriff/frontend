@@ -3,7 +3,7 @@
 	import type { Snippet } from 'svelte';
 	import { InfoIcon } from '@lucide/svelte';
 	import { docs } from '$lib/docs.svelte';
-	import { docContent } from '$lib/docsContent';
+	import { docEntry } from '$lib/docsContent';
 
 	// Wraps a graph/table card, adding a top-right info button that opens the docs
 	// panel for `id`. The active card gets a command ring; the others dim while a
@@ -13,7 +13,7 @@
 
 	const active = $derived(id != null && docs.activeId === id);
 	const dimmed = $derived(id != null && docs.activeId != null && docs.activeId !== id);
-	const title = $derived((id && docContent[id]?.title) || 'this card');
+	const title = $derived((id && docEntry(id)?.title) || 'this card');
 </script>
 
 <section
