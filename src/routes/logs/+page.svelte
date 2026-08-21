@@ -149,7 +149,7 @@
 	let tableAc: AbortController | null = null;
 
 	$effect(() => {
-		// Built before the early return so every filter it reads stays tracked.
+		// Built before the early return below, so Svelte keeps tracking every filter it reads.
 		const request = logsRequest(0);
 
 		if (!ctx.server) {
@@ -213,7 +213,8 @@
 				if (mine === facetGen) facets = res.facets;
 			})
 			.catch(() => {
-				// The picker degrades to categories with no counts; the table reports the error.
+				// Without facets the picker still lists categories, just without counts; only the table
+				// shows the error.
 				if (mine === facetGen) facets = undefined;
 			})
 			.finally(() => {

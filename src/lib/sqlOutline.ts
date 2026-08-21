@@ -58,7 +58,8 @@ export function previewLimits(roots: SqlNode[], budget = PREVIEW_LINES): Map<str
 	// Reserve a line for each root and for the "+N more" each truncated one needs.
 	let remaining = Math.max(0, budget - roots.length - wants.length);
 
-	// Water-fill: an equal share each round, leftovers flow to the still-truncated, one line minimum.
+	// Hand the remaining lines out in equal shares, round by round; what a short clause does not use
+	// goes to the ones still truncated. Every round gives at least one line, so the loop always ends.
 	let open = wants;
 	while (remaining > 0 && open.length > 0) {
 		const share = Math.max(1, Math.floor(remaining / open.length));

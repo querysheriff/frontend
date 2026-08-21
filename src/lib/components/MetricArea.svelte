@@ -16,8 +16,8 @@
 
 	const c = getChartContext();
 
-	// Full-width step area: each bucket [at-step, at] is a flat top, x clamped to the plot, and runs
-	// break at nulls.
+	// One flat top per bucket, spanning [at-step, at] with a vertical jump between them. x is clamped
+	// to the plot so a half-visible edge bucket is cut off, and a null value breaks the line.
 	const areaPath = $derived.by(() => {
 		const y0 = Number(c.yScale(0));
 		let d = '';

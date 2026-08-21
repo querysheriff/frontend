@@ -22,7 +22,7 @@
 
 	const allowed = $derived(session.isAuthenticated && (!requireSuperAdmin || session.isSuperAdmin));
 
-	// Before the query-string effect, so `db` is already out of scope when the URL is rebuilt.
+	// Runs before the effect that writes the URL, so `db` is already dropped on screens that ignore it.
 	$effect(() => {
 		ctx.dbScoped = dbSwitch;
 	});
@@ -46,7 +46,8 @@
 		urlSynced = true;
 	});
 
-	// Gating on `allowed` is load-bearing: writing earlier strips a deep link's page-scoped params.
+	// Only write once the children have rendered: they register the filter params, and writing before
+	// that drops them from a deep link.
 	$effect(() => {
 		if (!urlSynced || !contextBar || !allowed) return;
 		const qs = urlSync.queryString();

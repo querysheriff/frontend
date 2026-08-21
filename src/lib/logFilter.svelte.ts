@@ -37,7 +37,8 @@ function splitValues(raw: string): string[] {
 	}
 	out.push(current);
 
-	// A leading empty segment is the real "(none)" value, so only the trailing split artefact is dropped.
+	// An empty first segment is a real value — background workers have no database — so only a trailing
+	// empty one, left over from the split, is dropped.
 	while (out.length > 1 && out[out.length - 1] === '') out.pop();
 
 	return out;

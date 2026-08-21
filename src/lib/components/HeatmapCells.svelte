@@ -56,7 +56,7 @@
 				const intensity = heatmapStep(value, rowMax);
 				if (intensity < 0) return;
 
-				// The same full-slot geometry as every timeline chart: [at - step, at], clamped to the plot.
+				// A cell covers its whole bucket, from at-step to at, cut off at the edges of the plot.
 				const left = Math.max(0, Math.min(c.width, Number(c.xScale(new Date(bucket.at.getTime() - step)))));
 				const right = Math.max(0, Math.min(c.width, Number(c.xScale(bucket.at))));
 				const w = right - left - gap;

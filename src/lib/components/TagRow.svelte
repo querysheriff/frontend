@@ -16,7 +16,7 @@
 		more = port.scrollLeft + port.clientWidth < port.scrollWidth - 1;
 	}
 
-	// The port resizes when the column does, the strip when the tags change; both move the answer.
+	// Watch both: the visible box resizes with the column, the strip with the tag list.
 	$effect(() => {
 		if (!port || !strip) return;
 		measure();

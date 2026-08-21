@@ -86,7 +86,8 @@
 		return `${fmtDuration(sample.durationMs)} · ${truncate(sample.query, PREVIEW_CHARS)}`;
 	}
 
-	// Badge columns are sized to their widest value; `table-fixed` lets Event absorb the rest.
+	// Each badge column is as wide as its longest value; the table is table-fixed, so the Event column
+	// takes whatever width is left.
 	const headDef: { key: LogSortCol; label: string; cls: string; pad?: string }[] = [
 		{ key: 'at', label: 'At', cls: 'w-[11.75rem]', pad: 'pl-9 pr-4' },
 		// "Severity" to the user, `level` internally: the wire says level, Postgres says severity.

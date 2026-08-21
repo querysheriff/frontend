@@ -46,7 +46,7 @@ export function createTimeBrush(step: () => number) {
 				}
 
 				ctx.zoomTo(from, to);
-				// The domain is about to change underneath it, so drop the selection.
+				// The chart's time range is about to change, so clear the selection rectangle.
 				brush.reset();
 			}
 		}

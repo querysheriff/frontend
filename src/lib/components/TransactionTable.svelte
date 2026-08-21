@@ -76,7 +76,8 @@
 
 	const cell = 'border-b border-line-soft px-4 py-3 align-top';
 
-	// Fixed tracks so every stretch lines up in one grid; baseline-aligned because 13px and 14px meet there.
+	// Fixed column widths so every row lines up across statements, and baseline alignment because the
+	// 13px status sits next to 14px mono.
 	const timelineGrid = 'grid grid-cols-[6rem_4.5rem_5rem_minmax(0,1fr)] items-baseline gap-x-3 py-1.5';
 
 	function sortBy(key: TransactionSortCol) {

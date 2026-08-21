@@ -118,7 +118,8 @@ export class SqlPopoverState {
 	#place(text: string, trigger: HTMLElement, fresh: boolean, loading: boolean) {
 		const r = trigger.getBoundingClientRect();
 
-		// A trigger re-rendered away or scrolled off measures as a zero rect, pinning it to the corner.
+		// A row that was re-rendered or scrolled out of view measures as an empty rect, which would park
+		// the popover in the window corner.
 		const gone = !trigger.isConnected || (r.width === 0 && r.height === 0);
 		const offscreen = r.bottom < 0 || r.top > window.innerHeight;
 		if (gone || offscreen) {
@@ -129,7 +130,8 @@ export class SqlPopoverState {
 		const left = Math.max(MARGIN, Math.min(r.left, window.innerWidth - POPOVER_WIDTH - MARGIN));
 		const spaceBelow = window.innerHeight - r.bottom - MARGIN;
 		const spaceAbove = r.top - MARGIN;
-		// Flip up when a downward popover would be clipped; anchoring by `bottom` needs no height first.
+		// Open upward when there is not enough room below. Anchoring by `bottom` means the popover's
+		// height does not have to be measured first.
 		const openUp = spaceBelow < FLIP_THRESHOLD && spaceAbove > spaceBelow;
 		const maxHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, openUp ? spaceAbove : spaceBelow));
 
