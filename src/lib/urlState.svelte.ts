@@ -5,9 +5,7 @@ export interface UrlParams {
 	writeQuery(params: URLSearchParams): void;
 }
 
-// AppShell rebuilds the whole query string from the registered providers, so a
-// param nobody writes is dropped. Page-scoped providers therefore unregister on
-// teardown and their params disappear when you navigate away.
+// AppShell rebuilds the whole query string from the registered providers, so a param nobody writes is dropped.
 class UrlSync {
 	#providers = $state<UrlParams[]>([]);
 
@@ -24,8 +22,7 @@ class UrlSync {
 		return mode;
 	}
 
-	// Callers register from inside a $effect, so the list must be read untracked —
-	// otherwise registering re-triggers the very effect that registered.
+	// Read untracked: callers register from inside a $effect, which would otherwise re-trigger itself.
 	register(provider: UrlParams): () => void {
 		this.#providers = [...untrack(() => this.#providers), provider];
 

@@ -2,9 +2,6 @@
 	import { DateRangePicker } from 'bits-ui';
 	import type { DateRange } from 'bits-ui';
 
-	// Segmented, keyboard-driven From/To fields sharing one `CalendarDateTime`
-	// range. `onSubmit` fires on Enter so the caller can apply straight from the
-	// keyboard.
 	let {
 		value = $bindable(),
 		onSubmit

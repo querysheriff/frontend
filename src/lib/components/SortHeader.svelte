@@ -2,9 +2,6 @@
 	import { clsx } from 'clsx';
 	import { ArrowUpIcon, ArrowDownIcon, ArrowUpDownIcon } from '@lucide/svelte';
 
-	// One column heading. Shared by every data table so their headings keep the
-	// same type, padding and affordance — and so a sortable and a plain heading in
-	// the same row land on the same baseline.
 	let {
 		label,
 		align = 'left',
@@ -15,13 +12,9 @@
 	}: {
 		label: string;
 		align?: 'left' | 'right';
-		/** Width and responsive visibility for the column. */
 		class?: string;
-		/** Horizontal padding, overridden by columns whose cells carry a gutter. */
 		pad?: string;
-		/** How this column is currently sorted, or null when it is not the sorted one. */
 		dir?: 'asc' | 'desc' | null;
-		/** Left off for a column that cannot be sorted. */
 		onsort?: () => void;
 	} = $props();
 
@@ -29,10 +22,7 @@
 </script>
 
 {#snippet content()}
-	<!-- The sort icon is absolutely positioned beside the label so it never consumes
-	     layout width — the label stays flush with the column's values even when the
-	     column is too narrow to fit both. It sits left of the label on right-aligned
-	     columns, right of it otherwise. -->
+	<!-- Absolute so the icon never consumes layout width and the label stays flush with its values. -->
 	<span class="relative inline-flex items-center align-middle">
 		<span>{label}</span>
 		{#if onsort}
@@ -73,9 +63,6 @@
 			{@render content()}
 		</button>
 	{:else}
-		<!-- Mirrors the button's inner box exactly. That wrapper is
-		     vertical-align: middle, so a bare label would otherwise sit on a
-		     different line than its sortable neighbours. -->
 		<span class={box}>{@render content()}</span>
 	{/if}
 </th>

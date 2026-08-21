@@ -1,8 +1,7 @@
 <script module lang="ts">
 	import { LogFacetField } from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/log_pb';
 
-	/** What a cell can pivot the filter on. `search` covers PID, which the free-text filter
-	 *  matches rather than being a facet of its own. */
+	/** What a cell can pivot the filter on. `search` covers PID, which is free text, not a facet. */
 	export type LogPivot = { kind: 'facet'; field: LogFacetField; value: string } | { kind: 'search'; value: string };
 
 	export type LogSortCol = 'at' | 'level' | 'event' | 'category' | 'database' | 'user';
@@ -63,7 +62,6 @@
 		onPivot(p);
 	}
 
-	// Time and severity open newest/worst first; the label columns read better alphabetically.
 	const DESC_FIRST: LogSortCol[] = ['at', 'level'];
 
 	function sortBy(col: LogSortCol) {
@@ -73,11 +71,9 @@
 
 	const tsFmt = (r: LogRecord): string => (r.occurredAt ? fmtTs(timestampDate(r.occurredAt)) : '—');
 
-	// Twice what the widest column shows, so CSS still does the visible cutting but no row
-	// carries kilobytes of invisible text.
+	// Twice the widest column: CSS still cuts what shows, but no row carries kilobytes of hidden text.
 	const PREVIEW_CHARS = 200;
 
-	// Same rule in the row and in the panel, so the two slow-query event types look alike.
 	const messageOf = (r: LogRecord): string => (messageIsSampleText(r.classification) ? '' : r.message);
 
 	function preview(r: LogRecord): string {
@@ -90,17 +86,10 @@
 		return `${fmtDuration(sample.durationMs)} · ${truncate(sample.query, PREVIEW_CHARS)}`;
 	}
 
-	// Application, backend type and PID live in the expanded panel: application is
-	// high-cardinality noise (correlation ids get appended to it) and backend is almost always
-	// "client backend". Six columns is also what removes the forced horizontal scroll.
-	//
-	// The badge columns are sized to their widest value — WARNING 77px, CONSTRAINT VIOLATION
-	// 159px, plus 32px of cell padding — so neither ellipsises and neither leaves a gap. The
-	// table is `table-fixed`, so Event absorbs whatever is left.
+	// Badge columns are sized to their widest value; `table-fixed` lets Event absorb the rest.
 	const headDef: { key: LogSortCol; label: string; cls: string; pad?: string }[] = [
 		{ key: 'at', label: 'At', cls: 'w-[11.75rem]', pad: 'pl-9 pr-4' },
-		// "Severity" facing the user, `level` internally: the wire name is LogEvent.LogLevel,
-		// but Postgres calls these severities in its own log format (`error_severity`).
+		// "Severity" to the user, `level` internally: the wire says level, Postgres says severity.
 		{ key: 'level', label: 'Severity', cls: 'w-[7rem]' },
 		{ key: 'event', label: 'Event', cls: '' },
 		{ key: 'category', label: 'Category', cls: 'hidden w-[12.25rem] lg:table-cell' },
@@ -108,20 +97,11 @@
 		{ key: 'user', label: 'User', cls: 'hidden w-[8.5rem] lg:table-cell' }
 	];
 
-	// leading-[20px] on the cell rather than its contents fixes one line-box strut for the
-	// whole row, so a badge and the plain text beside it share a baseline.
 	const cell = 'border-b border-line-soft px-4 py-3 align-top leading-[20px]';
-	// Sized to its text, not the cell: `block w-full` would highlight and filter on click
-	// across empty space, reading as a hit area that is not there.
 	const pivotCls = 'inline-block max-w-full cursor-pointer truncate align-top hover:text-command';
-	// h-5 matches the strut. translate-y-px is an optical correction: a 12px all-caps label
-	// centred in a 20px box reads a pixel high against the mixed-case text beside it, and
-	// `align-baseline` overshoots by as much the other way. `pill` carries the hover state —
-	// see the style block at the end of this file.
 	const badgeCls = 'pill inline-flex h-5 max-w-full translate-y-px items-center align-top leading-none';
 	const panelLabel = 'mb-1 font-condensed text-2xs font-semibold tracking-[1px] text-ink/70 uppercase';
 
-	// Whether the panel has anything beyond the PID/application/backend footer.
 	const hasDetail = (r: LogRecord): boolean =>
 		!!(messageOf(r) || r.statementSample || r.stateCode || r.detail || r.hint || r.context || r.statement);
 </script>
@@ -169,13 +149,10 @@
 					aria-expanded={open}
 					class={clsx(
 						'relative cursor-pointer transition-colors',
-						// A neutral tint, not the terracotta accent: an expanded row is selected, not in
-						// trouble. Twice the hover weight, so open still reads as stronger than hovered.
 						open ? 'bg-hover-strong [&>td]:border-b-transparent' : 'hover:bg-hover'
 					)}
 				>
 					<td class="{cell} relative pr-4 pl-9">
-						<!-- In an absolute gutter so the timestamp still starts under its heading. -->
 						<span class="absolute top-3 left-3.5 flex h-5 items-center">
 							{#if open}
 								<ChevronDownIcon class="size-3.5 flex-none text-command" />
@@ -183,8 +160,6 @@
 								<ChevronRightIcon class="size-3.5 flex-none text-command" />
 							{/if}
 						</span>
-						<!-- inline-block so the box is the cell's 20px strut, not the font's 18.5px ink
-						     box, which would sit the timestamp below everything beside it. -->
 						<span class="inline-block align-top font-mono text-sm whitespace-nowrap text-ink/80">{tsFmt(r)}</span>
 					</td>
 
@@ -254,8 +229,6 @@
 								{/if}
 
 								{#if sample}
-									<!-- No query text: QUERY DETAIL renders the same SQL in full, with its plan and
-									     its other samples. Duration plus the links is what this adds. -->
 									<div class="mb-3.5">
 										<div class={panelLabel}>Sampled statement</div>
 										<div class="flex flex-wrap items-baseline gap-x-4 gap-y-1.5">
@@ -281,8 +254,7 @@
 													>
 												{/if}
 											{:else}
-												<!-- statement_id is null without compute_query_id, so there is no aggregate
-												     row to link to. -->
+												<!-- statement_id is null without compute_query_id, so nothing to link to. -->
 												<span class="font-sans text-xs text-ink/70">
 													Not matched to a known query — enable
 													<code class="font-mono">compute_query_id</code> to link these
@@ -293,8 +265,6 @@
 								{/if}
 
 								{#if r.stateCode}
-									<!-- Shown but not filterable: every SQLSTATE maps onto an event type, which is
-									     already a filter, so a second one narrowed nothing further. -->
 									<div class="mb-3.5">
 										<span
 											class="border border-danger/30 bg-danger/10 px-2.5 py-1 font-mono text-xs font-semibold text-danger"
@@ -384,9 +354,8 @@
 </div>
 
 <style>
-	/* Each pill's colour is data-driven, so it arrives as custom properties and the rules that
-	   consume them live here. `style:background` plus a `hover:` utility cannot work: an inline
-	   style beats any class rule, so the hover would never apply. */
+	/* Pill colours are data-driven, so they arrive as custom properties. `style:background` plus a
+	   `hover:` utility cannot work: an inline style beats any class rule. */
 	.pill {
 		color: var(--pill-fg);
 		background: var(--pill-bg);

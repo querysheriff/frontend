@@ -38,7 +38,6 @@
 		searchInput?.focus();
 	});
 
-	// Every field's values arrive in the one facet response, so drilling in costs no round trip.
 	const fields = $derived(
 		PICKABLE_FACETS.map((meta) => ({
 			...meta,

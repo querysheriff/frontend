@@ -16,13 +16,8 @@
 
 	const c = getChartContext();
 
-	// A full-width step area: each bucket [at-step, at] is a flat top at its value
-	// with a vertical jump at every boundary, so the first and last buckets fill
-	// their slots to the plot edges (unlike a center-anchored step curve, which
-	// leaves half-width stubs). x is clamped to the plot so a partial edge bucket
-	// is clipped rather than overflowing — this lets us share the chart's exact
-	// [xFrom, xTo] domain, keeping perfect x-alignment with the sibling charts.
-	// Runs break at null values, leaving gaps.
+	// Full-width step area: each bucket [at-step, at] is a flat top, x clamped to the plot, and runs
+	// break at nulls.
 	const areaPath = $derived.by(() => {
 		const y0 = Number(c.yScale(0));
 		let d = '';

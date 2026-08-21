@@ -20,8 +20,7 @@
 	type KeyRow = { key: string; valueCount: number };
 	type ValueRow = { value: string; statementCount: number };
 
-	// Draft state is seeded once and committed on Apply; TagFilterBar remounts the
-	// picker per chip, so later prop changes must not clobber a pending edit.
+	// Seeded once and committed on Apply: the picker remounts per chip, so props must not clobber it.
 	const seed = untrack(() => ({
 		step: (initial ? 'value' : 'key') as 'key' | 'value',
 		key: initial?.key ?? '',
@@ -87,8 +86,6 @@
 		};
 	});
 
-	// The whole value set arrives at once: it only contains values the QUERIES
-	// table displays, so it is small and filters client-side like the key list.
 	$effect(() => {
 		if (step !== 'value' || !key) return;
 

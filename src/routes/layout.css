@@ -17,13 +17,8 @@
 	/* Accent */
 	--color-command: #a83d2b;
 
-	/* Status */
-	/* Status — warm, earthy but vivid (ok/warn/error = fast/acceptable/slow).
-	   Warm-shifted to sit inside the terracotta/cream palette rather than pop as
-	   a foreign "modern" set, while staying clearly brighter than muted neutrals. */
 	--color-danger: #c23a24;
-	/* -text variants are darkened to clear WCAG AA (4.5:1) as text; the vivid
-	   base colors stay for dots, bars, and fills (non-text). */
+	/* -text variants are darkened to clear WCAG AA as text; the vivid bases stay for dots and fills. */
 	--color-warn-text: #9a5b12;
 	--color-warn: #d97b1c;
 	--color-ok: #5c9e34;
@@ -36,9 +31,8 @@
 	--color-teal: #4e7a86;
 	--color-taupe: #9a8f7e;
 
-	/* Semantic neutral scale — ink at fixed alphas, named by role.
-	   (color-mix in oklab matches Tailwind's own /opacity output.)
-	   line-* = borders/dividers, hover-* = background tints, weak to strong. */
+	/* Semantic neutral scale — ink at fixed alphas, named by role: line-* for borders, hover-* for
+	   background tints, weak to strong. */
 	--color-line-soft: color-mix(in oklab, var(--color-ink) 8%, transparent);
 	--color-line: color-mix(in oklab, var(--color-ink) 14%, transparent);
 	--color-line-card: color-mix(in oklab, var(--color-ink) 16%, transparent);
@@ -65,8 +59,7 @@
 	--shadow-chart: 0 4px 16px color-mix(in oklab, var(--color-ink) 10%, transparent);
 	--shadow-knob: 0 1px 2px color-mix(in oklab, var(--color-ink) 30%, transparent);
 
-	/* Text scale — rem, font-size only (line-height stays explicit via leading-*).
-	   Sized to match coda's scale (root 16px): text-xs 13 / text-sm 14 like coda. */
+	/* Text scale — rem, font-size only; line-height stays explicit via leading-*. */
 	--text-2xs: 0.75rem; /* 12px */
 	--text-xs: 0.8125rem; /* 13px */
 	--text-sm: 0.875rem; /* 14px */
@@ -94,7 +87,6 @@
 		text-rendering: optimizeLegibility;
 	}
 	::selection {
-		/* Neutral ink tint, matching the grey hover scale (not the terracotta accent). */
 		background: color-mix(in oklab, var(--color-ink) 16%, transparent);
 	}
 	/* That ink tint is invisible on the dark code surfaces; tint with paper there. */

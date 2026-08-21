@@ -18,8 +18,7 @@
 
 	afterNavigate(() => sidebar.closeDrawer());
 
-	// The mobile drawer is a modal Dialog; if the viewport grows to desktop while
-	// it is open, close it so bits-ui doesn't keep the (now-hidden) scroll lock.
+	// Close the mobile drawer when the viewport grows, or bits-ui keeps the now-hidden scroll lock.
 	onMount(() => {
 		const mq = window.matchMedia('(min-width: 768px)');
 		const onChange = () => mq.matches && sidebar.closeDrawer();
@@ -88,7 +87,6 @@
 	</div>
 {/snippet}
 
-<!-- Desktop: persistent sticky sidebar -->
 <aside
 	class="hidden h-screen w-[15.625rem] flex-none flex-col border-r border-line bg-shell md:sticky md:top-0 {sidebar.collapsed
 		? 'md:hidden'
@@ -97,7 +95,6 @@
 	{@render body()}
 </aside>
 
-<!-- Mobile: off-canvas drawer (bits-ui Dialog — focus trap, escape, scrim, return-focus) -->
 <Dialog.Root bind:open={sidebar.drawerOpen}>
 	<Dialog.Portal>
 		<Dialog.Overlay class="fixed inset-0 z-40 bg-scrim md:hidden" />

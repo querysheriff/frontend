@@ -4,8 +4,7 @@
 
 	let { state }: { state: SqlPopoverState } = $props();
 
-	// Capture, because scroll does not bubble: the query tables sit in their own
-	// overflow containers, and a listener on window alone would miss those.
+	// Capture, because scroll does not bubble: the query tables sit in their own overflow containers.
 	$effect(() => {
 		const opts = { capture: true, passive: true } as const;
 		document.addEventListener('scroll', state.reflow, opts);
@@ -48,8 +47,6 @@
 			</div>
 			{#if state.pop.context}
 				{@const c = state.pop.context}
-				<!-- Which session ran this, so a wait or a long transaction can be traced
-				     back to a process and an application without leaving the table. -->
 				<div
 					class="flex flex-none flex-wrap items-center gap-x-3 gap-y-1 border-b border-paper/14 px-3 py-2 font-mono text-xs leading-[1.4]"
 				>

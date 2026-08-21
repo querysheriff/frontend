@@ -8,7 +8,6 @@
 		app: string;
 		openMs: number;
 		start: Date | null;
-		/** Anchor for the timeline's relative offsets. */
 		startTs?: Timestamp;
 		events: TransactionEvent[];
 	};
@@ -62,9 +61,6 @@
 		}
 	}
 
-	// Reads as the debugging question: when did it start, how long did it stay
-	// open, then which session to go and look at. `pad` clears the chevron gutter
-	// on the first column.
 	const headDef: {
 		key?: TransactionSortCol;
 		label: string;
@@ -80,10 +76,7 @@
 
 	const cell = 'border-b border-line-soft px-4 py-3 align-top';
 
-	// Fixed tracks, not minmax: every stretch in every group must line up in one
-	// grid, otherwise each statement's block sizes its own columns independently.
-	// Baseline-aligned, not top-aligned: the status is condensed 13px while the rest
-	// is mono 14px, and two fonts at two sizes only line up on a shared baseline.
+	// Fixed tracks so every stretch lines up in one grid; baseline-aligned because 13px and 14px meet there.
 	const timelineGrid = 'grid grid-cols-[6rem_4.5rem_5rem_minmax(0,1fr)] items-baseline gap-x-3 py-1.5';
 
 	function sortBy(key: TransactionSortCol) {
@@ -120,22 +113,10 @@
 					aria-expanded={open}
 					class={clsx(
 						'cursor-pointer transition-colors',
-						// An open row is tinted and loses its bottom rule, so it reads as one piece
-						// with the panel it opened rather than a stray row. The tint is a neutral ink
-						// one, not the terracotta accent: an expanded row is selected, not in trouble,
-						// and a red wash reads as "something is wrong here". Twice the weight of the
-						// hover tint, so open still stands out from hovered.
 						open ? 'bg-hover-strong [&>td]:border-b-transparent' : 'hover:bg-hover'
 					)}
 				>
-					<!-- The chevron sits in the gutter rather than in the flow, so the date
-					     starts exactly under the STARTED label. -->
-					<!-- The cell carries the date's own type metrics: inheriting the 16px base
-					     size would build a taller line-box strut and push the text below the
-					     absolutely-positioned chevron. -->
 					<td class="{cell} relative pl-9 text-sm leading-[20px]">
-						<!-- Boxed to the same 20px line height as the date and centred inside it,
-						     so the two share a midline whatever the icon size. -->
 						<span class="absolute top-3 left-3.5 flex h-5 items-center">
 							{#if open}<ChevronDownIcon class="size-3.5 text-command" />{:else}<ChevronRightIcon
 									class="size-3.5 text-command"
@@ -161,8 +142,6 @@
 				{#if open}
 					<tr>
 						<td colspan={headDef.length} class="border-b border-line p-0">
-							<!-- Every sampled stretch, in order: the statements the transaction ran
-							     and what it was doing between them. -->
 							<div class="border-l-2 border-line-bold bg-hover-soft px-5 py-4 md:pl-12">
 								{#each groupEvents(r.events) as g (g.key)}
 									<div class="mt-5 first:mt-0">

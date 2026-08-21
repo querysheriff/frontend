@@ -11,9 +11,6 @@ const MIN_HEIGHT = 140;
 const MAX_HEIGHT = 440;
 const FLIP_THRESHOLD = 360;
 
-/** Extra identity shown above the SQL. The Locks and Transactions screens set it
- *  so a query can be traced back to the session that ran it; other screens leave
- *  it off. */
 export type SqlContext = { pid: number; app: string };
 
 type Placement = {
@@ -58,17 +55,13 @@ export class SqlPopoverState {
 		}
 	}
 
-	// The trigger is a table row you cross constantly while scanning, so opening
-	// costs a deliberate pause. Once one is open the next is instant: moving
-	// between rows is then reading, not passing through.
 	show(text: string, e: MouseEvent | FocusEvent, context?: SqlContext) {
 		this.#clearShow();
 		this.#clearHide();
 		this.#activeKey = null;
 		this.#context = context ?? null;
 
-		// currentTarget is nulled once the event finishes dispatching, so hold the
-		// element and measure it when the timer fires.
+		// currentTarget is nulled once the event finishes dispatching, so hold the element.
 		const trigger = e.currentTarget as HTMLElement;
 		if (this.pop) {
 			this.#place(text, trigger, true, false);
@@ -81,9 +74,6 @@ export class SqlPopoverState {
 		}, SHOW_DELAY_MS);
 	}
 
-	// Like show(), but the full text is fetched on demand by id. The list row
-	// only carries a short preview, so the ~20KB body is pulled the first time a
-	// row is hovered and cached for repeat hovers.
 	showLazy(id: bigint, e: MouseEvent | FocusEvent) {
 		this.#clearShow();
 		this.#context = null;
@@ -128,9 +118,7 @@ export class SqlPopoverState {
 	#place(text: string, trigger: HTMLElement, fresh: boolean, loading: boolean) {
 		const r = trigger.getBoundingClientRect();
 
-		// A trigger that was re-rendered away during the hover delay, or scrolled
-		// out of view while open, measures as a zero or off-screen rect. Anchoring
-		// to that pins the popover to the window corner instead of the query.
+		// A trigger re-rendered away or scrolled off measures as a zero rect, pinning it to the corner.
 		const gone = !trigger.isConnected || (r.width === 0 && r.height === 0);
 		const offscreen = r.bottom < 0 || r.top > window.innerHeight;
 		if (gone || offscreen) {
@@ -141,9 +129,7 @@ export class SqlPopoverState {
 		const left = Math.max(MARGIN, Math.min(r.left, window.innerWidth - POPOVER_WIDTH - MARGIN));
 		const spaceBelow = window.innerHeight - r.bottom - MARGIN;
 		const spaceAbove = r.top - MARGIN;
-		// Flip above the trigger when a downward popover would be clipped and there
-		// is more room above — keeps it on-screen for bottom-row samples. Anchoring
-		// by `bottom` lets it grow upward without measuring its height first.
+		// Flip up when a downward popover would be clipped; anchoring by `bottom` needs no height first.
 		const openUp = spaceBelow < FLIP_THRESHOLD && spaceAbove > spaceBelow;
 		const maxHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, openUp ? spaceAbove : spaceBelow));
 
@@ -164,8 +150,7 @@ export class SqlPopoverState {
 		this.#context = null;
 	}
 
-	// The popover is position:fixed, so it does not travel with its row. Re-anchor
-	// it to the trigger on any scroll or resize, rather than leave it stranded.
+	// position:fixed, so it does not travel with its row: re-anchor on any scroll or resize.
 	reflow = () => {
 		if (this.#reflowQueued || !this.pop || !this.#trigger) return;
 		this.#reflowQueued = true;
@@ -178,7 +163,6 @@ export class SqlPopoverState {
 		});
 	};
 
-	// Brief grace delay so the cursor can travel from the trigger into the popover.
 	hide = () => {
 		this.#clearShow();
 		this.#hideTimer = setTimeout(() => this.#reset(), HIDE_GRACE_MS);

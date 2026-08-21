@@ -37,8 +37,6 @@
 <svelte:window onkeydown={onKeydown} />
 
 {#if entry}
-	<!-- Docked in the layout flow (like the sidebar) so it shrinks the content
-	     instead of covering it — the right edge of tables/charts stays visible. -->
 	<aside
 		aria-labelledby="docs-title"
 		class="sticky top-0 flex h-screen w-[21rem] flex-none flex-col border-l border-line bg-card"

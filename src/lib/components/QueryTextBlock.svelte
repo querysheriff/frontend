@@ -8,8 +8,6 @@
 	const limits = $derived(previewLimits(roots));
 	const foldable = $derived(foldablePaths(roots));
 
-	// Explicit unfolds, by node path; a path with no entry follows the preview.
-	// Cleared when a different query arrives so paths never carry over.
 	let unfolded = $state<Record<string, boolean>>({});
 	let unfoldedFor: string | undefined = undefined;
 	$effect(() => {
@@ -18,15 +16,12 @@
 		unfolded = {};
 	});
 
-	// Children rendered for a node: all of them once unfolded, otherwise the
-	// preview's share — zero below the top level, so nesting costs a single line.
+	// All children once unfolded, otherwise the preview's share — zero below the top level.
 	function shownChildren(node: SqlNode, path: string): number {
 		if (unfolded[path] !== undefined) return unfolded[path] ? node.children.length : 0;
 		return Math.min(limits.get(path) ?? 0, node.children.length);
 	}
 
-	// Only "everything is open" reads as expanded; after picking sections apart by
-	// hand the button offers to open the rest rather than to close what's left.
 	const allExpanded = $derived(foldable.length > 0 && foldable.every((path) => unfolded[path] === true));
 
 	function toggleAll() {
@@ -43,10 +38,8 @@
 {#snippet row(node: SqlNode, path: string, depth: number)}
 	{@const shown = shownChildren(node, path)}
 	{@const pad = `${depth * INDENT_REM}rem`}
-	<!-- The floating toggle sits over the first row, so only that row keeps clear of it. -->
 	{@const clear = path === '0' ? 'pr-28' : ''}
 	{#if node.children.length === 0}
-		<!-- No chevron in flow, so pad to the column its foldable siblings' text starts at. -->
 		<div class="pl-5 break-words whitespace-pre-wrap text-paper/90 {clear}" style:margin-left={pad}>{node.text}</div>
 	{:else}
 		<button

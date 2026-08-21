@@ -3,7 +3,6 @@ import { authClient } from './connect';
 
 class SessionState {
 	user = $state<User | null>(null);
-	// Distinguishes "not logged in yet" from "still checking".
 	loaded = $state(false);
 
 	async load(): Promise<void> {

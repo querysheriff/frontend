@@ -57,9 +57,8 @@
 	const sql = new SqlPopoverState((id) => statementClient.getStatementText({ id }).then((r) => r.query));
 	const filters = new QueryFilterState();
 
-	// Registration must happen during init, not in a $effect: AppShell rebuilds the
-	// whole query string from the registered providers, and its effect would
-	// otherwise run first and strip ?q=/?tag= off a deep link before we appear.
+	// During init, not in a $effect: AppShell would otherwise rebuild the query string first and
+	// strip ?q=/?tag= off a deep link.
 	filters.applyQuery(new URLSearchParams(page.url.search));
 	onDestroy(urlSync.register(filters));
 
@@ -127,7 +126,6 @@
 			if (gen === chartGen) percentileSeries = res;
 		});
 
-		// Each chart paints as its own request lands.
 		Promise.allSettled([calls, percentiles]).then((results) => {
 			if (gen !== chartGen) return;
 			const failed = results.find((r) => r.status === 'rejected');
@@ -172,9 +170,7 @@
 		const ac = tableAc;
 		tableLoading = true;
 		tableError = null;
-		// Keep the existing rows on screen while re-fetching (sort/filter/range
-		// changes) and swap them in atomically — clearing here would collapse the
-		// table to an empty body and jump the layout before the new data lands.
+		// Rows stay on screen while re-fetching; clearing here would collapse the table and jump the layout.
 
 		statementClient
 			.queryStatements(request, { signal: ac.signal })

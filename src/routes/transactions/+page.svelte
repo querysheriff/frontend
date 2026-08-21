@@ -56,8 +56,6 @@
 		open: TransactionSortColumn.OPEN
 	};
 
-	// Sorting and paging are the server's job, exactly as on Queries: ordering a
-	// page client-side would only ever reorder the page, not the result set.
 	function tableRequest(offset: number) {
 		return {
 			...scope(),
@@ -73,7 +71,6 @@
 		return {
 			key: `${t.pid}-${tsKey(t.start)}`,
 			pid: t.pid,
-			// application_name is whatever the client set — an opaque string, never parsed.
 			app: t.applicationName,
 			openMs: durationMs(t.start, t.end),
 			start: toDate(t.start),
@@ -136,7 +133,6 @@
 		txnAc = new AbortController();
 		txnLoading = true;
 		txnError = null;
-		// Rows stay on screen while re-fetching and swap in atomically.
 
 		activityClient
 			.queryTransactions(request, { signal: txnAc.signal })
@@ -188,8 +184,7 @@
 		description="How old the longest-running open transaction was"
 	>
 		{#if chartRange && points.length > 0}
-			<!-- Same 1s floor as the Locks chart, so an idle range reads as a flat
-			     line at the bottom of a seconds axis instead of a millisecond one. -->
+			<!-- Same 1s floor as the Locks chart, so an idle range reads as a flat line on a seconds axis. -->
 			<LineChart
 				series={ageSeries}
 				from={chartRange.from}

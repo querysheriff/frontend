@@ -51,7 +51,6 @@
 		{ key: 'pctTime', label: '% Time', align: 'right', cls: 'hidden w-[5.25rem] lg:table-cell' }
 	];
 
-	// Numeric/text cells never truncate — only the query text (the <code>) does.
 	const numCell =
 		'px-4 py-3 border-b border-line-soft text-right align-top leading-[20px] font-mono text-md text-ink whitespace-nowrap';
 

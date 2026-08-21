@@ -31,8 +31,7 @@
 		onclose: () => void;
 	} = $props();
 
-	// Seeded once: the picker stays open across facet refreshes, which must not clobber a
-	// selection still being built.
+	// Seeded once: the picker stays open across facet refreshes, which must not clobber a selection.
 	const seed = untrack(() => ({
 		categories: filters.valuesFor(LogFacetField.CATEGORY),
 		events: filters.valuesFor(LogFacetField.CLASSIFICATION)
@@ -76,8 +75,6 @@
 		)
 	);
 
-	// Categories with events first; one that produced nothing is dimmed and sorted last rather
-	// than hidden, so "where did Lock go?" has a visible answer.
 	const categories = $derived(
 		CATEGORY_ORDER.map((category) => ({
 			category,
@@ -92,8 +89,6 @@
 
 	const term = $derived(search.trim().toLowerCase());
 
-	// Searching crosses both levels on purpose: typing "deadlock" has to find "Lock deadlock
-	// detected" without the user knowing it lives under Lock.
 	const matches = $derived(
 		term === ''
 			? []
@@ -109,8 +104,6 @@
 		| { kind: 'event'; value: string }
 		| { kind: 'whole-category' };
 
-	// One flat row list drives the keyboard cursor, so the arrow keys behave the same whichever
-	// view is on screen.
 	const rows = $derived.by((): Row[] => {
 		if (term !== '') return matches.map((e) => ({ kind: 'event', value: e.value }) as Row);
 		if (openCategory !== null) {
@@ -299,8 +292,6 @@
 		{:else}
 			{#each categories as category, i (category.category)}
 				{@const selected = pickedCategories.includes(String(category.category))}
-				<!-- Two actions per row — take the whole category, or drill into its event types —
-				     so the option is the row and the cursor is the highlight. -->
 				<div
 					class="flex items-center {i === highlight ? 'bg-hover' : ''} {category.count === 0 ? 'opacity-45' : ''}"
 					role="option"

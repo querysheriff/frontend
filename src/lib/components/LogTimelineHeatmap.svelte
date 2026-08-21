@@ -1,13 +1,10 @@
 <script module lang="ts">
-	/** What a hovered cell breaks down into, e.g. the classifications behind a category. */
 	export type HeatmapDetail = { label: string; count: number };
 
 	// Room for the swatch, its gap, the right-aligned total and the padding either side.
 	const LABEL_CHROME = 68;
 	const LABEL_CHAR = 6.3;
 
-	/** The gutter the row labels need. A caller showing more than one heatmap passes the same
-	 *  value to all of them, computed across every label, so the plots line up. */
 	export function heatmapLabelWidth(labels: string[]): number {
 		const widest = Math.max(0, ...labels.map((l) => Math.ceil(l.length * LABEL_CHAR)));
 
@@ -40,12 +37,8 @@
 		from: Date;
 		to: Date;
 		bucketMs: number;
-		/** The row-label gutter, from `heatmapLabelWidth`. */
 		labelWidth: number;
-		/** Loading, error or empty text, rendered *inside* the plot so the card keeps its
-		 *  height and the page below it does not jump. */
 		message?: string | null;
-		/** Extra lines for the tooltip, for a row whose cell is an aggregate. */
 		detail?: (rowKey: string, bucketIndex: number) => HeatmapDetail[];
 	} = $props();
 
@@ -53,8 +46,6 @@
 	const BOTTOM_AXIS = 26;
 	const DETAIL_LINES = 6;
 
-	// The same builder as every other timeline chart, so buckets and collection gaps line up
-	// with the QUERIES charts over the same range.
 	const model = $derived(
 		buildMetricMultiChartModel(
 			rows.map((row) => buckets.map((at, i) => ({ at, value: row.values[i] ?? null }))),
@@ -70,8 +61,7 @@
 
 	const bucketCenter = $derived((d: MetricSeriesRow) => new Date(d.at.getTime() - model.step / 2));
 
-	// The model can insert null rows for gaps, so its row index is not the caller's bucket
-	// index. Map back by instant.
+	// The model can insert null rows for gaps, so map back by instant rather than by row index.
 	function bucketIndexOf(at: Date): number {
 		return buckets.findIndex((b) => b.getTime() === at.getTime());
 	}
@@ -85,8 +75,7 @@
 	}
 </script>
 
-<!-- select-none and the swallowed double-click are ChartFrame's job for the fixed-height
-     charts; this one sizes to its rows, so it carries them itself. See ChartFrame for why. -->
+<!-- Sizes to its rows rather than a fixed height, so it carries select-none itself (see ChartFrame). -->
 <div class="relative select-none" style:height="{height}px" ondblclickcapture={(e) => e.stopPropagation()}>
 	<Chart
 		data={model.rows}
@@ -114,7 +103,6 @@
 			{/if}
 		</Svg>
 
-		<!-- Hidden mid-drag, like the crosshair. -->
 		<Tooltip.Root
 			x="data"
 			y="pointer"
@@ -168,8 +156,6 @@
 		</div>
 	{/if}
 
-	<!-- In the chart's left padding as HTML, so they use the app's type scale rather than
-	     SVG text. pointer-events-none keeps the brush and tooltip reachable. -->
 	<div class="pointer-events-none absolute inset-0">
 		{#each rows as row, r (row.key)}
 			<div

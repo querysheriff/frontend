@@ -1,10 +1,5 @@
-// Documentation shown in the right-side panel, keyed by the card's doc id.
-// Each entry explains what a card's data means, why it's the right metric to
-// look at, and how it's produced under the hood.
-
 export type DocLink = { label: string; href: string };
-// A block is a paragraph (string) or a bullet list. Inline `code` spans in any
-// string are wrapped in backticks and rendered as code by the drawer.
+// A block is a paragraph or a bullet list; inline `code` spans are rendered as code.
 export type DocBlock = string | { list: string[] };
 export type DocSection = { heading: string; body: DocBlock[]; link?: DocLink };
 export type DocEntry = { title: string; sections: DocSection[] };
@@ -520,8 +515,7 @@ const docContent: Record<string, DocEntry> = {
 	}
 };
 
-/** A card repeated per server takes a `<base>#<instance>` id, so only the clicked one
- *  highlights while they all share one entry. */
+/** A card repeated per server takes a `<base>#<instance>` id, so only the clicked one highlights. */
 export const DOC_ID_SEP = '#';
 
 export function docEntry(id: string): DocEntry | undefined {

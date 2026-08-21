@@ -17,9 +17,7 @@
 		to,
 		bucketMs,
 		format,
-		// A series that is genuinely all zeros would otherwise be drawn against a
-		// domain of 0–1, labelling the axis in fractions of the unit. Callers whose
-		// series can legitimately flatline set a floor to keep the scale readable.
+		// An all-zero series would otherwise get a 0–1 domain, labelling the axis in fractions.
 		minYMax = 0
 	}: {
 		series: Series[];
@@ -49,9 +47,6 @@
 		return m;
 	});
 
-	// The y-axis labels are mono text-2xs (12px, 0.6em advance). A fixed gutter fits
-	// "800K" or "12s" but not "8.33min", which then overruns the card. Size it from
-	// the widest label the formatter will actually produce.
 	const padLeft = $derived(Math.max(36, Math.ceil(format(yMax || 1).length * 7.2) + 12));
 
 	const brush = createTimeBrush(() => model.step);

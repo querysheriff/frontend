@@ -41,8 +41,6 @@
 
 	let headHeight = $state(0);
 
-	// Query has no `key`: every row here is the same query shape, so ordering by
-	// the concretized text sorts by whichever literals happened to be captured.
 	const headDef: {
 		key?: SampleSortCol;
 		label: string;
@@ -57,8 +55,6 @@
 
 	const thBase = 'border-b border-line font-condensed text-xs font-semibold tracking-[0.7px] text-ink/70 uppercase';
 
-	// Every sortable column here is temporal or numeric, so a fresh column always
-	// opens on its most useful end: newest, has-a-plan, slowest.
 	function sortBy(key: SampleSortCol) {
 		if (sort.col === key) sort = { col: key, dir: sort.dir === 'asc' ? 'desc' : 'asc' };
 		else sort = { col: key, dir: 'desc' };
@@ -106,9 +102,6 @@
 								</span>
 							</button>
 						{:else}
-							<!-- Mirrors the sortable button's inner box exactly. That wrapper is
-							     vertical-align: middle, so a bare text label lands on a different
-							     line than its sortable neighbours. -->
 							<span class={pad}>
 								<span class="relative inline-flex items-center align-middle">{h.label}</span>
 							</span>

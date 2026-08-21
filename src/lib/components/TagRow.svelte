@@ -1,12 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	// A single-line strip of query tags. Tags never wrap onto a second line, so a
-	// row's height stays tied to its query rather than to how many tags it happens
-	// to carry. When they don't all fit the strip scrolls sideways instead of
-	// hiding them — the scrollbar itself is suppressed (the app's is 11px, taller
-	// than the strip), so the fade is the affordance: it appears only on a side
-	// that really has more tags, and clears once you reach the end.
 	let { class: klass = '', children }: { class?: string; children: Snippet } = $props();
 
 	const FADE = '1.25rem';
@@ -22,8 +16,7 @@
 		more = port.scrollLeft + port.clientWidth < port.scrollWidth - 1;
 	}
 
-	// The port resizes when the column does; the strip resizes when the tags
-	// themselves change. Both move the answer, so watch each.
+	// The port resizes when the column does, the strip when the tags change; both move the answer.
 	$effect(() => {
 		if (!port || !strip) return;
 		measure();

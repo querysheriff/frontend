@@ -41,7 +41,6 @@
 	let metaLoading = $state(true);
 	let metaError = $state<string | null>(null);
 
-	// Split so the volume chart paints without waiting on the timing chart.
 	let callsSeries = $state<QueryStatementCallsSeriesResponse | undefined>(undefined);
 	let timingSeries = $state<QueryStatementTimingSeriesResponse | undefined>(undefined);
 	let chartRange = $state<{ from: Date; to: Date } | null>(null);
@@ -249,8 +248,7 @@
 	const tags = $derived(kvTags(baseTags));
 	const hasBaseTags = $derived(Object.keys(baseTags).length > 0);
 
-	// Samples carry the base tags too; show only the ones that differ from the
-	// base so each row isn't a repeat of the tag list shown at the top.
+	// Samples carry the base tags too, so show only what differs from the list shown at the top.
 	function extraTags(tagMap: Record<string, string>): string[] {
 		return kvTags(Object.fromEntries(Object.entries(tagMap).filter(([k, v]) => baseTags[k] !== v)));
 	}

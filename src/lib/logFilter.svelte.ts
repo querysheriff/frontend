@@ -37,15 +37,13 @@ function splitValues(raw: string): string[] {
 	}
 	out.push(current);
 
-	// A trailing empty segment is an artefact of the split; a leading one is the real "(none)"
-	// value that background-worker events carry, so only the tail is dropped.
+	// A leading empty segment is the real "(none)" value, so only the trailing split artefact is dropped.
 	while (out.length > 1 && out[out.length - 1] === '') out.pop();
 
 	return out;
 }
 
-// Guarded because splitValues('') yields [''], which Number() would turn into a filter for
-// level 0 — so an absent param would silently filter on UNSPECIFIED.
+// splitValues('') yields [''], which Number() would turn into a filter for level 0.
 function enumValues(raw: string | null): number[] {
 	if (!raw) return [];
 
@@ -54,10 +52,7 @@ function enumValues(raw: string | null): number[] {
 		.filter((n) => Number.isInteger(n));
 }
 
-/** The table's filter: free text, the severity selection and the facet chips. All of it lives
- *  in the URL, so a filtered view is a link. The charts deliberately share none of it. */
 export class LogFilterState implements UrlParams {
-	// The committed search term; the page debounces the input into it.
 	text = $state('');
 	levels = $state<LogEvent_LogLevel[]>([]);
 	facets = $state<LogFacetFilter[]>([]);
@@ -88,8 +83,7 @@ export class LogFilterState implements UrlParams {
 		}
 	}
 
-	/** Categories and individual event types collapse into one chip: they come from the same
-	 *  picker and the backend unions them, so two chips would read as an AND. */
+	/** Categories and event types collapse into one chip: the backend unions them, so two would read as AND. */
 	get chips(): LogFilterChip[] {
 		const label = (field: LogFacetField): string => FACET_FIELDS.find((f) => f.field === field)?.label ?? '';
 
@@ -112,8 +106,6 @@ export class LogFilterState implements UrlParams {
 		if (categories.length > 0 || events.length > 0) {
 			chips.push({
 				field: LogFacetField.CATEGORY,
-				// Named after what it actually holds: the picker writes either dimension, and
-				// "Category = Lock deadlock detected" would be calling an event type a category.
 				label: label(categories.length > 0 ? LogFacetField.CATEGORY : LogFacetField.CLASSIFICATION),
 				values: [describe(LogFacetField.CATEGORY, categories), describe(LogFacetField.CLASSIFICATION, events)]
 					.filter(Boolean)
@@ -130,16 +122,12 @@ export class LogFilterState implements UrlParams {
 		return chips;
 	}
 
-	// Severity lives in its own field because it is the one filter the charts and the facet
-	// counts ignore; these accessors hide that so callers treat every field the same way.
 	valuesFor(field: LogFacetField): string[] {
 		if (field === LogFacetField.LEVEL) return this.levels.map(String);
 
 		return this.facets.find((f) => f.field === field)?.values ?? [];
 	}
 
-	/** Re-picking a field replaces its selection rather than adding a second chip that would
-	 *  AND against it. An empty selection removes the chip. */
 	set(field: LogFacetField, values: string[]): void {
 		if (field === LogFacetField.LEVEL) {
 			this.levels = values.map(Number).filter((n) => Number.isInteger(n));
@@ -163,7 +151,6 @@ export class LogFilterState implements UrlParams {
 		this.facets = this.facets.map((f, i) => (i === at ? { field, values } : f));
 	}
 
-	/** Adds one value, for click-a-cell-to-filter in the table. */
 	add(field: LogFacetField, value: string): void {
 		const current = this.valuesFor(field);
 		if (current.includes(value)) return;
@@ -171,8 +158,6 @@ export class LogFilterState implements UrlParams {
 		this.set(field, [...current, value]);
 	}
 
-	/** The category chip stands for both dimensions the category picker writes, so it clears
-	 *  both. */
 	remove(field: LogFacetField): void {
 		if (field === LogFacetField.CATEGORY) {
 			this.set(LogFacetField.CLASSIFICATION, []);
@@ -190,8 +175,7 @@ export class LogFilterState implements UrlParams {
 		this.facets = [];
 	}
 
-	/** Categories go over the wire as categories, not expanded classifications: the backend
-	 *  owns that mapping, so "everything under Lock" keeps meaning that as it grows. */
+	/** Categories go over the wire as categories: the backend owns the mapping. */
 	toFacetRequest(): {
 		classifications: LogEvent_LogClassification[];
 		categories: LogEvent_LogCategory[];
@@ -210,8 +194,7 @@ export class LogFilterState implements UrlParams {
 		};
 	}
 
-	/** The table adds the severity selection; ListLogFacetsRequest has no field for it,
-	 *  because the counts ignore it so the severity totals stay stable as you toggle. */
+	/** ListLogFacetsRequest has no severity field: the counts ignore it, so the totals stay stable. */
 	toRequest(): ReturnType<LogFilterState['toFacetRequest']> & { logLevels: LogEvent_LogLevel[] } {
 		return { ...this.toFacetRequest(), logLevels: [...this.levels] };
 	}

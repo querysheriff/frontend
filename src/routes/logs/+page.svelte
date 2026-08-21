@@ -38,16 +38,13 @@
 
 	const filters = new LogFilterState();
 
-	// Registration must happen during init, not in a $effect: AppShell rebuilds the whole query
-	// string from the registered providers, and its effect would otherwise run first and strip
-	// the filter params off a deep link before we appear.
+	// During init, not in a $effect: AppShell would otherwise rebuild the query string first and
+	// strip the filter params off a deep link.
 	filters.applyQuery(new URLSearchParams(page.url.search));
 	onDestroy(urlSync.register(filters));
 
 	let search = $state(filters.text);
 
-	// Page-local rather than in the URL, matching QUERIES: the filters say what you are looking
-	// at and belong in a shared link; the ordering is a viewing preference.
 	let sort = $state<LogSort>({ col: 'at', dir: 'desc' });
 
 	const sortColumnProto: Record<LogSortCol, LogSortColumn> = {
@@ -69,8 +66,7 @@
 	let histogram = $state<LogHistogram | undefined>(undefined);
 	let chartLoading = $state(true);
 	let chartError = $state<string | null>(null);
-	// Seeded rather than null: the first render reads it before the effect below has run, and a
-	// null would collapse the cards for a frame.
+	// Seeded rather than null: the first render reads it before the effect below runs.
 	let range = $state(ctx.timeRange());
 
 	let facets = $state<LogFacet[] | undefined>(undefined);
@@ -99,8 +95,7 @@
 	let chartGen = 0;
 	let chartAc: AbortController | null = null;
 
-	// Server and time range only. Riding along in the table's response meant every sort
-	// recomputed it, and a preset range ending at "now" shifted the bucket grid each time.
+	// Server and time range only: riding along in the table's response made every sort recompute it.
 	$effect(() => {
 		const { from, to } = ctx.timeRange();
 		range = { from, to };
@@ -174,8 +169,6 @@
 		const ac = tableAc;
 		tableLoading = true;
 		tableError = null;
-		// Rows stay on screen while re-fetching and are swapped in atomically — clearing here
-		// would collapse the table and jump the layout. LoadingOverlay signals the refresh.
 
 		logClient
 			.queryLogs(request, { signal: ac.signal })
@@ -198,7 +191,6 @@
 	let facetGen = 0;
 	let facetAc: AbortController | null = null;
 
-	// Fetched separately so the counts and the table never wait on each other.
 	$effect(() => {
 		const request = { ...scope(), ...filters.toFacetRequest() };
 
@@ -254,12 +246,9 @@
 	const bucketMs = $derived(Number(histogram?.bucketMs ?? 0n));
 	const levelTotals = $derived(histogram?.levelTotals ?? []);
 
-	// Bucket ends: HeatmapCells draws each cell across (at - step, at], and the tooltip labels
-	// the same span, so the value has to be the end.
+	// Bucket ends: HeatmapCells draws each cell across (at - step, at] and labels the same span.
 	const bucketDates = $derived(buckets.map((b) => (b.bucketEnd ? timestampDate(b.bucketEnd) : new Date(0))));
 
-	// Every severity gets a row whether or not it occurred: a stable row set is what makes two
-	// windows comparable, and an empty PANIC row is worth seeing.
 	const severityRows = $derived.by((): HeatmapRow[] => {
 		const totals = new Map(levelTotals.map((c) => [c.level, Number(c.count)]));
 
@@ -272,8 +261,6 @@
 		}));
 	});
 
-	// Every category gets a row too, Uncategorized included: showing it conditionally would
-	// resize the card the moment the collector failed to classify something.
 	const categoryRows = $derived.by((): HeatmapRow[] => {
 		// A plain record rather than a Map, which the Svelte lint rules reserve for state.
 		const totals: Record<number, number> = {};
@@ -292,28 +279,20 @@
 		}));
 	});
 
-	// The event types behind one category cell, which is why the histogram nests them.
 	function categoryDetail(rowKey: string, bucketIndex: number): HeatmapDetail[] {
 		const bucket = buckets[bucketIndex];
 		if (!bucket) return [];
 
 		const entry = bucket.categories.find((c) => String(c.category) === rowKey);
 
-		return (
-			(entry?.classifications ?? [])
-				// The unrecognised classification has no name, and the "Uncategorized" row label
-				// already says what it is.
-				.filter((c) => c.classification !== LogEvent_LogClassification.UNSPECIFIED)
-				.map((c) => ({ label: classificationLabel(c.classification), count: Number(c.count) }))
-		);
+		return (entry?.classifications ?? [])
+			.filter((c) => c.classification !== LogEvent_LogClassification.UNSPECIFIED)
+			.map((c) => ({ label: classificationLabel(c.classification), count: Number(c.count) }));
 	}
 
-	// One gutter across both charts, so their plots start at the same x and the two time axes
-	// line up column for column.
+	// One gutter across both charts, so their plots start at the same x and the time axes line up.
 	const labelWidth = $derived(heatmapLabelWidth([...severityRows, ...categoryRows].map((row) => row.label)));
 
-	// Rendered inside the chart rather than instead of it, so the cards keep their height and
-	// nothing below them moves — as ChartEmpty does inside ChartFrame on QUERIES.
 	const chartMessage = $derived.by(() => {
 		if (buckets.length > 0 && levelTotals.length > 0) return null;
 		if (chartLoading) return 'Loading…';

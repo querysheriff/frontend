@@ -16,13 +16,9 @@
 		bucketMs,
 		fill,
 		label,
-		// Axis/tooltip formatting default to counts; the Locks screen plots seconds
-		// of waiting through the same chart by overriding them.
 		format = fmtCount,
 		formatFull = fmtCountFull,
 		unit = 'calls',
-		// Floor for the y-axis top, so an all-zero series still gets a readable
-		// scale instead of collapsing to a single unit.
 		minYMax = 1
 	}: {
 		data: MetricSeriesPoint[];
@@ -39,15 +35,12 @@
 
 	const model = $derived(buildMetricMultiChartModel([data], from, to, bucketMs));
 
-	// Hover dot / highlight / tooltip anchor to the bucket's center (not its `at`
-	// edge) so they sit in the middle of the bucket's slot, as the old bars did.
+	// Anchored to the bucket's center, not its `at` edge, so they sit in the middle of its slot.
 	const bucketCenter = $derived.by(() => {
 		const step = model.step;
 		return (d: MetricSeriesRow) => new Date(d.at.getTime() - step / 2);
 	});
 
-	// Kept intentionally soft so the outline doesn't dominate the gradient fill;
-	// the legend swatch reuses it so the two always match.
 	const lineOpacity = 0.5;
 
 	const yMax = $derived.by(() => {
@@ -56,9 +49,7 @@
 		return m;
 	});
 
-	// The y-axis labels are mono text-2xs (12px, 0.6em advance). A fixed gutter fits
-	// "800K" or "12s" but not "8.33min", which then overruns the card. Size it from
-	// the widest label the formatter will actually produce.
+	// Sized from the widest label the formatter can produce: a fixed gutter overruns on "8.33min".
 	const padLeft = $derived(Math.max(36, Math.ceil(format(yMax || 1).length * 7.2) + 12));
 
 	const brush = createTimeBrush(() => model.step);

@@ -10,10 +10,8 @@
 
 	type Props = {
 		children: Snippet;
-		/** Optional panel docked to the right of the content, in the layout flow (not overlaid). */
 		rightPanel?: Snippet;
 		contextBar?: boolean;
-		/** LOGS disables this because log events are server-wide, not per-database. */
 		dbSwitch?: boolean;
 		requireSuperAdmin?: boolean;
 	};
@@ -24,13 +22,11 @@
 
 	const allowed = $derived(session.isAuthenticated && (!requireSuperAdmin || session.isSuperAdmin));
 
-	// Declared before the query-string effect so `db` is already out of scope by the
-	// time the URL is rebuilt on a screen that does not use it.
+	// Before the query-string effect, so `db` is already out of scope when the URL is rebuilt.
 	$effect(() => {
 		ctx.dbScoped = dbSwitch;
 	});
 
-	// Wait until the session loads, then redirect anyone not allowed here.
 	$effect(() => {
 		if (!session.loaded) return;
 		if (!session.isAuthenticated) goto('/login');
@@ -50,10 +46,7 @@
 		urlSynced = true;
 	});
 
-	// Gating on `allowed` is load-bearing, not just an optimisation: children only
-	// render once the session resolves, and the query string is rebuilt from the
-	// providers they register. Writing any earlier strips a deep link's page-scoped
-	// params before the page that owns them exists.
+	// Gating on `allowed` is load-bearing: writing earlier strips a deep link's page-scoped params.
 	$effect(() => {
 		if (!urlSynced || !contextBar || !allowed) return;
 		const qs = urlSync.queryString();

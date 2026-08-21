@@ -54,8 +54,6 @@
 		waited: LockWaitSortColumn.WAITED
 	};
 
-	// Sorting and paging are the server's job: ordering a page client-side would
-	// only ever reorder the page, not the result set.
 	function tableRequest(offset: number) {
 		return {
 			...scope(),
@@ -69,7 +67,6 @@
 	function toParty(p: LockParty | undefined) {
 		return {
 			pid: p?.pid ?? 0,
-			// application_name is whatever the client set — an opaque string, never parsed.
 			app: p?.applicationName ?? '',
 			query: p?.query ?? '',
 			tags: kvTags(p?.queryTags ?? {})
@@ -78,8 +75,7 @@
 
 	function toRow(w: LockWait): LockWaitRow {
 		return {
-			// Everything that identifies an episode server-side, so two waits by one
-			// pid on different lock modes stay two rows instead of colliding on one key.
+			// Everything that identifies an episode, so one pid's waits on two lock modes stay two rows.
 			key: `${w.waiting?.pid ?? 0}-${tsKey(w.startedWaiting)}-${w.blocking?.pid ?? 0}-${w.lockMode}`,
 			waiting: toParty(w.waiting),
 			blocking: toParty(w.blocking),
@@ -143,7 +139,6 @@
 		waitsAc = new AbortController();
 		waitsLoading = true;
 		waitsError = null;
-		// Rows stay on screen while re-fetching and swap in atomically.
 
 		activityClient
 			.queryLockWaits(request, { signal: waitsAc.signal })

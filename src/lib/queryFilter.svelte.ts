@@ -19,8 +19,7 @@ export type TagFilter = {
 	values: string[];
 };
 
-// A key can never contain '=', so the first '=' is always the operator and only
-// the value list needs escaping.
+// A key can never contain '=', so the first '=' is the operator and only the values need escaping.
 const KEY_RE = /^[a-z][a-z0-9_]*$/;
 
 function encodeValue(value: string): string {
@@ -66,8 +65,7 @@ function decodeTagFilter(raw: string): TagFilter | null {
 	return { key, op: ne ? 'ne' : 'eq', values };
 }
 
-// A displayed tag is always a single agreed value: the backend omits any key
-// whose samples disagree, so there is no wildcard to interpret here.
+// The backend omits any key whose samples disagree, so a displayed tag is always one agreed value.
 export function parseDisplayTag(text: string): TagFilter | null {
 	const eq = text.indexOf('=');
 	if (eq < 0) return null;
@@ -91,14 +89,10 @@ const opToProto: Record<TagOp, TagFilterOperator> = {
 	exists: TagFilterOperator.EXISTS
 };
 
-// The QUERIES filter as a whole: the SQL text search (?q=) plus the tag chips
-// (one ?tag= each). `text` is the committed value — the page debounces the raw
-// input into it, so typing does not write a URL entry per keystroke.
 export class QueryFilterState implements UrlParams {
 	text = $state('');
 	chips = $state<TagFilter[]>([]);
-	// All kinds shown by default. The set is serialized to ?kind= only when it
-	// diverges from that default (absent = all on, empty string = all off).
+	// Serialized to ?kind= only when it diverges from all-on (absent = all on, empty = all off).
 	kinds = $state<Record<KindKey, boolean>>({ reads: true, writes: true, others: true });
 
 	applyQuery(params: URLSearchParams): void {
@@ -141,8 +135,6 @@ export class QueryFilterState implements UrlParams {
 		return KIND_KEYS.filter((k) => this.kinds[k]).map((k) => kindToProto[k]);
 	}
 
-	// Re-picking a key you already filtered on edits that chip rather than adding
-	// a second one that would AND against it.
 	add(filter: TagFilter): void {
 		const at = this.chips.findIndex((f) => f.key === filter.key && f.op === filter.op);
 		if (at < 0) {

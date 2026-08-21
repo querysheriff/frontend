@@ -11,7 +11,6 @@
 		onToggle
 	}: { serverName: string; alerts: AlertSetting[]; onToggle: (alert: AlertSetting) => void } = $props();
 
-	// Nothing sorts: the catalog is short, fixed, and reads best in the backend's order.
 	const headDef: { label: string; align: 'left' | 'right'; cls: string }[] = [
 		{ label: 'Severity', align: 'left', cls: 'w-[7rem]' },
 		{ label: 'Alert', align: 'left', cls: '' },
@@ -20,10 +19,8 @@
 	];
 
 	const cell = 'border-b border-line-soft px-4 py-3 align-middle';
-	// One line of the switch's height in every cell, so nothing centres on the baseline.
 	const line = 'flex min-h-6 items-center';
 
-	// Critical is filled, as LOGS fills its severe levels: tinted red misses AA on its own tint.
 	const sev: Record<AlertLevel, { label: string; chip: string }> = {
 		[AlertLevel.CRITICAL]: { label: 'Critical', chip: 'border-danger bg-danger text-paper' },
 		[AlertLevel.WARNING]: { label: 'Warning', chip: 'border-warn/34 bg-warn/10 text-warn-text' },

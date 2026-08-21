@@ -68,9 +68,6 @@ export function fmtBucketRange(end: Date, bucketMs: number): string {
 	return `${head} – ${MONTHS[end.getMonth()]} ${end.getDate()} ${hm(end)}`;
 }
 
-// The metric bucket is always a whole number of minutes (backend rounds to the
-// minute, floor 1). Renders it as an adjective for "<size> buckets", e.g.
-// "1-minute" / "24-minute" / "2-hour".
 export function fmtBucketSize(bucketMs: number): string {
 	const minutes = Math.round(bucketMs / 60_000);
 	if (minutes < 60) return `${minutes}-minute`;
@@ -86,10 +83,6 @@ export function fmtAxisTime(value: Date | number): string {
 	return `${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
-/** Keys like `process_id` or `request_id` are high-cardinality identifiers: useful
- *  once you have found the row, useless for scanning. The tag strip is a single
- *  line that clips, so they sort last and the meaningful tag is the one that
- *  survives the clip. */
 const isIdTag = (key: string): boolean => key.endsWith('_id');
 
 export function kvTags(tags: Record<string, string>): string[] {
@@ -123,7 +116,6 @@ export const sevByMean = (ms: number): string =>
 export const sevByDuration = (ms: number): string =>
 	ms >= 10000 ? 'var(--color-danger)' : ms >= 1000 ? 'var(--color-warn)' : 'var(--color-ok)';
 
-// The vivid warn/ok fills fail text contrast; swap them for their darker
-// text-safe variants when a severity color paints text (danger already passes).
+// The vivid warn/ok fills fail text contrast, so text uses their darker variants.
 export const sevText = (sev: string): string =>
 	sev === 'var(--color-warn)' ? 'var(--color-warn-text)' : sev === 'var(--color-ok)' ? 'var(--color-ok-text)' : sev;

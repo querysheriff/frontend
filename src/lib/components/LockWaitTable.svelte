@@ -41,10 +41,6 @@
 
 	let headHeight = $state(0);
 
-	// The two query columns carry no `key`: a lock wait is found by how long it
-	// lasted or when it happened, never by the alphabetical order of its SQL.
-	// When, then how bad, then the two statements side by side so the stuck one and
-	// its cause can be read against each other. Lock is a detail, so it comes last.
 	const headDef: { key?: LockWaitSortCol; label: string; align: 'left' | 'right'; cls: string }[] = [
 		{ key: 'started', label: 'Started', align: 'left', cls: 'hidden w-[9rem] sm:table-cell' },
 		{ key: 'waited', label: 'Waited', align: 'right', cls: 'w-[6.5rem]' },

@@ -5,10 +5,6 @@
 	import { docs } from '$lib/docs.svelte';
 	import { docEntry } from '$lib/docsContent';
 
-	// Wraps a graph/table card, adding a top-right info button that opens the docs
-	// panel for `id`. The active card gets a command ring; the others dim while a
-	// panel is open, so it's clear which card the docs describe. With no `id` it
-	// renders a plain card (used by non-documented ChartPanel instances).
 	let { id, class: klass = '', children }: { id?: string; class?: string; children: Snippet } = $props();
 
 	const active = $derived(id != null && docs.activeId === id);

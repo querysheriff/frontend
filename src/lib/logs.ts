@@ -48,8 +48,6 @@ function deepen(color: string): string {
 	return `color-mix(in oklab, ${color} 80%, var(--color-ink))`;
 }
 
-/** `Tag`'s hover, verbatim — border to the accent line, label to command red, fill unchanged —
- *  so a clickable pill highlights the same way wherever it appears. */
 function tagHover(background: string) {
 	return {
 		hoverColor: 'var(--color-command)',
@@ -58,8 +56,6 @@ function tagHover(background: string) {
 	};
 }
 
-/** Severe levels are filled solid, and hover deepens that fill instead of taking the accent
- *  tint: they are already command/danger/panic, so the tint would only wash them out. */
 export function levelBadge(level: LogEvent_LogLevel): PillStyle {
 	const m = META[level] ?? META[LogEvent_LogLevel.LOG];
 
@@ -102,10 +98,7 @@ export function classificationLabel(c: LogEvent_LogClassification): string {
 	return words.map((w, i) => (i === 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w)).join(' ');
 }
 
-/** Whether this event's `message` is machine output the statement sample replaces: both are
- *  logged as "duration: N ms …" plus the SQL or the EXPLAIN output. The backend blanks the
- *  message once it has extracted a sample; when extraction failed the leftover text is a
- *  corrupted multi-megabyte plan, so it is not worth rendering either way. */
+/** Whether `message` is machine output the sample replaces: blanked at ingest, or a corrupted plan. */
 export function messageIsSampleText(c: LogEvent_LogClassification): boolean {
 	return c === LogEvent_LogClassification.STATEMENT_DURATION || c === LogEvent_LogClassification.STATEMENT_AUTO_EXPLAIN;
 }
@@ -114,16 +107,11 @@ export function classificationCode(c: LogEvent_LogClassification): string {
 	return LogEvent_LogClassification[c] ?? '';
 }
 
-/** Nine categories against eight data colours, so one is the darker sibling of a hue. Mixed
- *  here rather than added as a token, keeping `layout.css` the source of the hues. */
 function shade(token: string): string {
 	return `color-mix(in oklab, ${token} 62%, var(--color-ink))`;
 }
 
-/** pganalyze's Log Insights categories, in their order — their taxonomy rather than one of
- *  ours, so their per-code docs explain what any classification means. Their trailing
- *  "events" ("Server events") is dropped: every chart row and picker row would repeat it.
- *  The classification -> category mapping itself lives in the backend. */
+/** The categories in display order. The classification -> category mapping lives in the backend. */
 const CATEGORY_META: { category: LogEvent_LogCategory; label: string; color: string }[] = [
 	{ category: LogEvent_LogCategory.SERVER, label: 'Server', color: 'var(--color-panic)' },
 	{ category: LogEvent_LogCategory.CONNECTION, label: 'Connection', color: 'var(--color-teal)' },
@@ -142,8 +130,6 @@ const CATEGORY_META: { category: LogEvent_LogCategory; label: string; color: str
 		label: 'Application Error',
 		color: 'var(--color-command)'
 	},
-	// The collector matched no rule — worth surfacing, since an unrecognised message is often
-	// the interesting one.
 	{ category: LogEvent_LogCategory.UNSPECIFIED, label: 'Uncategorized', color: 'var(--color-line-boldest)' }
 ];
 
@@ -171,8 +157,7 @@ export function categoryBadge(category: LogEvent_LogCategory): PillStyle {
 	};
 }
 
-/** Severity rows for the heatmap, most serious first. Not `log_min_messages` order, which
- *  ranks LOG above ERROR: read as a chart, LOG is routine chatter and belongs lower. */
+/** Most serious first, not `log_min_messages` order, which ranks LOG above ERROR. */
 export const LEVEL_ROWS: LogEvent_LogLevel[] = [
 	LogEvent_LogLevel.PANIC,
 	LogEvent_LogLevel.FATAL,
@@ -186,10 +171,7 @@ export const LEVEL_ROWS: LogEvent_LogLevel[] = [
 
 type FacetMeta = { field: LogFacetField; label: string; urlKey: string; pickable: boolean };
 
-/** Every filterable field, with the query-string key it round-trips through. Keys are
- *  `f`-prefixed because `ctx` already owns `server`, `db` and `range` in the same flat
- *  namespace. Category and event are not `pickable`: the category picker owns both, being
- *  the one place that drills from a category into its event types. */
+/** Every filterable field with its `f`-prefixed URL key; category and event are not pickable. */
 export const FACET_FIELDS: FacetMeta[] = [
 	{ field: LogFacetField.CATEGORY, label: 'Category', urlKey: 'fcat', pickable: false },
 	{ field: LogFacetField.CLASSIFICATION, label: 'Event', urlKey: 'fevent', pickable: false },
@@ -202,8 +184,7 @@ export const FACET_FIELDS: FacetMeta[] = [
 
 export const PICKABLE_FACETS: FacetMeta[] = FACET_FIELDS.filter((f) => f.pickable);
 
-// Background workers (checkpointer, autovacuum launcher, walwriter) have no session, so they
-// have no database, user or application. The backend reports that as the empty string.
+// Background workers have no session, so no database, user or application. The backend sends ''.
 const NO_VALUE_LABEL = '(none)';
 
 export function facetValues(facets: LogFacet[] | undefined, field: LogFacetField): LogFacetValue[] {

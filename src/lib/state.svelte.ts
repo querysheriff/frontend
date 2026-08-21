@@ -36,8 +36,7 @@ function toInputStr(d: Date): string {
 	return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
 }
 
-// Bridge the "YYYY-MM-DD HH:MM:SS" custom-range strings to the CalendarDateTime
-// values the bits-ui range picker binds to (parseDateTime wants an ISO "T").
+// The bits-ui range picker binds CalendarDateTime, and parseDateTime wants an ISO "T".
 export function rangeStrToDateTime(s: string): CalendarDateTime | undefined {
 	try {
 		return parseDateTime(s.replace(' ', 'T'));
@@ -56,9 +55,7 @@ class ContextState {
 	range = $state(DEFAULT_RANGE);
 	customFrom = $state(todayAt('00:00:00'));
 	customTo = $state(todayAt('23:59:59'));
-	// False on screens whose data is server-wide (LOGS). `db` keeps its value so
-	// leaving the screen restores the selection, but it is neither shown nor
-	// written to the URL while it means nothing.
+	// False on server-wide screens (LOGS): `db` keeps its value but is not shown or written to the URL.
 	dbScoped = $state(true);
 
 	get isCustom(): boolean {
@@ -77,9 +74,6 @@ class ContextState {
 		return fmtClock(this.customTo);
 	}
 
-	/** Narrow the window to an absolute range, as dragging across a chart does. Lives here
-	 *  rather than in each page so every chart's brush lands on the same behaviour, and so the
-	 *  selection is shareable through the range params `writeQuery` already emits. */
 	zoomTo(from: Date, to: Date): void {
 		this.customFrom = toInputStr(from);
 		this.customTo = toInputStr(to);
@@ -89,7 +83,6 @@ class ContextState {
 
 	timeRange(): { from: Date; to: Date } {
 		if (this.range === 'custom') {
-			// Inputs are typed as "YYYY-MM-DD HH:MM:SS"; normalize the space to ISO's "T".
 			const from = new Date(this.customFrom.replace(' ', 'T'));
 			const to = new Date(this.customTo.replace(' ', 'T'));
 			if (!isNaN(from.getTime()) && !isNaN(to.getTime()) && from.getTime() <= to.getTime()) {
@@ -136,8 +129,6 @@ export const ctx = new ContextState();
 
 urlSync.register(ctx);
 
-// A statement id is permanently bound to one server+database, so the detail
-// view pins them to the record's own scope instead of offering dead pickers.
 class ScopeLock {
 	server = $state<string | null>(null);
 	db = $state<string | null>(null);

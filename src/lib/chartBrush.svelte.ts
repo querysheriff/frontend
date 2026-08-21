@@ -1,6 +1,5 @@
 import { ctx } from './state.svelte';
 
-/** layerchart's BrushState, narrowed to what the handler below touches. */
 type BrushLike = {
 	active: boolean | undefined;
 	x: Array<number | Date | string | null>;
@@ -14,16 +13,7 @@ function toDate(value: unknown): Date | null {
 	return null;
 }
 
-/**
- * Drag-to-zoom for every time chart in the app, defined once so the gesture, the styling and
- * the resulting range are identical everywhere. The drag area is already exactly the plot:
- * BrushContext's root is inset by the chart's padding.
- *
- * `brushing` is exposed so a chart can hide its crosshair and tooltip mid-drag — otherwise the
- * tooltip sits under the cursor you are dragging with.
- *
- * @param step bucket width, read lazily; a drag narrower than one bucket is a stray click.
- */
+// Drag-to-zoom shared by every time chart; a drag narrower than one bucket is a stray click.
 export function createTimeBrush(step: () => number) {
 	let brushing = $state(false);
 
@@ -34,11 +24,7 @@ export function createTimeBrush(step: () => number) {
 		props: {
 			axis: 'x' as const,
 			classes: {
-				// A neutral tint, not the terracotta accent: a selection is a viewport, not an
-				// action. Hairline sides because layerchart's default resolves to `currentColor`.
 				range: 'bg-hover-strong border-x border-line-bold',
-				// Painting the edge handles reads as a thick coloured border, so they stay
-				// invisible and simply remain drag targets.
 				handle: 'bg-transparent'
 			},
 			onBrushStart: () => {
