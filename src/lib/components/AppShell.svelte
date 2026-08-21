@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { afterNavigate, goto, replaceState } from '$app/navigation';
+	import { afterNavigate, goto, pushState, replaceState } from '$app/navigation';
 	import { page } from '$app/state';
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	import ContextBar from '$lib/components/ContextBar.svelte';
@@ -57,7 +57,20 @@
 	$effect(() => {
 		if (!urlSynced || !contextBar || !allowed) return;
 		const qs = urlSync.queryString();
-		if (qs !== page.url.search.replace(/^\?/, '')) replaceState(`?${qs}`, page.state);
+		const mode = urlSync.takeMode();
+		if (qs === page.url.search.replace(/^\?/, '')) return;
+		if (mode === 'push') pushState(`?${qs}`, page.state);
+		else replaceState(`?${qs}`, page.state);
+	});
+
+	$effect(() => {
+		if (!contextBar) return;
+		const onPop = () => {
+			if (location.pathname !== page.url.pathname) return;
+			urlSync.applyQuery(location.search);
+		};
+		window.addEventListener('popstate', onPop);
+		return () => window.removeEventListener('popstate', onPop);
 	});
 </script>
 

@@ -84,6 +84,7 @@ class ContextState {
 		this.customFrom = toInputStr(from);
 		this.customTo = toInputStr(to);
 		this.range = 'custom';
+		urlSync.pushNext();
 	}
 
 	timeRange(): { from: Date; to: Date } {

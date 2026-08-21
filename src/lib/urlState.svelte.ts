@@ -11,6 +11,19 @@ export interface UrlParams {
 class UrlSync {
 	#providers = $state<UrlParams[]>([]);
 
+	#push = false;
+
+	pushNext(): void {
+		this.#push = true;
+	}
+
+	takeMode(): 'push' | 'replace' {
+		const mode = this.#push ? 'push' : 'replace';
+		this.#push = false;
+
+		return mode;
+	}
+
 	// Callers register from inside a $effect, so the list must be read untracked —
 	// otherwise registering re-triggers the very effect that registered.
 	register(provider: UrlParams): () => void {
