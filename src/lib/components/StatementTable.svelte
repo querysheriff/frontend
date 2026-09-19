@@ -12,7 +12,7 @@
 		tags: string[];
 	};
 
-	export type StatementSortCol = 'query' | 'usr' | 'meanMs' | 'calls' | 'rowsPerCall' | 'pctIo' | 'pctTime';
+	export type StatementSortCol = 'meanMs' | 'calls' | 'rowsPerCall' | 'pctIo' | 'pctTime';
 </script>
 
 <script lang="ts">
@@ -41,14 +41,38 @@
 
 	let headHeight = $state(0);
 
-	const headDef: { key: StatementSortCol; label: string; align: 'left' | 'right'; cls: string }[] = [
+	const headDef: {
+		key: string;
+		sort?: StatementSortCol;
+		label: string;
+		align: 'left' | 'right';
+		cls: string;
+	}[] = [
 		{ key: 'query', label: 'Query', align: 'left', cls: '' },
 		{ key: 'usr', label: 'User', align: 'left', cls: 'hidden w-[7.5rem] sm:table-cell' },
-		{ key: 'meanMs', label: 'Avg', align: 'right', cls: 'w-[5.625rem]' },
-		{ key: 'calls', label: 'Calls', align: 'right', cls: 'w-[5.625rem]' },
-		{ key: 'rowsPerCall', label: 'Rows/Call', align: 'right', cls: 'hidden w-[6.75rem] lg:table-cell' },
-		{ key: 'pctIo', label: '% IO', align: 'right', cls: 'hidden w-[4.875rem] lg:table-cell' },
-		{ key: 'pctTime', label: '% Time', align: 'right', cls: 'hidden w-[5.25rem] lg:table-cell' }
+		{ key: 'meanMs', sort: 'meanMs', label: 'Avg', align: 'right', cls: 'w-[5.625rem]' },
+		{ key: 'calls', sort: 'calls', label: 'Calls', align: 'right', cls: 'w-[5.625rem]' },
+		{
+			key: 'rowsPerCall',
+			sort: 'rowsPerCall',
+			label: 'Rows/Call',
+			align: 'right',
+			cls: 'hidden w-[6.75rem] lg:table-cell'
+		},
+		{
+			key: 'pctIo',
+			sort: 'pctIo',
+			label: '% IO',
+			align: 'right',
+			cls: 'hidden w-[4.875rem] lg:table-cell'
+		},
+		{
+			key: 'pctTime',
+			sort: 'pctTime',
+			label: '% Time',
+			align: 'right',
+			cls: 'hidden w-[5.25rem] lg:table-cell'
+		}
 	];
 
 	const numCell =
@@ -56,7 +80,7 @@
 
 	function sortBy(key: StatementSortCol) {
 		if (sort.col === key) sort = { col: key, dir: sort.dir === 'asc' ? 'desc' : 'asc' };
-		else sort = { col: key, dir: key === 'query' || key === 'usr' ? 'asc' : 'desc' };
+		else sort = { col: key, dir: 'desc' };
 	}
 </script>
 
@@ -65,12 +89,13 @@
 		<thead bind:clientHeight={headHeight}>
 			<tr class="bg-hover-soft">
 				{#each headDef as h (h.key)}
+					{@const key = h.sort}
 					<SortHeader
 						label={h.label}
 						align={h.align}
 						class={h.cls}
-						dir={sort.col === h.key ? sort.dir : null}
-						onsort={() => sortBy(h.key)}
+						dir={key && sort.col === key ? sort.dir : null}
+						onsort={key ? () => sortBy(key) : undefined}
 					/>
 				{/each}
 			</tr>

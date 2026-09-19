@@ -31,8 +31,6 @@
 	const PAGE_SIZE = 50;
 
 	const sortColumnProto: Record<StatementSortCol, StatementSortColumn> = {
-		query: StatementSortColumn.QUERY,
-		usr: StatementSortColumn.USER,
 		meanMs: StatementSortColumn.AVG,
 		calls: StatementSortColumn.CALLS,
 		rowsPerCall: StatementSortColumn.ROWS_PER_CALL,
