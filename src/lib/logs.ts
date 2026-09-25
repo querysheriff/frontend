@@ -5,7 +5,7 @@ import {
 	LogFacetField,
 	type LogFacet,
 	type LogFacetValue
-} from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/log_pb';
+} from '$lib/gen/querysheriff/v1/log_pb';
 
 export type LevelTier = 'info' | 'warn' | 'severe';
 

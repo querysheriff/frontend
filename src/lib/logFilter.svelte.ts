@@ -3,7 +3,7 @@ import {
 	LogEvent_LogClassification,
 	LogEvent_LogCategory,
 	LogFacetField
-} from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/log_pb';
+} from '$lib/gen/querysheriff/v1/log_pb';
 import { FACET_FIELDS, facetValueLabel } from './logs';
 import type { UrlParams } from './urlState.svelte';
 

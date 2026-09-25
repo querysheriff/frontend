@@ -5,7 +5,7 @@
 	import FormLabel from '$lib/components/FormLabel.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
 	import { timestampDate } from '@bufbuild/protobuf/wkt';
-	import type { CollectorToken } from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/admin_pb';
+	import type { CollectorToken } from '$lib/gen/querysheriff/v1/admin_pb';
 	import { adminClient } from '$lib/connect';
 	import StateBlock from '$lib/components/StateBlock.svelte';
 	import { cleanErr, errMsg, fmtDateTime } from '$lib/format';

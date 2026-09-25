@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { CheckIcon, ChevronLeftIcon, ChevronRightIcon, SearchIcon } from '@lucide/svelte';
-	import { LogFacetField, type LogFacet } from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/log_pb';
+	import { LogFacetField, type LogFacet } from '$lib/gen/querysheriff/v1/log_pb';
 	import { fmtCount } from '$lib/format';
 	import { PICKABLE_FACETS, facetTruncated, facetValueLabel, facetValues } from '$lib/logs';
 	import type { LogFilterState } from '$lib/logFilter.svelte';

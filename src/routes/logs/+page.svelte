@@ -9,7 +9,7 @@
 		type LogFacet,
 		type LogHistogram,
 		type LogRecord
-	} from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/log_pb';
+	} from '$lib/gen/querysheriff/v1/log_pb';
 	import { logClient } from '$lib/connect';
 	import { ctx, serversState } from '$lib/state.svelte';
 	import { urlSync } from '$lib/urlState.svelte';

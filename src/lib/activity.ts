@@ -1,8 +1,5 @@
 import { timestampDate, type Timestamp } from '@bufbuild/protobuf/wkt';
-import {
-	TransactionEventStatus,
-	type TransactionEvent
-} from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/activity_pb';
+import { TransactionEventStatus, type TransactionEvent } from '$lib/gen/querysheriff/v1/activity_pb';
 import { fmtRel } from '$lib/format';
 
 export function statusLabel(s: TransactionEventStatus): string {

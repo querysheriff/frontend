@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import type { GetStatementSamplePlanResponse } from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/statement_pb';
+	import type { GetStatementSamplePlanResponse } from '$lib/gen/querysheriff/v1/statement_pb';
 	import { statementClient } from '$lib/connect';
 	import { errMsg } from '$lib/format';
 	import PlanViewer from '$lib/components/PlanViewer.svelte';

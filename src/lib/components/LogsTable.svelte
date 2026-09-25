@@ -1,5 +1,5 @@
 <script module lang="ts">
-	import { LogFacetField } from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/log_pb';
+	import { LogFacetField } from '$lib/gen/querysheriff/v1/log_pb';
 
 	/** What a cell can pivot the filter on. `search` covers PID, which is free text, not a facet. */
 	export type LogPivot = { kind: 'facet'; field: LogFacetField; value: string } | { kind: 'search'; value: string };
@@ -12,7 +12,7 @@
 	import { clsx } from 'clsx';
 	import { ChevronDownIcon, ChevronRightIcon, ExternalLinkIcon } from '@lucide/svelte';
 	import { timestampDate } from '@bufbuild/protobuf/wkt';
-	import type { LogRecord } from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/log_pb';
+	import type { LogRecord } from '$lib/gen/querysheriff/v1/log_pb';
 	import { fmtDuration, fmtTs, sevByDuration, sevText, truncate } from '$lib/format';
 	import {
 		categoryBadge,

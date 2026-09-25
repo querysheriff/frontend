@@ -8,8 +8,8 @@
 		QueryStatementTimingSeriesResponse,
 		StatementMetric,
 		StatementSample
-	} from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/statement_pb';
-	import { SampleSortColumn } from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/statement_pb';
+	} from '$lib/gen/querysheriff/v1/statement_pb';
+	import { SampleSortColumn } from '$lib/gen/querysheriff/v1/statement_pb';
 	import { statementClient } from '$lib/connect';
 	import StateBlock from '$lib/components/StateBlock.svelte';
 	import { ctx, scopeLock } from '$lib/state.svelte';

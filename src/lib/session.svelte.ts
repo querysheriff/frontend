@@ -1,4 +1,4 @@
-import type { User } from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/auth_pb';
+import type { User } from '$lib/gen/querysheriff/v1/auth_pb';
 import { authClient } from './connect';
 
 class SessionState {

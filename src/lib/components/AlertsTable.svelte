@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Switch } from 'bits-ui';
-	import { AlertLevel } from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/alert_pb';
-	import type { AlertSetting } from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/alert_pb';
+	import { AlertLevel } from '$lib/gen/querysheriff/v1/alert_pb';
+	import type { AlertSetting } from '$lib/gen/querysheriff/v1/alert_pb';
 	import SortHeader from '$lib/components/SortHeader.svelte';
 	import { fmtCount } from '$lib/format';
 

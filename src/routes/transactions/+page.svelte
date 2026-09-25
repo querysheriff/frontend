@@ -4,7 +4,7 @@
 		TransactionSortColumn,
 		type QueryTransactionAgeSeriesResponse,
 		type Transaction
-	} from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/activity_pb';
+	} from '$lib/gen/querysheriff/v1/activity_pb';
 	import { activityClient } from '$lib/connect';
 	import { ctx, serversState } from '$lib/state.svelte';
 	import { errMsg, fmtDuration } from '$lib/format';

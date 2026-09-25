@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { LayersIcon, SearchIcon, SlidersHorizontalIcon } from '@lucide/svelte';
-	import { LogFacetField, type LogFacet } from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/log_pb';
+	import { LogFacetField, type LogFacet } from '$lib/gen/querysheriff/v1/log_pb';
 	import LogChip from '$lib/components/LogChip.svelte';
 	import LogCategoryPicker from '$lib/components/LogCategoryPicker.svelte';
 	import LogFacetPicker from '$lib/components/LogFacetPicker.svelte';

@@ -6,10 +6,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import DocCard from '$lib/components/DocCard.svelte';
 	import FormLabel from '$lib/components/FormLabel.svelte';
-	import type {
-		ServerAlertSettings,
-		AlertSetting
-	} from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/alert_pb';
+	import type { ServerAlertSettings, AlertSetting } from '$lib/gen/querysheriff/v1/alert_pb';
 	import { alertClient } from '$lib/connect';
 	import StateBlock from '$lib/components/StateBlock.svelte';
 	import { DOC_ID_SEP } from '$lib/docsContent';

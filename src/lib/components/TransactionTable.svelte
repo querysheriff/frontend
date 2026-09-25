@@ -1,5 +1,5 @@
 <script module lang="ts">
-	import type { TransactionEvent } from '@buf/querysheriff_backend.bufbuild_es/querysheriff/v1/activity_pb';
+	import type { TransactionEvent } from '$lib/gen/querysheriff/v1/activity_pb';
 	import type { Timestamp } from '@bufbuild/protobuf/wkt';
 
 	export type TransactionRow = {
