@@ -25,8 +25,7 @@
 	let newTokenServer = $state('');
 	let copied = $state(false);
 
-	const rowAction =
-		'inline-flex cursor-pointer items-center gap-1.5 font-condensed text-xs leading-none font-bold tracking-[0.6px] uppercase';
+	const rowAction = 'inline-flex cursor-pointer items-center gap-1.5 font-sans text-xs leading-none font-bold';
 
 	async function load() {
 		loading = true;
@@ -102,8 +101,7 @@
 		}
 	}
 
-	const th =
-		'border-b border-line px-5 py-3 font-condensed text-xs font-semibold tracking-[0.7px] whitespace-nowrap text-ink/70 uppercase';
+	const th = 'border-b border-line px-5 py-3 font-sans text-xs font-semibold whitespace-nowrap text-ink/70';
 </script>
 
 <PageBar>
@@ -184,19 +182,15 @@
 			<div class="p-5">
 				<div role="alert" class="mb-4 flex items-center gap-2.5 border border-danger/30 bg-danger/8 px-3.5 py-3">
 					<TriangleAlertIcon class="size-4 flex-none text-danger" />
-					<div class="font-condensed text-sm font-bold tracking-[0.6px] text-danger uppercase">
-						Copy this token now. It will not be shown again.
-					</div>
+					<div class="font-sans text-sm font-bold text-danger">Copy this token now. It will not be shown again.</div>
 				</div>
-				<span class="mb-1.5 block font-condensed text-2xs font-semibold tracking-[1px] text-ink/70 uppercase"
-					>Token</span
-				>
+				<span class="mb-1.5 block font-sans text-2xs font-semibold text-ink/70">Token</span>
 				<div class="flex items-center gap-3 border border-line-boldest bg-ink px-3.5 py-3.5">
 					<code class="min-w-0 flex-1 font-mono text-md leading-[1.5] break-all text-paper">{newToken}</code>
 					<button
 						type="button"
 						onclick={copyToken}
-						class="inline-flex flex-none cursor-pointer items-center gap-1.5 bg-command px-3 py-1.5 font-condensed text-xs font-bold tracking-[0.6px] whitespace-nowrap text-paper uppercase hover:bg-danger"
+						class="inline-flex flex-none cursor-pointer items-center gap-1.5 bg-command px-3 py-1.5 font-sans text-xs font-bold whitespace-nowrap text-paper hover:bg-danger"
 					>
 						<CopyIcon class="size-3 stroke-[2.2]" />
 						<span>{copied ? 'Copied' : 'Copy'}</span>

@@ -36,7 +36,7 @@
 	<!-- Height matches the ContextBar (min-h-[4.25rem]) so this border lines up with the section header's. -->
 	<div class="flex h-[4.25rem] items-center gap-3 border-b border-line px-5">
 		<QuerySheriffMark class="size-8 flex-none text-command" />
-		<span class="font-condensed text-2xl font-bold tracking-[2.5px] text-ink">QuerySheriff</span>
+		<span class="font-sans text-2xl font-bold tracking-[2.5px] text-ink">QuerySheriff</span>
 		<button
 			type="button"
 			aria-label="Close navigation"
@@ -50,18 +50,18 @@
 	<nav class="flex flex-col gap-0.5 px-2 py-2.5">
 		{#each navItems as item (item.key)}
 			<a href={item.href} title={item.label} class={navClass(isNavActive(item, page.url.pathname))}>
-				<span class="font-condensed text-lg font-semibold tracking-[0.4px] uppercase">{item.label}</span>
+				<span class="font-sans text-lg font-semibold">{item.label}</span>
 			</a>
 		{/each}
 	</nav>
 
 	{#if session.isSuperAdmin}
 		<div class="mt-auto border-t border-line px-2 pt-2 pb-1">
-			<div class="px-3.5 pt-2 pb-2 font-condensed text-2xs font-bold tracking-[1.4px] text-ink/70 uppercase">Admin</div>
+			<div class="px-3.5 pt-2 pb-2 font-sans text-2xs font-bold text-ink/70">Admin</div>
 			<div class="flex flex-col gap-0.5">
 				{#each adminItems as item (item.key)}
 					<a href={item.href} title={item.label} class={navClass(isNavActive(item, page.url.pathname))}>
-						<span class="font-condensed text-lg font-semibold tracking-[0.4px] uppercase">{item.label}</span>
+						<span class="font-sans text-lg font-semibold">{item.label}</span>
 					</a>
 				{/each}
 			</div>
@@ -71,7 +71,7 @@
 	<div class="{session.isSuperAdmin ? '' : 'mt-auto'} border-t border-line p-3.5">
 		<div class="flex items-center gap-3 px-2.5 py-2 hover:bg-hover-soft">
 			<span
-				class="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-command font-condensed text-xl font-bold text-paper"
+				class="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-command font-sans text-xl font-bold text-paper"
 				>{session.displayName.charAt(0).toUpperCase()}</span
 			>
 			<span class="min-w-0 flex-1 truncate font-sans text-md font-semibold text-ink">{session.displayName}</span>

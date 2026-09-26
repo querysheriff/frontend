@@ -27,8 +27,7 @@
 			style="max-width: {maxWidth};"
 		>
 			<div class="flex items-center justify-between gap-3 border-b border-line px-5 py-4">
-				<Dialog.Title class="font-condensed text-xl font-bold tracking-[0.6px] text-ink uppercase">{title}</Dialog.Title
-				>
+				<Dialog.Title class="font-sans text-xl font-bold text-ink">{title}</Dialog.Title>
 				<Dialog.Description class="sr-only">{description ?? title}</Dialog.Description>
 				<Dialog.Close aria-label="Close" class="cursor-pointer leading-none text-ink/55 hover:text-danger">
 					<XIcon class="size-4" />

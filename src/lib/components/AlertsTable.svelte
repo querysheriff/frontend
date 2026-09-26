@@ -46,7 +46,7 @@
 					<td class={cell}>
 						<div class={line}>
 							<span
-								class="inline-flex h-6 w-[4.625rem] items-center justify-center border px-1.5 font-condensed text-2xs font-bold tracking-[0.7px] uppercase {sev[
+								class="inline-flex h-6 w-[4.625rem] items-center justify-center border px-1.5 font-sans text-2xs font-bold {sev[
 									alert.level
 								].chip}"
 							>

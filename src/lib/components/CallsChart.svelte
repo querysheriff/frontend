@@ -3,7 +3,6 @@
 	import { scaleTime } from 'd3-scale';
 	import { fmtAxisTime, fmtBucketRange, fmtCount, fmtCountFull } from '$lib/format';
 	import ChartFrame from '$lib/components/ChartFrame.svelte';
-	import GapBands from '$lib/components/GapBands.svelte';
 	import MetricArea from '$lib/components/MetricArea.svelte';
 	import SeriesPoints from '$lib/components/SeriesPoints.svelte';
 	import { buildMetricMultiChartModel, type MetricSeriesPoint, type MetricSeriesRow } from '$lib/metricChart';
@@ -45,7 +44,7 @@
 
 	const yMax = $derived.by(() => {
 		let m = 0;
-		for (const p of data) if (p.value != null && p.value > m) m = p.value;
+		for (const p of data) if (p.value > m) m = p.value;
 		return m;
 	});
 
@@ -70,7 +69,6 @@
 	>
 		<Svg>
 			<Grid y={{ class: 'stroke-ink/10' }} />
-			<GapBands gaps={model.gaps} />
 			<Axis
 				placement="left"
 				rule
@@ -115,14 +113,9 @@
 				class="border border-line-card bg-card px-3 py-2 shadow-chart"
 			>
 				{#snippet children({ data: point }: { data: MetricSeriesRow })}
-					{@const value = point.values[0]}
 					<div class="flex flex-col gap-1 font-mono text-xs leading-[1.4] whitespace-nowrap">
 						<div class="text-ink/70">{fmtBucketRange(point.at, model.step)}</div>
-						{#if value == null}
-							<div class="text-ink/70">No data</div>
-						{:else}
-							<div class="font-semibold text-ink">{formatFull(value)}{unit ? ` ${unit}` : ''}</div>
-						{/if}
+						<div class="font-semibold text-ink">{formatFull(point.values[0])}{unit ? ` ${unit}` : ''}</div>
 					</div>
 				{/snippet}
 			</Tooltip.Root>

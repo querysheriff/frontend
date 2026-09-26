@@ -21,7 +21,7 @@
 
 	<div class="flex min-w-0 flex-1 flex-col gap-0.5">
 		<div class="flex items-baseline gap-2.5">
-			<h1 class="truncate font-condensed text-xl leading-[1.15] font-bold tracking-[0.6px] text-ink uppercase">
+			<h1 class="truncate font-sans text-xl leading-[1.15] font-bold text-ink">
 				{title}
 			</h1>
 		</div>

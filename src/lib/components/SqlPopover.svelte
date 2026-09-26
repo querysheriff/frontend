@@ -33,12 +33,12 @@
 			style:max-height="{state.pop.maxHeight}px"
 		>
 			<div class="flex flex-none items-center justify-between gap-3 border-b border-paper/14 px-3 py-2.5">
-				<span class="font-condensed text-2xs font-semibold tracking-[1px] text-paper/55 uppercase">Full query</span>
+				<span class="font-sans text-2xs font-semibold text-paper/55">Full query</span>
 				{#if !state.pop.loading}
 					<button
 						type="button"
 						onclick={state.copy}
-						class="inline-flex cursor-pointer items-center gap-1.5 bg-command px-3 py-1.5 font-condensed text-xs font-bold tracking-[0.6px] whitespace-nowrap text-paper uppercase hover:bg-danger"
+						class="inline-flex cursor-pointer items-center gap-1.5 bg-command px-3 py-1.5 font-sans text-xs font-bold whitespace-nowrap text-paper hover:bg-danger"
 					>
 						<CopyIcon class="size-3 stroke-[2.2]" />
 						<span>{state.copied ? 'Copied' : 'Copy'}</span>

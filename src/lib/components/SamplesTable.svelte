@@ -53,7 +53,7 @@
 		{ key: 'dur', label: 'Duration', align: 'right', cls: 'w-[6.875rem]' }
 	];
 
-	const thBase = 'border-b border-line font-condensed text-xs font-semibold tracking-[0.7px] text-ink/70 uppercase';
+	const thBase = 'border-b border-line font-sans text-xs font-semibold text-ink/70';
 
 	function sortBy(key: SampleSortCol) {
 		if (sort.col === key) sort = { col: key, dir: sort.dir === 'asc' ? 'desc' : 'asc' };
@@ -77,7 +77,7 @@
 							<button
 								type="button"
 								onclick={() => sortBy(key)}
-								class="{pad} group/sort w-full cursor-pointer uppercase select-none focus-visible:text-command"
+								class="{pad} group/sort w-full cursor-pointer select-none focus-visible:text-command"
 							>
 								<span class="relative inline-flex items-center align-middle">
 									<span>{h.label}</span>

@@ -5,11 +5,11 @@ import { fmtRel } from '$lib/format';
 export function statusLabel(s: TransactionEventStatus): string {
 	switch (s) {
 		case TransactionEventStatus.ACTIVE:
-			return 'ACTIVE';
+			return 'Active';
 		case TransactionEventStatus.IDLE:
-			return 'IDLE';
+			return 'Idle';
 		case TransactionEventStatus.ABORTED:
-			return 'ABORTED';
+			return 'Aborted';
 		default:
 			return '';
 	}

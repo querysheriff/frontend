@@ -237,9 +237,7 @@
 					</span>
 					<span class="flex min-w-0 flex-1 flex-col">
 						<span class="truncate">{event.label}</span>
-						<span class="truncate font-condensed text-2xs tracking-[0.5px] text-ink/55 uppercase"
-							>{categoryLabel(event.category)}</span
-						>
+						<span class="truncate font-sans text-2xs text-ink/55">{categoryLabel(event.category)}</span>
 					</span>
 					<span class={countCls}>{fmtCount(event.count)}</span>
 				</button>
@@ -340,7 +338,7 @@
 		<button
 			type="button"
 			onclick={apply}
-			class="flex-1 cursor-pointer bg-command py-2 text-center font-condensed text-md font-semibold tracking-[0.6px] text-paper uppercase hover:bg-danger"
+			class="flex-1 cursor-pointer bg-command py-2 text-center font-sans text-md font-semibold text-paper hover:bg-danger"
 		>
 			{selectedCount > 0 ? `Apply ${selectedCount} filter${selectedCount === 1 ? '' : 's'}` : 'Show all categories'}
 		</button>

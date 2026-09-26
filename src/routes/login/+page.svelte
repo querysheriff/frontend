@@ -41,7 +41,7 @@
 	<div class="w-full max-w-[25.25rem]">
 		<div class="mb-8 flex items-center justify-center gap-3">
 			<QuerySheriffMark class="size-10 flex-none text-command" />
-			<h1 class="font-condensed text-[27px] font-bold tracking-[3px] text-ink">QuerySheriff</h1>
+			<h1 class="font-sans text-[27px] font-bold tracking-[3px] text-ink">QuerySheriff</h1>
 		</div>
 
 		<form onsubmit={submit} class="border border-line-card bg-card px-8 pt-8 pb-7">
@@ -79,7 +79,7 @@
 			<button
 				type="submit"
 				disabled={submitting}
-				class="flex h-[2.75rem] w-full cursor-pointer items-center justify-center gap-2.5 bg-command font-condensed text-lg font-bold tracking-[1px] text-paper uppercase hover:bg-danger disabled:cursor-default disabled:opacity-70"
+				class="flex h-[2.75rem] w-full cursor-pointer items-center justify-center gap-2.5 bg-command font-sans text-lg font-bold text-paper hover:bg-danger disabled:cursor-default disabled:opacity-70"
 			>
 				<span>{submitting ? 'Signing in…' : 'Sign in'}</span>
 				<ArrowRightIcon class="size-4 stroke-[2.2]" />

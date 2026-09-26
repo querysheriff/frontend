@@ -28,8 +28,7 @@
 	let userError = $state<string | null>(null);
 	let saving = $state(false);
 
-	const rowAction =
-		'inline-flex cursor-pointer items-center gap-1.5 font-condensed text-xs leading-none font-bold tracking-[0.6px] uppercase';
+	const rowAction = 'inline-flex cursor-pointer items-center gap-1.5 font-sans text-xs leading-none font-bold';
 
 	async function load() {
 		loading = true;
@@ -121,10 +120,9 @@
 		}
 	}
 
-	const th =
-		'border-b border-line px-5 py-3 text-left font-condensed text-xs font-semibold tracking-[0.7px] whitespace-nowrap text-ink/70 uppercase';
+	const th = 'border-b border-line px-5 py-3 text-left font-sans text-xs font-semibold whitespace-nowrap text-ink/70';
 	const allChip =
-		'inline-block border border-accent-line bg-accent px-2 py-0.5 font-condensed text-2xs font-bold tracking-[0.5px] whitespace-nowrap text-command uppercase';
+		'inline-block border border-accent-line bg-accent px-2 py-0.5 font-sans text-2xs font-bold whitespace-nowrap text-command';
 	const serverChip =
 		'inline-block border border-steel/28 bg-steel/10 px-2 py-0.5 font-mono text-xs whitespace-nowrap text-steel';
 </script>
@@ -236,9 +234,7 @@
 					The super admin can view every server.
 				</div>
 			{:else}
-				<span class="mb-2 block font-condensed text-2xs font-semibold tracking-[1px] text-ink/70 uppercase">
-					Allowed Servers
-				</span>
+				<span class="mb-2 block font-sans text-2xs font-semibold text-ink/70"> Allowed Servers </span>
 				{#if serverOptions.length === 0}
 					<div class="font-mono text-sm text-ink/70">No servers yet — create a collector token first</div>
 				{:else}

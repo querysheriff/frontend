@@ -182,7 +182,7 @@
 														{fmtDuration(durationMs(e.from, e.to))}
 													</span>
 													<span
-														class="font-condensed text-xs leading-[18px] font-bold tracking-[0.5px] whitespace-nowrap uppercase"
+														class="font-sans text-xs leading-[18px] font-bold whitespace-nowrap"
 														style:color={statusText(e.status)}>{statusLabel(e.status)}</span
 													>
 													<span class="truncate font-mono text-sm leading-[18px] text-ink/70">{waitText(e)}</span>

@@ -4,7 +4,6 @@
 	import { curveLinear } from 'd3-shape';
 	import { fmtAxisTime, fmtClockMinute } from '$lib/format';
 	import ChartFrame from '$lib/components/ChartFrame.svelte';
-	import GapBands from '$lib/components/GapBands.svelte';
 	import SeriesPoints from '$lib/components/SeriesPoints.svelte';
 	import { buildMetricMultiChartModel, type MetricSeriesPoint, type MetricSeriesRow } from '$lib/metricChart';
 	import { createTimeBrush } from '$lib/chartBrush.svelte';
@@ -41,7 +40,7 @@
 		let m = minYMax;
 		for (const s of series) {
 			for (const p of s.points) {
-				if (p.value != null && p.value > m) m = p.value;
+				if (p.value > m) m = p.value;
 			}
 		}
 		return m;
@@ -67,7 +66,6 @@
 	>
 		<Svg>
 			<Grid y={{ class: 'stroke-ink/10' }} />
-			<GapBands gaps={model.gaps} />
 			<Axis
 				placement="left"
 				rule
@@ -83,13 +81,7 @@
 				tickLabelProps={{ class: 'fill-ink/45 font-mono text-2xs', stroke: 'none' }}
 			/>
 			{#each series as s, i (s.label)}
-				<Spline
-					y={(d: MetricSeriesRow) => d.values[i]}
-					defined={(d: MetricSeriesRow) => d.values[i] != null}
-					curve={curveLinear}
-					stroke={s.color}
-					stroke-width={2}
-				/>
+				<Spline y={(d: MetricSeriesRow) => d.values[i]} curve={curveLinear} stroke={s.color} stroke-width={2} />
 			{/each}
 			{#if !brush.brushing}
 				<Highlight lines motion="none" />
@@ -114,9 +106,7 @@
 								<span class="flex items-center gap-1.5 text-ink/70">
 									<span class="h-0.5 w-3" style:background={s.color}></span>{s.label}
 								</span>
-								<span class="font-semibold text-ink"
-									>{point.values[i] == null ? '—' : format(point.values[i] as number)}</span
-								>
+								<span class="font-semibold text-ink">{format(point.values[i])}</span>
 							</div>
 						{/each}
 					</div>

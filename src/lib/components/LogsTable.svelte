@@ -90,7 +90,7 @@
 	const cell = 'border-b border-line-soft px-4 py-3 align-top leading-[20px]';
 	const pivotCls = 'inline-block max-w-full cursor-pointer truncate align-top hover:text-command';
 	const badgeCls = 'pill inline-flex h-5 max-w-full translate-y-px items-center align-top leading-none';
-	const panelLabel = 'mb-1 font-condensed text-2xs font-semibold tracking-[1px] text-ink/70 uppercase';
+	const panelLabel = 'mb-1 font-sans text-2xs font-semibold text-ink/70';
 
 	const hasDetail = (r: LogRecord): boolean =>
 		!!(messageOf(r) || r.statementSample || r.stateCode || r.detail || r.hint || r.context || r.statement);
@@ -159,7 +159,7 @@
 							type="button"
 							onclick={(e) => pivot(e, { kind: 'facet', field: LogFacetField.LEVEL, value: String(r.logLevel) })}
 							title="Filter by {levelLabel(r.logLevel)}"
-							class="{badgeCls} cursor-pointer px-2 font-condensed text-2xs font-bold tracking-[0.7px] whitespace-nowrap uppercase"
+							class="{badgeCls} cursor-pointer px-2 font-sans text-2xs font-bold whitespace-nowrap"
 							style:--pill-fg={lb.color}
 							style:--pill-bg={lb.background}
 							style:--pill-border={lb.border}
@@ -187,7 +187,7 @@
 							type="button"
 							onclick={(e) => pivot(e, { kind: 'facet', field: LogFacetField.CATEGORY, value: String(r.category) })}
 							title="Filter by {categoryLabel(r.category)}"
-							class="{badgeCls} cursor-pointer truncate px-2 font-condensed text-2xs font-semibold tracking-[0.6px] uppercase"
+							class="{badgeCls} cursor-pointer truncate px-2 font-sans text-2xs font-semibold"
 							style:--pill-fg={cb.color}
 							style:--pill-bg={cb.background}
 							style:--pill-border={cb.border}
@@ -231,8 +231,7 @@
 												<a
 													href="/queries/{sample.statementId}"
 													onclick={(e) => e.stopPropagation()}
-													class="font-condensed text-xs font-semibold tracking-[0.6px] text-command uppercase hover:underline"
-													>Open query</a
+													class="font-sans text-xs font-semibold text-command hover:underline">Open query</a
 												>
 												{#if sample.hasPlan}
 													<a
@@ -240,7 +239,7 @@
 														target="_blank"
 														rel="noopener"
 														onclick={(e) => e.stopPropagation()}
-														class="inline-flex items-center gap-1.5 font-condensed text-xs font-semibold tracking-[0.6px] text-command uppercase hover:underline"
+														class="inline-flex items-center gap-1.5 font-sans text-xs font-semibold text-command hover:underline"
 														>View plan<ExternalLinkIcon class="size-3 stroke-[2.2]" /></a
 													>
 												{/if}

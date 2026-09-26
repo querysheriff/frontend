@@ -3,8 +3,8 @@
 		key: string;
 		label: string;
 		color: string;
-		/** Aligned with the model's rows; null for a bucket with no collection. */
-		values: (number | null)[];
+		/** Aligned with `buckets`. */
+		values: number[];
 		total: number;
 	};
 
@@ -24,17 +24,16 @@
 
 <script lang="ts">
 	import { getChartContext } from 'layerchart';
-	import type { MetricSeriesRow } from '$lib/metricChart';
 
 	let {
 		rows,
-		bucketAt,
+		buckets,
 		step,
 		rowHeight,
 		gap = 1
 	}: {
 		rows: HeatmapRow[];
-		bucketAt: MetricSeriesRow[];
+		buckets: Date[];
 		step: number;
 		rowHeight: number;
 		gap?: number;
@@ -48,17 +47,17 @@
 		const out: Cell[] = [];
 
 		rows.forEach((row, r) => {
-			const rowMax = Math.max(0, ...row.values.map((v) => v ?? 0));
+			const rowMax = Math.max(0, ...row.values);
 			const y = r * rowHeight;
 
-			bucketAt.forEach((bucket, i) => {
-				const value = row.values[i] ?? 0;
+			buckets.forEach((at, i) => {
+				const value = row.values[i];
 				const intensity = heatmapStep(value, rowMax);
 				if (intensity < 0) return;
 
 				// A cell covers its whole bucket, from at-step to at, cut off at the edges of the plot.
-				const left = Math.max(0, Math.min(c.width, Number(c.xScale(new Date(bucket.at.getTime() - step)))));
-				const right = Math.max(0, Math.min(c.width, Number(c.xScale(bucket.at))));
+				const left = Math.max(0, Math.min(c.width, Number(c.xScale(new Date(at.getTime() - step)))));
+				const right = Math.max(0, Math.min(c.width, Number(c.xScale(at))));
 				const w = right - left - gap;
 				if (w <= 0) return;
 

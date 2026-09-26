@@ -1,10 +1,18 @@
 <script lang="ts">
-	import { DatabaseIcon, ClockIcon, ChevronDownIcon, CheckIcon, ArrowRightIcon } from '@lucide/svelte';
+	import { DatabaseIcon, ClockIcon, ChevronDownIcon, CheckIcon, ArrowRightIcon, StarIcon } from '@lucide/svelte';
 	import { Select, Popover } from 'bits-ui';
 	import type { DateRange } from 'bits-ui';
 	import { page } from '$app/state';
 	import { screenDescription, screenTitle } from '$lib/nav';
-	import { ctx, scopeLock, serversState, presets, rangeStrToDateTime, dateTimeToRangeStr } from '$lib/state.svelte';
+	import {
+		ctx,
+		defaultScope,
+		scopeLock,
+		serversState,
+		presets,
+		rangeStrToDateTime,
+		dateTimeToRangeStr
+	} from '$lib/state.svelte';
 	import SidebarToggle from '$lib/components/SidebarToggle.svelte';
 	import DateTimeRangeField from '$lib/components/DateTimeRangeField.svelte';
 
@@ -46,7 +54,7 @@
 	const panelCls = 'z-50 max-w-[calc(100vw-24px)] border border-line-strong bg-card p-1.5 shadow-dropdown';
 	const itemCls =
 		'flex w-full cursor-pointer items-center gap-2.5 px-2.5 py-2 font-mono text-sm text-ink hover:bg-hover data-[highlighted]:bg-hover';
-	const labelCls = 'px-2.5 pt-1.5 pb-1 font-condensed text-2xs font-semibold tracking-[1px] text-ink/70 uppercase';
+	const labelCls = 'px-2.5 pt-1.5 pb-1 font-sans text-2xs font-semibold text-ink/70';
 	const dotTitle = (ok: boolean) =>
 		ok
 			? 'Collector healthy · reported within 5 minutes'
@@ -60,7 +68,7 @@
 
 	<div class="flex min-w-0 flex-1 flex-col gap-0.5">
 		<div class="flex items-baseline gap-2.5">
-			<h1 class="truncate font-condensed text-xl leading-[1.15] font-bold tracking-[0.6px] text-ink uppercase">
+			<h1 class="truncate font-sans text-xl leading-[1.15] font-bold text-ink">
 				{title}
 			</h1>
 		</div>
@@ -91,7 +99,7 @@
 				<Select.Root type="single" value={ctx.server} onValueChange={selectServer}>
 					<Select.Trigger>
 						{#snippet child({ props })}
-							<button {...props} class="{triggerCls} border-r border-line" aria-label="Select Postgres server">
+							<button {...props} class={triggerCls} aria-label="Select Postgres server">
 								<span
 									class="h-2 w-2 rounded-full {selfHealth === 'ok' ? 'bg-ok' : 'bg-warn'}"
 									title={dotTitle(selfHealth === 'ok')}
@@ -121,38 +129,49 @@
 					</Select.Portal>
 				</Select.Root>
 
-				<Select.Root type="single" value={ctx.db} onValueChange={(v) => (ctx.db = v)} disabled={!dbSwitch}>
-					<Select.Trigger>
-						{#snippet child({ props })}
-							<button
-								{...props}
-								title={dbSwitch ? 'Select database' : 'Logs are server-wide — the database filter does not apply here'}
-								class="{triggerCls} {dbSwitch ? '' : 'cursor-not-allowed opacity-40'}"
-							>
-								<DatabaseIcon class="size-3.5 flex-none text-steel" />
-								<span class="font-mono text-sm font-medium text-ink">{dbSwitch ? ctx.db || '—' : '—'}</span>
-								<ChevronDownIcon class="size-3.5 text-ink/55" />
-							</button>
-						{/snippet}
-					</Select.Trigger>
-					<Select.Portal>
-						<Select.Content sideOffset={6} align="end" class="{panelCls} min-w-[11.875rem]">
-							<div class={labelCls}>Database</div>
-							{#each serversState.databasesFor(ctx.server) as d (d)}
-								<Select.Item value={d} label={d}>
-									{#snippet child({ props, selected })}
-										<div {...props} class="{itemCls} {selected ? 'font-semibold' : ''}">
-											<span class="flex-1 text-left">{d}</span>
-											{#if selected}<CheckIcon class="size-3.5 text-command" />{/if}
-										</div>
-									{/snippet}
-								</Select.Item>
-							{:else}
-								<div class="px-2.5 py-2 font-mono text-sm text-ink/70">No databases</div>
-							{/each}
-						</Select.Content>
-					</Select.Portal>
-				</Select.Root>
+				{#if dbSwitch}
+					<Select.Root type="single" value={ctx.db} onValueChange={(v) => (ctx.db = v)}>
+						<Select.Trigger>
+							{#snippet child({ props })}
+								<button {...props} title="Select database" class="{triggerCls} border-l border-line">
+									<DatabaseIcon class="size-3.5 flex-none text-steel" />
+									<span class="font-mono text-sm font-medium text-ink">{ctx.db || '—'}</span>
+									<ChevronDownIcon class="size-3.5 text-ink/55" />
+								</button>
+							{/snippet}
+						</Select.Trigger>
+						<Select.Portal>
+							<Select.Content sideOffset={6} align="end" class="{panelCls} min-w-[11.875rem]">
+								<div class={labelCls}>Database</div>
+								{#each serversState.databasesFor(ctx.server) as d (d)}
+									<Select.Item value={d} label={d}>
+										{#snippet child({ props, selected })}
+											<div {...props} class="{itemCls} {selected ? 'font-semibold' : ''}">
+												<span class="flex-1 text-left">{d}</span>
+												{#if selected}<CheckIcon class="size-3.5 text-command" />{/if}
+											</div>
+										{/snippet}
+									</Select.Item>
+								{:else}
+									<div class="px-2.5 py-2 font-mono text-sm text-ink/70">No databases</div>
+								{/each}
+							</Select.Content>
+						</Select.Portal>
+					</Select.Root>
+					<button
+						type="button"
+						onclick={() => defaultScope.toggle()}
+						disabled={!ctx.server || !ctx.db}
+						aria-pressed={defaultScope.isCurrent}
+						aria-label="Set as default server and database"
+						title={defaultScope.isCurrent
+							? 'Default server and database · click to unset'
+							: 'Set as default server and database'}
+						class="flex cursor-pointer items-center border-l border-line px-2.5 hover:bg-hover-soft disabled:cursor-default disabled:opacity-40"
+					>
+						<StarIcon class="size-3.5 {defaultScope.isCurrent ? 'fill-warn text-warn' : 'text-ink/55'}" />
+					</button>
+				{/if}
 			{/if}
 		</div>
 
@@ -189,9 +208,7 @@
 					class="z-50 flex max-w-[calc(100vw-24px)] flex-col border border-line-strong bg-card shadow-popover sm:flex-row"
 				>
 					<div class="border-b border-line px-2 py-3.5 sm:min-w-[10.75rem] sm:border-r sm:border-b-0">
-						<div class="mb-2.5 px-2.5 font-condensed text-2xs font-semibold tracking-[1px] text-ink/70 uppercase">
-							Quick ranges
-						</div>
+						<div class="mb-2.5 px-2.5 font-sans text-2xs font-semibold text-ink/70">Quick ranges</div>
 						{#each presets as { key, label } (key)}
 							<button
 								type="button"
@@ -206,14 +223,12 @@
 						{/each}
 					</div>
 					<div class="w-[16.75rem] max-w-full px-4 py-3.5">
-						<div class="mb-2.5 font-condensed text-2xs font-semibold tracking-[1px] text-ink/70 uppercase">
-							Absolute time range
-						</div>
+						<div class="mb-2.5 font-sans text-2xs font-semibold text-ink/70">Absolute time range</div>
 						<DateTimeRangeField bind:value={draftRange} onSubmit={applyCustom} />
 						<button
 							type="button"
 							onclick={applyCustom}
-							class="mt-3.5 w-full cursor-pointer bg-command px-2.5 py-2.5 text-center font-condensed text-md font-semibold tracking-[0.6px] text-paper uppercase hover:bg-danger"
+							class="mt-3.5 w-full cursor-pointer bg-command px-2.5 py-2.5 text-center font-sans text-md font-semibold text-paper hover:bg-danger"
 						>
 							Apply range
 						</button>

@@ -88,6 +88,7 @@ const docContent: Record<string, DocEntry> = {
 					'For example, when a query runs 20 times with an average time of 400 ms, the calculation treats this as 20 query runs of 400 ms.',
 					'The chart groups these results into equal time intervals and calculates the estimated p90, p95, and p99 values for each interval.',
 					'Utility statements such as `BEGIN`, `COMMIT`, and `SET` are excluded from these percentiles. They run extremely often and finish almost instantly, so counting them would pull the numbers down and hide the real speed of read and write queries.',
+					'For the same reason, queries averaging under 10 ms are excluded too. Intervals where no query took 10 ms or more are left blank.',
 					'Lower percentiles such as p75 are also not shown, so the chart stays focused on the slower queries that matter most.'
 				]
 			}

@@ -49,16 +49,13 @@
 <th
 	scope="col"
 	aria-sort={onsort ? (dir === 'asc' ? 'ascending' : dir === 'desc' ? 'descending' : 'none') : undefined}
-	class={clsx(
-		'border-b border-line font-condensed text-xs font-semibold tracking-[0.7px] whitespace-nowrap text-ink/70 uppercase',
-		klass
-	)}
+	class={clsx('border-b border-line font-sans text-xs font-semibold whitespace-nowrap text-ink/70', klass)}
 >
 	{#if onsort}
 		<button
 			type="button"
 			onclick={onsort}
-			class="{box} group/sort w-full cursor-pointer uppercase select-none focus-visible:text-command"
+			class="{box} group/sort w-full cursor-pointer select-none focus-visible:text-command"
 		>
 			{@render content()}
 		</button>

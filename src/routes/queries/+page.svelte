@@ -249,12 +249,16 @@
 	<ChartPanel
 		docId="q-speed"
 		title="Query speed over time"
-		description="How long queries took — p90 means roughly 9 in 10 finished faster"
+		description="How long queries of 10 ms or more took — p90 means roughly 9 in 10 finished faster"
 	>
 		{#if chartRange && latency.some((s) => s.points.length > 0)}
 			<LineChart series={latency} from={chartRange.from} to={chartRange.to} {bucketMs} format={fmtDuration} />
 		{:else}
-			<ChartEmpty message={chartLoading ? 'Loading…' : (chartError ?? 'No data')} />
+			<ChartEmpty
+				message={chartLoading
+					? 'Loading…'
+					: (chartError ?? (callsPoints.length > 0 ? 'No queries took 10 ms or more' : 'No data'))}
+			/>
 		{/if}
 	</ChartPanel>
 </div>

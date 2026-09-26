@@ -88,7 +88,7 @@
 			<button
 				type="button"
 				onclick={toggleAll}
-				class="absolute top-3.5 right-4 z-[1] flex cursor-pointer items-center gap-1.5 font-condensed text-2xs font-semibold tracking-[0.7px] text-paper/45 uppercase hover:text-paper"
+				class="absolute top-3.5 right-4 z-[1] flex cursor-pointer items-center gap-1.5 font-sans text-2xs font-semibold text-paper/45 hover:text-paper"
 			>
 				{#if allExpanded}
 					<ChevronsDownUpIcon class="size-3.5" /><span>Collapse all</span>

@@ -23,7 +23,7 @@
 	} & HTMLButtonAttributes = $props();
 
 	const base =
-		'inline-flex cursor-pointer items-center justify-center gap-1.5 font-condensed whitespace-nowrap uppercase transition-colors disabled:cursor-default disabled:opacity-60';
+		'inline-flex cursor-pointer items-center justify-center gap-1.5 font-sans whitespace-nowrap transition-colors disabled:cursor-default disabled:opacity-60';
 
 	const variants: Record<ButtonVariant, string> = {
 		primary: 'bg-command font-bold text-paper hover:bg-danger',
@@ -32,8 +32,8 @@
 	};
 
 	const sizes: Record<ButtonSize, string> = {
-		sm: 'px-3 py-1.5 text-xs tracking-[0.6px]',
-		md: 'px-4 py-2.5 text-sm tracking-[0.8px]'
+		sm: 'px-3 py-1.5 text-xs',
+		md: 'px-4 py-2.5 text-sm'
 	};
 </script>
 

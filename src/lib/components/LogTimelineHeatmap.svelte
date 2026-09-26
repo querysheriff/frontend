@@ -16,7 +16,6 @@
 	import { Axis, Chart, Highlight, Svg, Tooltip } from 'layerchart';
 	import { scaleTime } from 'd3-scale';
 	import { fmtAxisTime, fmtBucketRange, fmtCount, fmtCountFull } from '$lib/format';
-	import GapBands from '$lib/components/GapBands.svelte';
 	import HeatmapCells, { type HeatmapRow } from '$lib/components/HeatmapCells.svelte';
 	import { buildMetricMultiChartModel, type MetricSeriesRow } from '$lib/metricChart';
 	import { createTimeBrush } from '$lib/chartBrush.svelte';
@@ -48,7 +47,7 @@
 
 	const model = $derived(
 		buildMetricMultiChartModel(
-			rows.map((row) => buckets.map((at, i) => ({ at, value: row.values[i] ?? null }))),
+			rows.map((row) => buckets.map((at, i) => ({ at, value: row.values[i] }))),
 			from,
 			to,
 			bucketMs
@@ -61,7 +60,7 @@
 
 	const bucketCenter = $derived((d: MetricSeriesRow) => new Date(d.at.getTime() - model.step / 2));
 
-	// The model can insert null rows for gaps, so map back by instant rather than by row index.
+	// The model pads rows out to the full range, so map back by instant rather than by row index.
 	function bucketIndexOf(at: Date): number {
 		return buckets.findIndex((b) => b.getTime() === at.getTime());
 	}
@@ -70,7 +69,7 @@
 		const index = bucketIndexOf(at);
 
 		return rows
-			.map((row) => ({ row, count: index < 0 ? 0 : (row.values[index] ?? 0), index }))
+			.map((row) => ({ row, count: index < 0 ? 0 : row.values[index], index }))
 			.filter((entry) => entry.count > 0);
 	}
 </script>
@@ -89,7 +88,6 @@
 		brush={brush.props}
 	>
 		<Svg>
-			<GapBands gaps={model.gaps} />
 			<Axis
 				placement="bottom"
 				rule
@@ -97,7 +95,7 @@
 				format={fmtAxisTime}
 				tickLabelProps={{ class: 'fill-ink/45 font-mono text-2xs', stroke: 'none' }}
 			/>
-			<HeatmapCells {rows} bucketAt={model.rows} step={model.step} rowHeight={ROW_HEIGHT} />
+			<HeatmapCells {rows} {buckets} step={model.step} rowHeight={ROW_HEIGHT} />
 			{#if !brush.brushing && !message}
 				<Highlight lines motion="none" />
 			{/if}
@@ -159,8 +157,7 @@
 	<div class="pointer-events-none absolute inset-0">
 		{#each rows as row, r (row.key)}
 			<div
-				class="absolute flex items-center gap-1.5 pr-2 font-condensed text-2xs font-semibold tracking-[0.5px] uppercase {row.total >
-				0
+				class="absolute flex items-center gap-1.5 pr-2 font-sans text-2xs font-semibold {row.total > 0
 					? 'text-ink/70'
 					: 'text-ink/35'}"
 				style:top="{r * ROW_HEIGHT}px"
@@ -169,7 +166,7 @@
 			>
 				<span class="size-2 flex-none" style:background={row.color} style:opacity={row.total > 0 ? 1 : 0.3}></span>
 				<span class="truncate" title={row.label}>{row.label}</span>
-				<span class="ml-auto font-mono tracking-normal">{row.total > 0 ? fmtCount(row.total) : ''}</span>
+				<span class="ml-auto font-mono">{row.total > 0 ? fmtCount(row.total) : ''}</span>
 			</div>
 		{/each}
 	</div>

@@ -1,3 +1,4 @@
+import { browser } from '$app/environment';
 import { fmtClock } from './format';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { parseDateTime, getLocalTimeZone, type CalendarDateTime, type DateValue } from '@internationalized/date';
@@ -49,9 +50,32 @@ export function dateTimeToRangeStr(dt: DateValue): string {
 	return toInputStr(dt.toDate(getLocalTimeZone()));
 }
 
+const DEFAULT_SERVER_KEY = 'querysheriff:default-server';
+const DEFAULT_DB_KEY = 'querysheriff:default-db';
+
+class DefaultScope {
+	server = $state((browser && localStorage.getItem(DEFAULT_SERVER_KEY)) || '');
+	db = $state((browser && localStorage.getItem(DEFAULT_DB_KEY)) || '');
+
+	get isCurrent(): boolean {
+		return this.server !== '' && this.server === ctx.server && this.db === ctx.db;
+	}
+
+	toggle(): void {
+		const clear = this.isCurrent;
+		this.server = clear ? '' : ctx.server;
+		this.db = clear ? '' : ctx.db;
+		if (!browser) return;
+		localStorage.setItem(DEFAULT_SERVER_KEY, this.server);
+		localStorage.setItem(DEFAULT_DB_KEY, this.db);
+	}
+}
+
+export const defaultScope = new DefaultScope();
+
 class ContextState {
-	server = $state('');
-	db = $state('');
+	server = $state(defaultScope.server);
+	db = $state(defaultScope.db);
 	range = $state(DEFAULT_RANGE);
 	customFrom = $state(todayAt('00:00:00'));
 	customTo = $state(todayAt('23:59:59'));
@@ -183,11 +207,12 @@ class ServersState {
 
 	reconcile() {
 		if (!this.names.includes(ctx.server)) {
-			ctx.server = this.names[0] ?? '';
+			ctx.server = this.names.includes(defaultScope.server) ? defaultScope.server : (this.names[0] ?? '');
 		}
 		const dbs = this.databasesFor(ctx.server);
 		if (!dbs.includes(ctx.db)) {
-			ctx.db = dbs[0] ?? '';
+			const useDefault = ctx.server === defaultScope.server && dbs.includes(defaultScope.db);
+			ctx.db = useDefault ? defaultScope.db : (dbs[0] ?? '');
 		}
 	}
 }

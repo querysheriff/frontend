@@ -310,7 +310,7 @@
 				type="button"
 				onclick={apply}
 				disabled={!canApply}
-				class="w-full py-2 text-center font-condensed text-md font-semibold tracking-[0.6px] uppercase {canApply
+				class="w-full py-2 text-center font-sans text-md font-semibold {canApply
 					? 'cursor-pointer bg-command text-paper hover:bg-danger'
 					: 'cursor-not-allowed bg-hover-strong text-ink/35'}"
 			>

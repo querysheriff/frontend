@@ -42,10 +42,7 @@
 		class="sticky top-0 flex h-screen w-[21rem] flex-none flex-col border-l border-line bg-card"
 	>
 		<header class="flex min-h-[4.25rem] items-center justify-between gap-3 border-b border-line px-5 py-3.5">
-			<h2
-				id="docs-title"
-				class="min-w-0 font-condensed text-lg leading-[1.15] font-bold tracking-[0.4px] text-ink uppercase"
-			>
+			<h2 id="docs-title" class="min-w-0 font-sans text-lg leading-[1.15] font-bold text-ink">
 				{entry.title}
 			</h2>
 			<button
@@ -61,7 +58,7 @@
 		<div class="flex-1 overflow-y-auto px-5 py-4">
 			{#each entry.sections as section (section.heading)}
 				<section class="mb-5 last:mb-0">
-					<h3 class="mb-1.5 font-condensed text-2xs font-bold tracking-[1px] text-command uppercase">
+					<h3 class="mb-1.5 font-sans text-2xs font-bold text-command">
 						{section.heading}
 					</h3>
 					{#each section.body as block, i (i)}

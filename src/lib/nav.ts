@@ -6,49 +6,49 @@ export interface NavItem {
 
 // `query-detail` is a sub-view of Queries (reached by clicking a row), so it is not listed here.
 export const navItems: NavItem[] = [
-	{ key: 'slow-queries', label: 'QUERIES', href: '/queries' },
-	{ key: 'locks', label: 'LOCKS', href: '/locks' },
-	{ key: 'transactions', label: 'TRANSACTIONS', href: '/transactions' },
-	{ key: 'logs', label: 'LOGS', href: '/logs' },
-	{ key: 'alerts', label: 'ALERTS', href: '/alerts' }
+	{ key: 'slow-queries', label: 'Queries', href: '/queries' },
+	{ key: 'locks', label: 'Locks', href: '/locks' },
+	{ key: 'transactions', label: 'Transactions', href: '/transactions' },
+	{ key: 'logs', label: 'Logs', href: '/logs' },
+	{ key: 'alerts', label: 'Alerts', href: '/alerts' }
 ];
 
 export const adminItems: NavItem[] = [
-	{ key: 'admin-collectors', label: 'COLLECTORS', href: '/admin/collectors' },
-	{ key: 'admin-users', label: 'USERS', href: '/admin/users' }
+	{ key: 'admin-collectors', label: 'Collectors', href: '/admin/collectors' },
+	{ key: 'admin-users', label: 'Users', href: '/admin/users' }
 ];
 
 export const screenMeta: Record<string, { title: string; description: string }> = {
 	'slow-queries': {
-		title: 'QUERIES',
+		title: 'Queries',
 		description: 'How often queries ran, how long they took, and how each one compares'
 	},
 	'query-detail': {
-		title: 'QUERY DETAIL',
+		title: 'Query detail',
 		description: 'How often this query ran, how long it took, and real samples'
 	},
 	locks: {
-		title: 'LOCKS',
+		title: 'Locks',
 		description: 'How much time queries spent stuck waiting, and what was holding them up'
 	},
 	transactions: {
-		title: 'TRANSACTIONS',
+		title: 'Transactions',
 		description: 'How long transactions stayed open, and what they were doing all that time'
 	},
 	logs: {
-		title: 'LOGS',
+		title: 'Logs',
 		description: 'What PostgreSQL logged on this server, by severity and category'
 	},
 	alerts: {
-		title: 'ALERTS',
+		title: 'Alerts',
 		description: 'Slack notifications and per-alert toggles for each monitored server'
 	},
 	'admin-collectors': {
-		title: 'COLLECTORS',
+		title: 'Collectors',
 		description: 'Access tokens that let collectors report into querysheriff'
 	},
 	'admin-users': {
-		title: 'USERS',
+		title: 'Users',
 		description: 'User accounts and which servers each one can see'
 	}
 };

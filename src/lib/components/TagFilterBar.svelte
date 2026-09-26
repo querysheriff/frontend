@@ -91,7 +91,7 @@
 		<div class="flex items-center gap-3.5">
 			{#each kindOptions as opt (opt.key)}
 				<label
-					class="flex cursor-pointer items-center gap-2 font-condensed text-xs leading-none font-semibold tracking-[0.5px] text-ink/70 uppercase select-none hover:text-ink"
+					class="flex cursor-pointer items-center gap-2 font-sans text-xs leading-none font-semibold text-ink/70 select-none hover:text-ink"
 				>
 					<input
 						type="checkbox"

@@ -133,11 +133,7 @@
 	class="absolute top-[calc(100%+6px)] left-0 z-[3] w-[min(21rem,calc(100vw-2rem))] border border-line-strong bg-card shadow-popover"
 >
 	{#if field === null}
-		<div
-			class="border-b border-line px-3.5 py-2 font-condensed text-2xs font-semibold tracking-[1px] text-ink/70 uppercase"
-		>
-			Filter by
-		</div>
+		<div class="border-b border-line px-3.5 py-2 font-sans text-2xs font-semibold text-ink/70">Filter by</div>
 		<div class="max-h-[18rem] overflow-y-auto p-1.5" role="listbox" aria-label="Filter fields" tabindex="-1">
 			{#each fields as meta, i (meta.field)}
 				<button
@@ -223,7 +219,7 @@
 			<button
 				type="button"
 				onclick={apply}
-				class="w-full cursor-pointer bg-command py-2 text-center font-condensed text-md font-semibold tracking-[0.6px] text-paper uppercase hover:bg-danger"
+				class="w-full cursor-pointer bg-command py-2 text-center font-sans text-md font-semibold text-paper hover:bg-danger"
 			>
 				{picked.length > 0 ? `Apply ${picked.length} value${picked.length === 1 ? '' : 's'}` : 'Clear this filter'}
 			</button>
