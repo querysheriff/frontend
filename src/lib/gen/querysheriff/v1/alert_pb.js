@@ -8,20 +8,20 @@ import { enumDesc, fileDesc, messageDesc, serviceDesc, tsEnum } from "@bufbuild/
  * Describes the file querysheriff/v1/alert.proto.
  */
 export const file_querysheriff_v1_alert = /*@__PURE__*/
-  fileDesc("ChtxdWVyeXNoZXJpZmYvdjEvYWxlcnQucHJvdG8SD3F1ZXJ5c2hlcmlmZi52MSIUChJRdWVyeUFsZXJ0c1JlcXVlc3QiTAoTUXVlcnlBbGVydHNSZXNwb25zZRI1CgdzZXJ2ZXJzGAEgAygLMiQucXVlcnlzaGVyaWZmLnYxLlNlcnZlckFsZXJ0U2V0dGluZ3MidAoTU2VydmVyQWxlcnRTZXR0aW5ncxITCgtzZXJ2ZXJfbmFtZRgBIAEoCRIZChFzbGFja193ZWJob29rX3VybBgCIAEoCRItCgZhbGVydHMYAyADKAsyHS5xdWVyeXNoZXJpZmYudjEuQWxlcnRTZXR0aW5nIoABCgxBbGVydFNldHRpbmcSCwoDa2V5GAEgASgJEg0KBXRpdGxlGAIgASgJEioKBWxldmVsGAMgASgOMhsucXVlcnlzaGVyaWZmLnYxLkFsZXJ0TGV2ZWwSDwoHZW5hYmxlZBgEIAEoCBIXCg9maXJlc19sYXN0X3dlZWsYBSABKAMiewoaVXBkYXRlQWxlcnRTZXR0aW5nc1JlcXVlc3QSEwoLc2VydmVyX25hbWUYASABKAkSGQoRc2xhY2tfd2ViaG9va191cmwYAiABKAkSLQoHdG9nZ2xlcxgDIAMoCzIcLnF1ZXJ5c2hlcmlmZi52MS5BbGVydFRvZ2dsZSIrCgtBbGVydFRvZ2dsZRILCgNrZXkYASABKAkSDwoHZW5hYmxlZBgCIAEoCCIdChtVcGRhdGVBbGVydFNldHRpbmdzUmVzcG9uc2UqcgoKQWxlcnRMZXZlbBIbChdBTEVSVF9MRVZFTF9VTlNQRUNJRklFRBAAEhQKEEFMRVJUX0xFVkVMX0lORk8QARIXChNBTEVSVF9MRVZFTF9XQVJOSU5HEAISGAoUQUxFUlRfTEVWRUxfQ1JJVElDQUwQAzLeAQoMQWxlcnRTZXJ2aWNlEloKC1F1ZXJ5QWxlcnRzEiMucXVlcnlzaGVyaWZmLnYxLlF1ZXJ5QWxlcnRzUmVxdWVzdBokLnF1ZXJ5c2hlcmlmZi52MS5RdWVyeUFsZXJ0c1Jlc3BvbnNlIgAScgoTVXBkYXRlQWxlcnRTZXR0aW5ncxIrLnF1ZXJ5c2hlcmlmZi52MS5VcGRhdGVBbGVydFNldHRpbmdzUmVxdWVzdBosLnF1ZXJ5c2hlcmlmZi52MS5VcGRhdGVBbGVydFNldHRpbmdzUmVzcG9uc2UiAEJEWkJnaXRodWIuY29tL3F1ZXJ5c2hlcmlmZi9iYWNrZW5kL2dlbi9xdWVyeXNoZXJpZmYvdjE7cXVlcnlzaGVyaWZmdjFiBnByb3RvMw");
+  fileDesc("ChtxdWVyeXNoZXJpZmYvdjEvYWxlcnQucHJvdG8SD3F1ZXJ5c2hlcmlmZi52MSIaChhMaXN0QWxlcnRTZXR0aW5nc1JlcXVlc3QiUgoZTGlzdEFsZXJ0U2V0dGluZ3NSZXNwb25zZRI1CgdzZXJ2ZXJzGAEgAygLMiQucXVlcnlzaGVyaWZmLnYxLlNlcnZlckFsZXJ0U2V0dGluZ3MidAoTU2VydmVyQWxlcnRTZXR0aW5ncxITCgtzZXJ2ZXJfbmFtZRgBIAEoCRIZChFzbGFja193ZWJob29rX3VybBgCIAEoCRItCgZhbGVydHMYAyADKAsyHS5xdWVyeXNoZXJpZmYudjEuQWxlcnRTZXR0aW5nIoABCgxBbGVydFNldHRpbmcSCwoDa2V5GAEgASgJEg0KBXRpdGxlGAIgASgJEioKBWxldmVsGAMgASgOMhsucXVlcnlzaGVyaWZmLnYxLkFsZXJ0TGV2ZWwSDwoHZW5hYmxlZBgEIAEoCBIXCg9maXJlc19sYXN0X3dlZWsYBSABKAMiSwoZVXBkYXRlQWxlcnRXZWJob29rUmVxdWVzdBITCgtzZXJ2ZXJfbmFtZRgBIAEoCRIZChFzbGFja193ZWJob29rX3VybBgCIAEoCSIcChpVcGRhdGVBbGVydFdlYmhvb2tSZXNwb25zZSJOChlVcGRhdGVBbGVydFNldHRpbmdSZXF1ZXN0EhMKC3NlcnZlcl9uYW1lGAEgASgJEgsKA2tleRgCIAEoCRIPCgdlbmFibGVkGAMgASgIIhwKGlVwZGF0ZUFsZXJ0U2V0dGluZ1Jlc3BvbnNlKnIKCkFsZXJ0TGV2ZWwSGwoXQUxFUlRfTEVWRUxfVU5TUEVDSUZJRUQQABIUChBBTEVSVF9MRVZFTF9JTkZPEAESFwoTQUxFUlRfTEVWRUxfV0FSTklORxACEhgKFEFMRVJUX0xFVkVMX0NSSVRJQ0FMEAMy3gIKDEFsZXJ0U2VydmljZRJsChFMaXN0QWxlcnRTZXR0aW5ncxIpLnF1ZXJ5c2hlcmlmZi52MS5MaXN0QWxlcnRTZXR0aW5nc1JlcXVlc3QaKi5xdWVyeXNoZXJpZmYudjEuTGlzdEFsZXJ0U2V0dGluZ3NSZXNwb25zZSIAEm8KElVwZGF0ZUFsZXJ0V2ViaG9vaxIqLnF1ZXJ5c2hlcmlmZi52MS5VcGRhdGVBbGVydFdlYmhvb2tSZXF1ZXN0GisucXVlcnlzaGVyaWZmLnYxLlVwZGF0ZUFsZXJ0V2ViaG9va1Jlc3BvbnNlIgASbwoSVXBkYXRlQWxlcnRTZXR0aW5nEioucXVlcnlzaGVyaWZmLnYxLlVwZGF0ZUFsZXJ0U2V0dGluZ1JlcXVlc3QaKy5xdWVyeXNoZXJpZmYudjEuVXBkYXRlQWxlcnRTZXR0aW5nUmVzcG9uc2UiAEJEWkJnaXRodWIuY29tL3F1ZXJ5c2hlcmlmZi9iYWNrZW5kL2dlbi9xdWVyeXNoZXJpZmYvdjE7cXVlcnlzaGVyaWZmdjFiBnByb3RvMw");
 
 /**
- * Describes the message querysheriff.v1.QueryAlertsRequest.
- * Use `create(QueryAlertsRequestSchema)` to create a new message.
+ * Describes the message querysheriff.v1.ListAlertSettingsRequest.
+ * Use `create(ListAlertSettingsRequestSchema)` to create a new message.
  */
-export const QueryAlertsRequestSchema = /*@__PURE__*/
+export const ListAlertSettingsRequestSchema = /*@__PURE__*/
   messageDesc(file_querysheriff_v1_alert, 0);
 
 /**
- * Describes the message querysheriff.v1.QueryAlertsResponse.
- * Use `create(QueryAlertsResponseSchema)` to create a new message.
+ * Describes the message querysheriff.v1.ListAlertSettingsResponse.
+ * Use `create(ListAlertSettingsResponseSchema)` to create a new message.
  */
-export const QueryAlertsResponseSchema = /*@__PURE__*/
+export const ListAlertSettingsResponseSchema = /*@__PURE__*/
   messageDesc(file_querysheriff_v1_alert, 1);
 
 /**
@@ -39,25 +39,32 @@ export const AlertSettingSchema = /*@__PURE__*/
   messageDesc(file_querysheriff_v1_alert, 3);
 
 /**
- * Describes the message querysheriff.v1.UpdateAlertSettingsRequest.
- * Use `create(UpdateAlertSettingsRequestSchema)` to create a new message.
+ * Describes the message querysheriff.v1.UpdateAlertWebhookRequest.
+ * Use `create(UpdateAlertWebhookRequestSchema)` to create a new message.
  */
-export const UpdateAlertSettingsRequestSchema = /*@__PURE__*/
+export const UpdateAlertWebhookRequestSchema = /*@__PURE__*/
   messageDesc(file_querysheriff_v1_alert, 4);
 
 /**
- * Describes the message querysheriff.v1.AlertToggle.
- * Use `create(AlertToggleSchema)` to create a new message.
+ * Describes the message querysheriff.v1.UpdateAlertWebhookResponse.
+ * Use `create(UpdateAlertWebhookResponseSchema)` to create a new message.
  */
-export const AlertToggleSchema = /*@__PURE__*/
+export const UpdateAlertWebhookResponseSchema = /*@__PURE__*/
   messageDesc(file_querysheriff_v1_alert, 5);
 
 /**
- * Describes the message querysheriff.v1.UpdateAlertSettingsResponse.
- * Use `create(UpdateAlertSettingsResponseSchema)` to create a new message.
+ * Describes the message querysheriff.v1.UpdateAlertSettingRequest.
+ * Use `create(UpdateAlertSettingRequestSchema)` to create a new message.
  */
-export const UpdateAlertSettingsResponseSchema = /*@__PURE__*/
+export const UpdateAlertSettingRequestSchema = /*@__PURE__*/
   messageDesc(file_querysheriff_v1_alert, 6);
+
+/**
+ * Describes the message querysheriff.v1.UpdateAlertSettingResponse.
+ * Use `create(UpdateAlertSettingResponseSchema)` to create a new message.
+ */
+export const UpdateAlertSettingResponseSchema = /*@__PURE__*/
+  messageDesc(file_querysheriff_v1_alert, 7);
 
 /**
  * Describes the enum querysheriff.v1.AlertLevel.

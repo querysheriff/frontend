@@ -3,11 +3,11 @@
 	import { page } from '$app/state';
 	import { timestampFromDate, timestampDate } from '@bufbuild/protobuf/wkt';
 	import type {
-		QueryStatementCallsSeriesResponse,
-		QueryStatementPercentileSeriesResponse,
-		StatementMetric,
+		GetLatencySeriesResponse,
+		GetStatementSeriesResponse,
 		StatementStat
 	} from '$lib/gen/querysheriff/v1/statement_pb';
+	import type { MetricPoint } from '$lib/gen/querysheriff/v1/common_pb';
 	import { StatementSortColumn } from '$lib/gen/querysheriff/v1/statement_pb';
 	import { statementClient } from '$lib/connect';
 	import StateBlock from '$lib/components/StateBlock.svelte';
@@ -46,13 +46,13 @@
 	let sort = $state<{ col: StatementSortCol; dir: 'asc' | 'desc' }>({ col: 'pctTime', dir: 'desc' });
 
 	// Fetched separately so the volume chart can paint without waiting on percentiles.
-	let callsSeries = $state<QueryStatementCallsSeriesResponse | undefined>(undefined);
-	let percentileSeries = $state<QueryStatementPercentileSeriesResponse | undefined>(undefined);
+	let callsSeries = $state<GetStatementSeriesResponse | undefined>(undefined);
+	let percentileSeries = $state<GetLatencySeriesResponse | undefined>(undefined);
 	let chartRange = $state<{ from: Date; to: Date } | null>(null);
 	let chartLoading = $state(true);
 	let chartError = $state<string | null>(null);
 
-	const sql = new SqlPopoverState((id) => statementClient.getStatementText({ id }).then((r) => r.query));
+	const sql = new SqlPopoverState((id) => statementClient.getStatement({ id }).then((r) => r.query));
 	const filters = new QueryFilterState();
 
 	// During init, not in a $effect: AppShell would otherwise rebuild the query string first and
@@ -76,12 +76,12 @@
 			id: s.id.toString(),
 			query: s.preview,
 			usr: s.userName,
-			meanMs: s.avgExecTime,
+			meanMs: s.avgMs,
 			calls,
 			rowsPerCall: calls > 0 ? Number(s.rows) / calls : 0,
 			pctIo: s.pctIo,
-			pctTime: s.pctOfTotal,
-			sev: sevByMean(s.avgExecTime),
+			pctTime: s.pctTime,
+			sev: sevByMean(s.avgMs),
 			tags: kvTags(s.tags)
 		};
 	}
@@ -91,7 +91,7 @@
 	$effect(() => {
 		const { from, to } = ctx.timeRange();
 		chartRange = { from, to };
-		if (!ctx.server) {
+		if (!ctx.server || !ctx.db) {
 			chartLoading = !serversState.loaded;
 			if (serversState.loaded) {
 				callsSeries = undefined;
@@ -116,11 +116,11 @@
 			to: timestampFromDate(to)
 		};
 
-		const calls = statementClient.queryStatementCallsSeries({ scope }, { signal: ac.signal }).then((res) => {
+		const calls = statementClient.getStatementSeries(scope, { signal: ac.signal }).then((res) => {
 			if (gen === chartGen) callsSeries = res;
 		});
 
-		const percentiles = statementClient.queryStatementPercentileSeries({ scope }, { signal: ac.signal }).then((res) => {
+		const percentiles = statementClient.getLatencySeries(scope, { signal: ac.signal }).then((res) => {
 			if (gen === chartGen) percentileSeries = res;
 		});
 
@@ -139,7 +139,7 @@
 			databaseName: ctx.db,
 			from: timestampFromDate(from),
 			to: timestampFromDate(to),
-			queryText: filters.text,
+			search: filters.text,
 			tagFilters: filters.toProto(),
 			kinds: filters.kindsProto(),
 			sortColumn: sortColumnProto[sort.col],
@@ -152,7 +152,7 @@
 	let tableGen = 0;
 	let tableAc: AbortController | null = null;
 	$effect(() => {
-		if (!ctx.server) {
+		if (!ctx.server || !ctx.db) {
 			tableLoading = !serversState.loaded;
 			if (serversState.loaded) {
 				rows = [];
@@ -171,7 +171,7 @@
 		// Rows stay on screen while re-fetching; clearing here would collapse the table and jump the layout.
 
 		statementClient
-			.queryStatements(request, { signal: ac.signal })
+			.listStatements(request, { signal: ac.signal })
 			.then((res) => {
 				if (gen !== tableGen) return;
 				rows = res.statements.map(toRow);
@@ -193,7 +193,7 @@
 		const gen = tableGen;
 		loadingMore = true;
 		try {
-			const res = await statementClient.queryStatements(tableRequest(rows.length), { signal: tableAc?.signal });
+			const res = await statementClient.listStatements(tableRequest(rows.length), { signal: tableAc?.signal });
 			if (gen !== tableGen) return;
 			const seen = new Set(rows.map((r) => r.id));
 			rows = [...rows, ...res.statements.map(toRow).filter((r) => !seen.has(r.id))];
@@ -205,8 +205,8 @@
 		}
 	}
 
-	function toPoints(m?: StatementMetric): MetricSeriesPoint[] {
-		return (m?.series ?? []).flatMap((p) => (p.at ? [{ at: timestampDate(p.at), value: p.value }] : []));
+	function toPoints(points: MetricPoint[] = []): MetricSeriesPoint[] {
+		return points.flatMap((p) => (p.at ? [{ at: timestampDate(p.at), value: p.value }] : []));
 	}
 
 	const bucketMs = $derived(Number(callsSeries?.bucketMs ?? percentileSeries?.bucketMs ?? 0n));
@@ -217,9 +217,9 @@
 			: 'How many times queries ran'
 	);
 	const latency = $derived([
-		{ label: 'p90', color: 'var(--color-steel)', points: toPoints(percentileSeries?.p90) },
-		{ label: 'p95', color: 'var(--color-warn)', points: toPoints(percentileSeries?.p95) },
-		{ label: 'p99', color: 'var(--color-danger)', points: toPoints(percentileSeries?.p99) }
+		{ label: 'p90', color: 'var(--color-steel)', points: toPoints(percentileSeries?.p90Ms) },
+		{ label: 'p95', color: 'var(--color-warn)', points: toPoints(percentileSeries?.p95Ms) },
+		{ label: 'p99', color: 'var(--color-danger)', points: toPoints(percentileSeries?.p99Ms) }
 	]);
 
 	// The tag sits inside a row that navigates on click.

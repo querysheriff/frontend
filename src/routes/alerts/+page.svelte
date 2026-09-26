@@ -22,7 +22,7 @@
 		loading = true;
 		error = null;
 		try {
-			const res = await alertClient.queryAlerts({});
+			const res = await alertClient.listAlertSettings({});
 			servers = res.servers;
 			drafts = Object.fromEntries(res.servers.map((s) => [s.serverName, s.slackWebhookUrl]));
 		} catch (e) {
@@ -38,19 +38,11 @@
 		return (drafts[s.serverName] ?? '').trim() !== s.slackWebhookUrl.trim();
 	}
 
-	async function persist(
-		s: ServerAlertSettings,
-		slackWebhookUrl: string,
-		toggles: { key: string; enabled: boolean }[]
-	) {
-		await alertClient.updateAlertSettings({ serverName: s.serverName, slackWebhookUrl, toggles });
-	}
-
 	async function saveWebhook(s: ServerAlertSettings) {
 		const url = (drafts[s.serverName] ?? '').trim();
 		error = null;
 		try {
-			await persist(s, url, []);
+			await alertClient.updateAlertWebhook({ serverName: s.serverName, slackWebhookUrl: url });
 			s.slackWebhookUrl = url;
 			drafts[s.serverName] = url;
 		} catch (e) {
@@ -67,7 +59,7 @@
 		alert.enabled = next; // optimistic; reverted on failure
 		error = null;
 		try {
-			await persist(s, s.slackWebhookUrl, [{ key: alert.key, enabled: next }]);
+			await alertClient.updateAlertSetting({ serverName: s.serverName, key: alert.key, enabled: next });
 		} catch (e) {
 			alert.enabled = !next;
 			error = errMsg(e);

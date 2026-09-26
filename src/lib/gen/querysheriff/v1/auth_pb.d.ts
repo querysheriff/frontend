@@ -114,21 +114,21 @@ export declare type LogoutResponse = Message<"querysheriff.v1.LogoutResponse"> &
 export declare const LogoutResponseSchema: GenMessage<LogoutResponse>;
 
 /**
- * @generated from message querysheriff.v1.CurrentUserRequest
+ * @generated from message querysheriff.v1.GetCurrentUserRequest
  */
-export declare type CurrentUserRequest = Message<"querysheriff.v1.CurrentUserRequest"> & {
+export declare type GetCurrentUserRequest = Message<"querysheriff.v1.GetCurrentUserRequest"> & {
 };
 
 /**
- * Describes the message querysheriff.v1.CurrentUserRequest.
- * Use `create(CurrentUserRequestSchema)` to create a new message.
+ * Describes the message querysheriff.v1.GetCurrentUserRequest.
+ * Use `create(GetCurrentUserRequestSchema)` to create a new message.
  */
-export declare const CurrentUserRequestSchema: GenMessage<CurrentUserRequest>;
+export declare const GetCurrentUserRequestSchema: GenMessage<GetCurrentUserRequest>;
 
 /**
- * @generated from message querysheriff.v1.CurrentUserResponse
+ * @generated from message querysheriff.v1.GetCurrentUserResponse
  */
-export declare type CurrentUserResponse = Message<"querysheriff.v1.CurrentUserResponse"> & {
+export declare type GetCurrentUserResponse = Message<"querysheriff.v1.GetCurrentUserResponse"> & {
   /**
    * @generated from field: querysheriff.v1.User user = 1;
    */
@@ -136,10 +136,10 @@ export declare type CurrentUserResponse = Message<"querysheriff.v1.CurrentUserRe
 };
 
 /**
- * Describes the message querysheriff.v1.CurrentUserResponse.
- * Use `create(CurrentUserResponseSchema)` to create a new message.
+ * Describes the message querysheriff.v1.GetCurrentUserResponse.
+ * Use `create(GetCurrentUserResponseSchema)` to create a new message.
  */
-export declare const CurrentUserResponseSchema: GenMessage<CurrentUserResponse>;
+export declare const GetCurrentUserResponseSchema: GenMessage<GetCurrentUserResponse>;
 
 /**
  * @generated from service querysheriff.v1.AuthService
@@ -162,12 +162,12 @@ export declare const AuthService: GenService<{
     output: typeof LogoutResponseSchema;
   },
   /**
-   * @generated from rpc querysheriff.v1.AuthService.CurrentUser
+   * @generated from rpc querysheriff.v1.AuthService.GetCurrentUser
    */
-  currentUser: {
+  getCurrentUser: {
     methodKind: "unary";
-    input: typeof CurrentUserRequestSchema;
-    output: typeof CurrentUserResponseSchema;
+    input: typeof GetCurrentUserRequestSchema;
+    output: typeof GetCurrentUserResponseSchema;
   },
 }>;
 

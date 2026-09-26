@@ -1,9 +1,5 @@
-import {
-	LogEvent_LogLevel,
-	LogEvent_LogClassification,
-	LogEvent_LogCategory,
-	LogFacetField
-} from '$lib/gen/querysheriff/v1/log_pb';
+import type { MessageInitShape } from '@bufbuild/protobuf';
+import { LogEvent_LogLevel, LogFacetField, type LogFilterSchema } from '$lib/gen/querysheriff/v1/log_pb';
 import { FACET_FIELDS, facetValueLabel } from './logs';
 import type { UrlParams } from './urlState.svelte';
 
@@ -177,15 +173,10 @@ export class LogFilterState implements UrlParams {
 	}
 
 	/** Categories go over the wire as categories: the backend owns the mapping. */
-	toFacetRequest(): {
-		classifications: LogEvent_LogClassification[];
-		categories: LogEvent_LogCategory[];
-		databases: string[];
-		usernames: string[];
-		applicationNames: string[];
-		backendTypes: string[];
-	} {
+	toFilter(): MessageInitShape<typeof LogFilterSchema> {
 		return {
+			search: this.text,
+			levels: [...this.levels],
 			classifications: this.valuesFor(LogFacetField.CLASSIFICATION).map(Number),
 			categories: this.valuesFor(LogFacetField.CATEGORY).map(Number),
 			databases: this.valuesFor(LogFacetField.DATABASE),
@@ -193,10 +184,5 @@ export class LogFilterState implements UrlParams {
 			applicationNames: this.valuesFor(LogFacetField.APPLICATION_NAME),
 			backendTypes: this.valuesFor(LogFacetField.BACKEND_TYPE)
 		};
-	}
-
-	/** ListLogFacetsRequest has no severity field: the counts ignore it, so the totals stay stable. */
-	toRequest(): ReturnType<LogFilterState['toFacetRequest']> & { logLevels: LogEvent_LogLevel[] } {
-		return { ...this.toFacetRequest(), logLevels: [...this.levels] };
 	}
 }

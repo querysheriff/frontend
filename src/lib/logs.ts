@@ -1,7 +1,7 @@
 import {
 	LogEvent_LogLevel,
 	LogEvent_LogClassification,
-	LogEvent_LogCategory,
+	LogCategory,
 	LogFacetField,
 	type LogFacet,
 	type LogFacetValue
@@ -112,40 +112,40 @@ function shade(token: string): string {
 }
 
 /** The categories in display order. The classification -> category mapping lives in the backend. */
-const CATEGORY_META: { category: LogEvent_LogCategory; label: string; color: string }[] = [
-	{ category: LogEvent_LogCategory.SERVER, label: 'Server', color: 'var(--color-panic)' },
-	{ category: LogEvent_LogCategory.CONNECTION, label: 'Connection', color: 'var(--color-teal)' },
-	{ category: LogEvent_LogCategory.WAL_CHECKPOINT, label: 'WAL & Checkpoint', color: 'var(--color-taupe)' },
-	{ category: LogEvent_LogCategory.AUTOVACUUM, label: 'Autovacuum', color: 'var(--color-ok)' },
-	{ category: LogEvent_LogCategory.LOCK, label: 'Lock', color: 'var(--color-danger)' },
-	{ category: LogEvent_LogCategory.STATEMENT, label: 'Statement', color: 'var(--color-steel)' },
-	{ category: LogEvent_LogCategory.STANDBY, label: 'Standby Server', color: shade('var(--color-ok)') },
+const CATEGORY_META: { category: LogCategory; label: string; color: string }[] = [
+	{ category: LogCategory.SERVER, label: 'Server', color: 'var(--color-panic)' },
+	{ category: LogCategory.CONNECTION, label: 'Connection', color: 'var(--color-teal)' },
+	{ category: LogCategory.WAL_CHECKPOINT, label: 'WAL & Checkpoint', color: 'var(--color-taupe)' },
+	{ category: LogCategory.AUTOVACUUM, label: 'Autovacuum', color: 'var(--color-ok)' },
+	{ category: LogCategory.LOCK, label: 'Lock', color: 'var(--color-danger)' },
+	{ category: LogCategory.STATEMENT, label: 'Statement', color: 'var(--color-steel)' },
+	{ category: LogCategory.STANDBY, label: 'Standby Server', color: shade('var(--color-ok)') },
 	{
-		category: LogEvent_LogCategory.CONSTRAINT_VIOLATION,
+		category: LogCategory.CONSTRAINT_VIOLATION,
 		label: 'Constraint Violation',
 		color: 'var(--color-warn)'
 	},
 	{
-		category: LogEvent_LogCategory.APPLICATION_ERROR,
+		category: LogCategory.APPLICATION_ERROR,
 		label: 'Application Error',
 		color: 'var(--color-command)'
 	},
-	{ category: LogEvent_LogCategory.UNSPECIFIED, label: 'Uncategorized', color: 'var(--color-line-boldest)' }
+	{ category: LogCategory.UNSPECIFIED, label: 'Uncategorized', color: 'var(--color-line-boldest)' }
 ];
 
-export const CATEGORY_ORDER: LogEvent_LogCategory[] = CATEGORY_META.map((m) => m.category);
+export const CATEGORY_ORDER: LogCategory[] = CATEGORY_META.map((m) => m.category);
 
 const CATEGORY_BY_VALUE = new Map(CATEGORY_META.map((m) => [m.category, m]));
 
-export function categoryLabel(category: LogEvent_LogCategory): string {
+export function categoryLabel(category: LogCategory): string {
 	return CATEGORY_BY_VALUE.get(category)?.label ?? 'Uncategorized';
 }
 
-export function categoryColor(category: LogEvent_LogCategory): string {
+export function categoryColor(category: LogCategory): string {
 	return CATEGORY_BY_VALUE.get(category)?.color ?? 'var(--color-steel)';
 }
 
-export function categoryBadge(category: LogEvent_LogCategory): PillStyle {
+export function categoryBadge(category: LogCategory): PillStyle {
 	const color = categoryColor(category);
 	const background = tint(color, 10);
 

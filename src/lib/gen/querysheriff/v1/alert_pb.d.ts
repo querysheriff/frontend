@@ -11,21 +11,21 @@ import type { Message } from "@bufbuild/protobuf";
 export declare const file_querysheriff_v1_alert: GenFile;
 
 /**
- * @generated from message querysheriff.v1.QueryAlertsRequest
+ * @generated from message querysheriff.v1.ListAlertSettingsRequest
  */
-export declare type QueryAlertsRequest = Message<"querysheriff.v1.QueryAlertsRequest"> & {
+export declare type ListAlertSettingsRequest = Message<"querysheriff.v1.ListAlertSettingsRequest"> & {
 };
 
 /**
- * Describes the message querysheriff.v1.QueryAlertsRequest.
- * Use `create(QueryAlertsRequestSchema)` to create a new message.
+ * Describes the message querysheriff.v1.ListAlertSettingsRequest.
+ * Use `create(ListAlertSettingsRequestSchema)` to create a new message.
  */
-export declare const QueryAlertsRequestSchema: GenMessage<QueryAlertsRequest>;
+export declare const ListAlertSettingsRequestSchema: GenMessage<ListAlertSettingsRequest>;
 
 /**
- * @generated from message querysheriff.v1.QueryAlertsResponse
+ * @generated from message querysheriff.v1.ListAlertSettingsResponse
  */
-export declare type QueryAlertsResponse = Message<"querysheriff.v1.QueryAlertsResponse"> & {
+export declare type ListAlertSettingsResponse = Message<"querysheriff.v1.ListAlertSettingsResponse"> & {
   /**
    * @generated from field: repeated querysheriff.v1.ServerAlertSettings servers = 1;
    */
@@ -33,10 +33,10 @@ export declare type QueryAlertsResponse = Message<"querysheriff.v1.QueryAlertsRe
 };
 
 /**
- * Describes the message querysheriff.v1.QueryAlertsResponse.
- * Use `create(QueryAlertsResponseSchema)` to create a new message.
+ * Describes the message querysheriff.v1.ListAlertSettingsResponse.
+ * Use `create(ListAlertSettingsResponseSchema)` to create a new message.
  */
-export declare const QueryAlertsResponseSchema: GenMessage<QueryAlertsResponse>;
+export declare const ListAlertSettingsResponseSchema: GenMessage<ListAlertSettingsResponse>;
 
 /**
  * @generated from message querysheriff.v1.ServerAlertSettings
@@ -101,9 +101,9 @@ export declare type AlertSetting = Message<"querysheriff.v1.AlertSetting"> & {
 export declare const AlertSettingSchema: GenMessage<AlertSetting>;
 
 /**
- * @generated from message querysheriff.v1.UpdateAlertSettingsRequest
+ * @generated from message querysheriff.v1.UpdateAlertWebhookRequest
  */
-export declare type UpdateAlertSettingsRequest = Message<"querysheriff.v1.UpdateAlertSettingsRequest"> & {
+export declare type UpdateAlertWebhookRequest = Message<"querysheriff.v1.UpdateAlertWebhookRequest"> & {
   /**
    * @generated from field: string server_name = 1;
    */
@@ -113,51 +113,63 @@ export declare type UpdateAlertSettingsRequest = Message<"querysheriff.v1.Update
    * @generated from field: string slack_webhook_url = 2;
    */
   slackWebhookUrl: string;
-
-  /**
-   * @generated from field: repeated querysheriff.v1.AlertToggle toggles = 3;
-   */
-  toggles: AlertToggle[];
 };
 
 /**
- * Describes the message querysheriff.v1.UpdateAlertSettingsRequest.
- * Use `create(UpdateAlertSettingsRequestSchema)` to create a new message.
+ * Describes the message querysheriff.v1.UpdateAlertWebhookRequest.
+ * Use `create(UpdateAlertWebhookRequestSchema)` to create a new message.
  */
-export declare const UpdateAlertSettingsRequestSchema: GenMessage<UpdateAlertSettingsRequest>;
+export declare const UpdateAlertWebhookRequestSchema: GenMessage<UpdateAlertWebhookRequest>;
 
 /**
- * @generated from message querysheriff.v1.AlertToggle
+ * @generated from message querysheriff.v1.UpdateAlertWebhookResponse
  */
-export declare type AlertToggle = Message<"querysheriff.v1.AlertToggle"> & {
+export declare type UpdateAlertWebhookResponse = Message<"querysheriff.v1.UpdateAlertWebhookResponse"> & {
+};
+
+/**
+ * Describes the message querysheriff.v1.UpdateAlertWebhookResponse.
+ * Use `create(UpdateAlertWebhookResponseSchema)` to create a new message.
+ */
+export declare const UpdateAlertWebhookResponseSchema: GenMessage<UpdateAlertWebhookResponse>;
+
+/**
+ * @generated from message querysheriff.v1.UpdateAlertSettingRequest
+ */
+export declare type UpdateAlertSettingRequest = Message<"querysheriff.v1.UpdateAlertSettingRequest"> & {
   /**
-   * @generated from field: string key = 1;
+   * @generated from field: string server_name = 1;
+   */
+  serverName: string;
+
+  /**
+   * @generated from field: string key = 2;
    */
   key: string;
 
   /**
-   * @generated from field: bool enabled = 2;
+   * @generated from field: bool enabled = 3;
    */
   enabled: boolean;
 };
 
 /**
- * Describes the message querysheriff.v1.AlertToggle.
- * Use `create(AlertToggleSchema)` to create a new message.
+ * Describes the message querysheriff.v1.UpdateAlertSettingRequest.
+ * Use `create(UpdateAlertSettingRequestSchema)` to create a new message.
  */
-export declare const AlertToggleSchema: GenMessage<AlertToggle>;
+export declare const UpdateAlertSettingRequestSchema: GenMessage<UpdateAlertSettingRequest>;
 
 /**
- * @generated from message querysheriff.v1.UpdateAlertSettingsResponse
+ * @generated from message querysheriff.v1.UpdateAlertSettingResponse
  */
-export declare type UpdateAlertSettingsResponse = Message<"querysheriff.v1.UpdateAlertSettingsResponse"> & {
+export declare type UpdateAlertSettingResponse = Message<"querysheriff.v1.UpdateAlertSettingResponse"> & {
 };
 
 /**
- * Describes the message querysheriff.v1.UpdateAlertSettingsResponse.
- * Use `create(UpdateAlertSettingsResponseSchema)` to create a new message.
+ * Describes the message querysheriff.v1.UpdateAlertSettingResponse.
+ * Use `create(UpdateAlertSettingResponseSchema)` to create a new message.
  */
-export declare const UpdateAlertSettingsResponseSchema: GenMessage<UpdateAlertSettingsResponse>;
+export declare const UpdateAlertSettingResponseSchema: GenMessage<UpdateAlertSettingResponse>;
 
 /**
  * @generated from enum querysheriff.v1.AlertLevel
@@ -194,20 +206,28 @@ export declare const AlertLevelSchema: GenEnum<AlertLevel>;
  */
 export declare const AlertService: GenService<{
   /**
-   * @generated from rpc querysheriff.v1.AlertService.QueryAlerts
+   * @generated from rpc querysheriff.v1.AlertService.ListAlertSettings
    */
-  queryAlerts: {
+  listAlertSettings: {
     methodKind: "unary";
-    input: typeof QueryAlertsRequestSchema;
-    output: typeof QueryAlertsResponseSchema;
+    input: typeof ListAlertSettingsRequestSchema;
+    output: typeof ListAlertSettingsResponseSchema;
   },
   /**
-   * @generated from rpc querysheriff.v1.AlertService.UpdateAlertSettings
+   * @generated from rpc querysheriff.v1.AlertService.UpdateAlertWebhook
    */
-  updateAlertSettings: {
+  updateAlertWebhook: {
     methodKind: "unary";
-    input: typeof UpdateAlertSettingsRequestSchema;
-    output: typeof UpdateAlertSettingsResponseSchema;
+    input: typeof UpdateAlertWebhookRequestSchema;
+    output: typeof UpdateAlertWebhookResponseSchema;
+  },
+  /**
+   * @generated from rpc querysheriff.v1.AlertService.UpdateAlertSetting
+   */
+  updateAlertSetting: {
+    methodKind: "unary";
+    input: typeof UpdateAlertSettingRequestSchema;
+    output: typeof UpdateAlertSettingResponseSchema;
   },
 }>;
 

@@ -1,4 +1,4 @@
-import { createClient, type Client } from '@connectrpc/connect';
+import { Code, ConnectError, createClient, type Client, type Interceptor } from '@connectrpc/connect';
 import { createConnectTransport } from '@connectrpc/connect-web';
 import { env } from '$env/dynamic/public';
 import { ActivityService } from '$lib/gen/querysheriff/v1/activity_pb';
@@ -12,11 +12,31 @@ import { AlertService } from '$lib/gen/querysheriff/v1/alert_pb';
 const baseUrl = env.PUBLIC_API_URL || '/api';
 const REQUEST_TIMEOUT_MS = 30_000;
 
+let onSessionEnded = (): void => {};
+
+/** Registers what to do when the backend rejects the session cookie. */
+export function handleSessionEnded(handler: () => void): void {
+	onSessionEnded = handler;
+}
+
+// Any rejected session (expired, revoked) signs the user out; a rejected login is just a wrong password.
+const endSessionOnUnauthenticated: Interceptor = (next) => async (req) => {
+	try {
+		return await next(req);
+	} catch (e) {
+		if (ConnectError.from(e).code === Code.Unauthenticated && req.method !== AuthService.method.login) {
+			onSessionEnded();
+		}
+		throw e;
+	}
+};
+
 // fetch override sends the HTTP-only session cookie on every request (cross-origin in dev).
 const transport = createConnectTransport({
 	baseUrl,
 	defaultTimeoutMs: REQUEST_TIMEOUT_MS,
-	fetch: (input, init) => globalThis.fetch(input, { ...init, credentials: 'include' })
+	fetch: (input, init) => globalThis.fetch(input, { ...init, credentials: 'include' }),
+	interceptors: [endSessionOnUnauthenticated]
 });
 
 export const activityClient: Client<typeof ActivityService> = createClient(ActivityService, transport);

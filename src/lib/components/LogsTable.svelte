@@ -3,9 +3,6 @@
 
 	/** What a cell can pivot the filter on. `search` covers PID, which is free text, not a facet. */
 	export type LogPivot = { kind: 'facet'; field: LogFacetField; value: string } | { kind: 'search'; value: string };
-
-	export type LogSortCol = 'at' | 'level' | 'event' | 'category' | 'database' | 'user';
-	export type LogSort = { col: LogSortCol; dir: 'asc' | 'desc' };
 </script>
 
 <script lang="ts">
@@ -29,12 +26,12 @@
 
 	let {
 		records,
-		sort = $bindable(),
+		sortDesc = $bindable(),
 		loading = false,
 		onPivot
 	}: {
 		records: LogRecord[];
-		sort: LogSort;
+		sortDesc: boolean;
 		loading?: boolean;
 		onPivot: (pivot: LogPivot) => void;
 	} = $props();
@@ -62,13 +59,6 @@
 		onPivot(p);
 	}
 
-	const DESC_FIRST: LogSortCol[] = ['at', 'level'];
-
-	function sortBy(col: LogSortCol) {
-		if (sort.col === col) sort = { col, dir: sort.dir === 'asc' ? 'desc' : 'asc' };
-		else sort = { col, dir: DESC_FIRST.includes(col) ? 'desc' : 'asc' };
-	}
-
 	const tsFmt = (r: LogRecord): string => (r.occurredAt ? fmtTs(timestampDate(r.occurredAt)) : '—');
 
 	// Twice the widest column: CSS still cuts what shows, but no row carries kilobytes of hidden text.
@@ -88,14 +78,13 @@
 
 	// Each badge column is as wide as its longest value; the table is table-fixed, so the Event column
 	// takes whatever width is left.
-	const headDef: { key: LogSortCol; label: string; cls: string; pad?: string }[] = [
-		{ key: 'at', label: 'At', cls: 'w-[11.75rem]', pad: 'pl-9 pr-4' },
+	const headDef: { label: string; cls: string }[] = [
 		// "Severity" to the user, `level` internally: the wire says level, Postgres says severity.
-		{ key: 'level', label: 'Severity', cls: 'w-[7rem]' },
-		{ key: 'event', label: 'Event', cls: '' },
-		{ key: 'category', label: 'Category', cls: 'hidden w-[12.25rem] lg:table-cell' },
-		{ key: 'database', label: 'Database', cls: 'hidden w-[8.5rem] sm:table-cell' },
-		{ key: 'user', label: 'User', cls: 'hidden w-[8.5rem] lg:table-cell' }
+		{ label: 'Severity', cls: 'w-[7rem]' },
+		{ label: 'Event', cls: '' },
+		{ label: 'Category', cls: 'hidden w-[12.25rem] lg:table-cell' },
+		{ label: 'Database', cls: 'hidden w-[8.5rem] sm:table-cell' },
+		{ label: 'User', cls: 'hidden w-[8.5rem] lg:table-cell' }
 	];
 
 	const cell = 'border-b border-line-soft px-4 py-3 align-top leading-[20px]';
@@ -124,14 +113,15 @@
 	<table class="w-full min-w-[34rem] table-fixed border-collapse font-sans">
 		<thead bind:clientHeight={headHeight}>
 			<tr class="bg-hover-soft">
+				<SortHeader
+					label="At"
+					class="w-[11.75rem]"
+					pad="pl-9 pr-4"
+					dir={sortDesc ? 'desc' : 'asc'}
+					onsort={() => (sortDesc = !sortDesc)}
+				/>
 				{#each headDef as col (col.label)}
-					<SortHeader
-						label={col.label}
-						class={col.cls}
-						pad={col.pad}
-						dir={sort.col === col.key ? sort.dir : null}
-						onsort={() => sortBy(col.key)}
-					/>
+					<SortHeader label={col.label} class={col.cls} />
 				{/each}
 			</tr>
 		</thead>
@@ -218,7 +208,7 @@
 
 				{#if open}
 					<tr>
-						<td colspan={headDef.length} class="border-b border-line p-0">
+						<td colspan={headDef.length + 1} class="border-b border-line p-0">
 							<div class="border-l-2 border-line-bold bg-hover-soft px-5 py-4 md:pl-12">
 								{#if messageOf(r)}
 									<div class="mb-3.5">
@@ -244,7 +234,7 @@
 													class="font-condensed text-xs font-semibold tracking-[0.6px] text-command uppercase hover:underline"
 													>Open query</a
 												>
-												{#if sample.hasExplainPlan}
+												{#if sample.hasPlan}
 													<a
 														href="/queries/{sample.statementId}/plan/{sample.id}"
 														target="_blank"

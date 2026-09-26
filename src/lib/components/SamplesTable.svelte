@@ -9,7 +9,7 @@
 		sev: string;
 	};
 
-	export type SampleSortCol = 'at' | 'plan' | 'dur';
+	export type SampleSortCol = 'at' | 'dur';
 </script>
 
 <script lang="ts">
@@ -49,7 +49,7 @@
 	}[] = [
 		{ key: 'at', label: 'At', align: 'left', cls: 'hidden w-[11.25rem] sm:table-cell' },
 		{ label: 'Query', align: 'left', cls: '' },
-		{ key: 'plan', label: 'Plan', align: 'left', cls: 'w-[7rem]' },
+		{ label: 'Plan', align: 'left', cls: 'w-[7rem]' },
 		{ key: 'dur', label: 'Duration', align: 'right', cls: 'w-[6.875rem]' }
 	];
 

@@ -5,37 +5,12 @@
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
 import type { Message } from "@bufbuild/protobuf";
 import type { Timestamp } from "@bufbuild/protobuf/wkt";
+import type { MetricPoint } from "./common_pb.js";
 
 /**
  * Describes the file querysheriff/v1/statement.proto.
  */
 export declare const file_querysheriff_v1_statement: GenFile;
-
-/**
- * @generated from message querysheriff.v1.TagFilter
- */
-export declare type TagFilter = Message<"querysheriff.v1.TagFilter"> & {
-  /**
-   * @generated from field: string key = 1;
-   */
-  key: string;
-
-  /**
-   * @generated from field: querysheriff.v1.TagFilterOperator op = 2;
-   */
-  op: TagFilterOperator;
-
-  /**
-   * @generated from field: repeated string values = 3;
-   */
-  values: string[];
-};
-
-/**
- * Describes the message querysheriff.v1.TagFilter.
- * Use `create(TagFilterSchema)` to create a new message.
- */
-export declare const TagFilterSchema: GenMessage<TagFilter>;
 
 /**
  * @generated from message querysheriff.v1.ReportStatementsRequest
@@ -73,6 +48,52 @@ export declare type ReportStatementsResponse = Message<"querysheriff.v1.ReportSt
  * Use `create(ReportStatementsResponseSchema)` to create a new message.
  */
 export declare const ReportStatementsResponseSchema: GenMessage<ReportStatementsResponse>;
+
+/**
+ * @generated from message querysheriff.v1.StatementDelta
+ */
+export declare type StatementDelta = Message<"querysheriff.v1.StatementDelta"> & {
+  /**
+   * @generated from field: string user_name = 1;
+   */
+  userName: string;
+
+  /**
+   * @generated from field: string database_name = 2;
+   */
+  databaseName: string;
+
+  /**
+   * @generated from field: int64 query_id = 3;
+   */
+  queryId: bigint;
+
+  /**
+   * @generated from field: int64 calls = 4;
+   */
+  calls: bigint;
+
+  /**
+   * @generated from field: int64 rows = 5;
+   */
+  rows: bigint;
+
+  /**
+   * @generated from field: double total_exec_time = 6;
+   */
+  totalExecTime: number;
+
+  /**
+   * @generated from field: double total_io_time = 7;
+   */
+  totalIoTime: number;
+};
+
+/**
+ * Describes the message querysheriff.v1.StatementDelta.
+ * Use `create(StatementDeltaSchema)` to create a new message.
+ */
+export declare const StatementDeltaSchema: GenMessage<StatementDelta>;
 
 /**
  * @generated from message querysheriff.v1.StatementIdentity
@@ -150,9 +171,35 @@ export declare type StatementText = Message<"querysheriff.v1.StatementText"> & {
 export declare const StatementTextSchema: GenMessage<StatementText>;
 
 /**
- * @generated from message querysheriff.v1.QueryStatementsRequest
+ * @generated from message querysheriff.v1.TagFilter
  */
-export declare type QueryStatementsRequest = Message<"querysheriff.v1.QueryStatementsRequest"> & {
+export declare type TagFilter = Message<"querysheriff.v1.TagFilter"> & {
+  /**
+   * @generated from field: string key = 1;
+   */
+  key: string;
+
+  /**
+   * @generated from field: querysheriff.v1.TagFilterOperator op = 2;
+   */
+  op: TagFilterOperator;
+
+  /**
+   * @generated from field: repeated string values = 3;
+   */
+  values: string[];
+};
+
+/**
+ * Describes the message querysheriff.v1.TagFilter.
+ * Use `create(TagFilterSchema)` to create a new message.
+ */
+export declare const TagFilterSchema: GenMessage<TagFilter>;
+
+/**
+ * @generated from message querysheriff.v1.ListStatementsRequest
+ */
+export declare type ListStatementsRequest = Message<"querysheriff.v1.ListStatementsRequest"> & {
   /**
    * @generated from field: string server_name = 1;
    */
@@ -174,51 +221,51 @@ export declare type QueryStatementsRequest = Message<"querysheriff.v1.QueryState
   to?: Timestamp | undefined;
 
   /**
-   * @generated from field: string query_text = 5;
+   * @generated from field: string search = 5;
    */
-  queryText: string;
+  search: string;
 
   /**
-   * @generated from field: int32 limit = 6;
-   */
-  limit: number;
-
-  /**
-   * @generated from field: repeated querysheriff.v1.TagFilter tag_filters = 7;
+   * @generated from field: repeated querysheriff.v1.TagFilter tag_filters = 6;
    */
   tagFilters: TagFilter[];
 
   /**
-   * @generated from field: repeated querysheriff.v1.QueryKind kinds = 8;
+   * @generated from field: repeated querysheriff.v1.QueryKind kinds = 7;
    */
   kinds: QueryKind[];
 
   /**
-   * @generated from field: int32 offset = 9;
-   */
-  offset: number;
-
-  /**
-   * @generated from field: querysheriff.v1.StatementSortColumn sort_column = 10;
+   * @generated from field: querysheriff.v1.StatementSortColumn sort_column = 8;
    */
   sortColumn: StatementSortColumn;
 
   /**
-   * @generated from field: bool sort_desc = 11;
+   * @generated from field: bool sort_desc = 9;
    */
   sortDesc: boolean;
+
+  /**
+   * @generated from field: int32 limit = 10;
+   */
+  limit: number;
+
+  /**
+   * @generated from field: int32 offset = 11;
+   */
+  offset: number;
 };
 
 /**
- * Describes the message querysheriff.v1.QueryStatementsRequest.
- * Use `create(QueryStatementsRequestSchema)` to create a new message.
+ * Describes the message querysheriff.v1.ListStatementsRequest.
+ * Use `create(ListStatementsRequestSchema)` to create a new message.
  */
-export declare const QueryStatementsRequestSchema: GenMessage<QueryStatementsRequest>;
+export declare const ListStatementsRequestSchema: GenMessage<ListStatementsRequest>;
 
 /**
- * @generated from message querysheriff.v1.QueryStatementsResponse
+ * @generated from message querysheriff.v1.ListStatementsResponse
  */
-export declare type QueryStatementsResponse = Message<"querysheriff.v1.QueryStatementsResponse"> & {
+export declare type ListStatementsResponse = Message<"querysheriff.v1.ListStatementsResponse"> & {
   /**
    * @generated from field: repeated querysheriff.v1.StatementStat statements = 1;
    */
@@ -231,15 +278,118 @@ export declare type QueryStatementsResponse = Message<"querysheriff.v1.QueryStat
 };
 
 /**
- * Describes the message querysheriff.v1.QueryStatementsResponse.
- * Use `create(QueryStatementsResponseSchema)` to create a new message.
+ * Describes the message querysheriff.v1.ListStatementsResponse.
+ * Use `create(ListStatementsResponseSchema)` to create a new message.
  */
-export declare const QueryStatementsResponseSchema: GenMessage<QueryStatementsResponse>;
+export declare const ListStatementsResponseSchema: GenMessage<ListStatementsResponse>;
 
 /**
- * @generated from message querysheriff.v1.SeriesScope
+ * @generated from message querysheriff.v1.StatementStat
  */
-export declare type SeriesScope = Message<"querysheriff.v1.SeriesScope"> & {
+export declare type StatementStat = Message<"querysheriff.v1.StatementStat"> & {
+  /**
+   * @generated from field: uint64 id = 1;
+   */
+  id: bigint;
+
+  /**
+   * @generated from field: string preview = 2;
+   */
+  preview: string;
+
+  /**
+   * @generated from field: string user_name = 3;
+   */
+  userName: string;
+
+  /**
+   * @generated from field: map<string, string> tags = 4;
+   */
+  tags: { [key: string]: string };
+
+  /**
+   * @generated from field: int64 calls = 5;
+   */
+  calls: bigint;
+
+  /**
+   * @generated from field: int64 rows = 6;
+   */
+  rows: bigint;
+
+  /**
+   * @generated from field: double avg_ms = 7;
+   */
+  avgMs: number;
+
+  /**
+   * @generated from field: double pct_time = 8;
+   */
+  pctTime: number;
+
+  /**
+   * @generated from field: double pct_io = 9;
+   */
+  pctIo: number;
+};
+
+/**
+ * Describes the message querysheriff.v1.StatementStat.
+ * Use `create(StatementStatSchema)` to create a new message.
+ */
+export declare const StatementStatSchema: GenMessage<StatementStat>;
+
+/**
+ * @generated from message querysheriff.v1.GetStatementRequest
+ */
+export declare type GetStatementRequest = Message<"querysheriff.v1.GetStatementRequest"> & {
+  /**
+   * @generated from field: uint64 id = 1;
+   */
+  id: bigint;
+};
+
+/**
+ * Describes the message querysheriff.v1.GetStatementRequest.
+ * Use `create(GetStatementRequestSchema)` to create a new message.
+ */
+export declare const GetStatementRequestSchema: GenMessage<GetStatementRequest>;
+
+/**
+ * @generated from message querysheriff.v1.GetStatementResponse
+ */
+export declare type GetStatementResponse = Message<"querysheriff.v1.GetStatementResponse"> & {
+  /**
+   * @generated from field: string query = 1;
+   */
+  query: string;
+
+  /**
+   * @generated from field: map<string, string> tags = 2;
+   */
+  tags: { [key: string]: string };
+
+  /**
+   * @generated from field: string server_name = 3;
+   */
+  serverName: string;
+
+  /**
+   * @generated from field: string database_name = 4;
+   */
+  databaseName: string;
+};
+
+/**
+ * Describes the message querysheriff.v1.GetStatementResponse.
+ * Use `create(GetStatementResponseSchema)` to create a new message.
+ */
+export declare const GetStatementResponseSchema: GenMessage<GetStatementResponse>;
+
+/**
+ * @generated from message querysheriff.v1.GetStatementSeriesRequest
+ */
+export declare type GetStatementSeriesRequest = Message<"querysheriff.v1.GetStatementSeriesRequest"> & {
   /**
    * @generated from field: string server_name = 1;
    */
@@ -267,82 +417,29 @@ export declare type SeriesScope = Message<"querysheriff.v1.SeriesScope"> & {
 };
 
 /**
- * Describes the message querysheriff.v1.SeriesScope.
- * Use `create(SeriesScopeSchema)` to create a new message.
+ * Describes the message querysheriff.v1.GetStatementSeriesRequest.
+ * Use `create(GetStatementSeriesRequestSchema)` to create a new message.
  */
-export declare const SeriesScopeSchema: GenMessage<SeriesScope>;
+export declare const GetStatementSeriesRequestSchema: GenMessage<GetStatementSeriesRequest>;
 
 /**
- * @generated from message querysheriff.v1.QueryStatementCallsSeriesRequest
+ * @generated from message querysheriff.v1.GetStatementSeriesResponse
  */
-export declare type QueryStatementCallsSeriesRequest = Message<"querysheriff.v1.QueryStatementCallsSeriesRequest"> & {
+export declare type GetStatementSeriesResponse = Message<"querysheriff.v1.GetStatementSeriesResponse"> & {
   /**
-   * @generated from field: querysheriff.v1.SeriesScope scope = 1;
+   * @generated from field: repeated querysheriff.v1.MetricPoint calls = 1;
    */
-  scope?: SeriesScope | undefined;
-};
-
-/**
- * Describes the message querysheriff.v1.QueryStatementCallsSeriesRequest.
- * Use `create(QueryStatementCallsSeriesRequestSchema)` to create a new message.
- */
-export declare const QueryStatementCallsSeriesRequestSchema: GenMessage<QueryStatementCallsSeriesRequest>;
-
-/**
- * @generated from message querysheriff.v1.QueryStatementCallsSeriesResponse
- */
-export declare type QueryStatementCallsSeriesResponse = Message<"querysheriff.v1.QueryStatementCallsSeriesResponse"> & {
-  /**
-   * @generated from field: querysheriff.v1.StatementMetric calls = 1;
-   */
-  calls?: StatementMetric | undefined;
+  calls: MetricPoint[];
 
   /**
-   * @generated from field: int64 bucket_ms = 2;
+   * @generated from field: repeated querysheriff.v1.MetricPoint avg_ms = 2;
    */
-  bucketMs: bigint;
-};
-
-/**
- * Describes the message querysheriff.v1.QueryStatementCallsSeriesResponse.
- * Use `create(QueryStatementCallsSeriesResponseSchema)` to create a new message.
- */
-export declare const QueryStatementCallsSeriesResponseSchema: GenMessage<QueryStatementCallsSeriesResponse>;
-
-/**
- * @generated from message querysheriff.v1.QueryStatementPercentileSeriesRequest
- */
-export declare type QueryStatementPercentileSeriesRequest = Message<"querysheriff.v1.QueryStatementPercentileSeriesRequest"> & {
-  /**
-   * @generated from field: querysheriff.v1.SeriesScope scope = 1;
-   */
-  scope?: SeriesScope | undefined;
-};
-
-/**
- * Describes the message querysheriff.v1.QueryStatementPercentileSeriesRequest.
- * Use `create(QueryStatementPercentileSeriesRequestSchema)` to create a new message.
- */
-export declare const QueryStatementPercentileSeriesRequestSchema: GenMessage<QueryStatementPercentileSeriesRequest>;
-
-/**
- * @generated from message querysheriff.v1.QueryStatementPercentileSeriesResponse
- */
-export declare type QueryStatementPercentileSeriesResponse = Message<"querysheriff.v1.QueryStatementPercentileSeriesResponse"> & {
-  /**
-   * @generated from field: querysheriff.v1.StatementMetric p90 = 1;
-   */
-  p90?: StatementMetric | undefined;
+  avgMs: MetricPoint[];
 
   /**
-   * @generated from field: querysheriff.v1.StatementMetric p95 = 2;
+   * @generated from field: repeated querysheriff.v1.MetricPoint avg_io_ms = 3;
    */
-  p95?: StatementMetric | undefined;
-
-  /**
-   * @generated from field: querysheriff.v1.StatementMetric p99 = 3;
-   */
-  p99?: StatementMetric | undefined;
+  avgIoMs: MetricPoint[];
 
   /**
    * @generated from field: int64 bucket_ms = 4;
@@ -351,467 +448,15 @@ export declare type QueryStatementPercentileSeriesResponse = Message<"querysheri
 };
 
 /**
- * Describes the message querysheriff.v1.QueryStatementPercentileSeriesResponse.
- * Use `create(QueryStatementPercentileSeriesResponseSchema)` to create a new message.
+ * Describes the message querysheriff.v1.GetStatementSeriesResponse.
+ * Use `create(GetStatementSeriesResponseSchema)` to create a new message.
  */
-export declare const QueryStatementPercentileSeriesResponseSchema: GenMessage<QueryStatementPercentileSeriesResponse>;
+export declare const GetStatementSeriesResponseSchema: GenMessage<GetStatementSeriesResponse>;
 
 /**
- * @generated from message querysheriff.v1.QueryStatementTimingSeriesRequest
+ * @generated from message querysheriff.v1.GetLatencySeriesRequest
  */
-export declare type QueryStatementTimingSeriesRequest = Message<"querysheriff.v1.QueryStatementTimingSeriesRequest"> & {
-  /**
-   * @generated from field: querysheriff.v1.SeriesScope scope = 1;
-   */
-  scope?: SeriesScope | undefined;
-};
-
-/**
- * Describes the message querysheriff.v1.QueryStatementTimingSeriesRequest.
- * Use `create(QueryStatementTimingSeriesRequestSchema)` to create a new message.
- */
-export declare const QueryStatementTimingSeriesRequestSchema: GenMessage<QueryStatementTimingSeriesRequest>;
-
-/**
- * @generated from message querysheriff.v1.QueryStatementTimingSeriesResponse
- */
-export declare type QueryStatementTimingSeriesResponse = Message<"querysheriff.v1.QueryStatementTimingSeriesResponse"> & {
-  /**
-   * @generated from field: querysheriff.v1.StatementMetric avg = 1;
-   */
-  avg?: StatementMetric | undefined;
-
-  /**
-   * @generated from field: querysheriff.v1.StatementMetric avg_io = 2;
-   */
-  avgIo?: StatementMetric | undefined;
-
-  /**
-   * @generated from field: int64 bucket_ms = 3;
-   */
-  bucketMs: bigint;
-};
-
-/**
- * Describes the message querysheriff.v1.QueryStatementTimingSeriesResponse.
- * Use `create(QueryStatementTimingSeriesResponseSchema)` to create a new message.
- */
-export declare const QueryStatementTimingSeriesResponseSchema: GenMessage<QueryStatementTimingSeriesResponse>;
-
-/**
- * @generated from message querysheriff.v1.QueryStatementDetailRequest
- */
-export declare type QueryStatementDetailRequest = Message<"querysheriff.v1.QueryStatementDetailRequest"> & {
-  /**
-   * @generated from field: uint64 id = 1;
-   */
-  id: bigint;
-
-  /**
-   * @generated from field: google.protobuf.Timestamp from = 2;
-   */
-  from?: Timestamp | undefined;
-
-  /**
-   * @generated from field: google.protobuf.Timestamp to = 3;
-   */
-  to?: Timestamp | undefined;
-};
-
-/**
- * Describes the message querysheriff.v1.QueryStatementDetailRequest.
- * Use `create(QueryStatementDetailRequestSchema)` to create a new message.
- */
-export declare const QueryStatementDetailRequestSchema: GenMessage<QueryStatementDetailRequest>;
-
-/**
- * @generated from message querysheriff.v1.QueryStatementDetailResponse
- */
-export declare type QueryStatementDetailResponse = Message<"querysheriff.v1.QueryStatementDetailResponse"> & {
-  /**
-   * @generated from field: string query = 1;
-   */
-  query: string;
-
-  /**
-   * @generated from field: map<string, string> tags = 2;
-   */
-  tags: { [key: string]: string };
-
-  /**
-   * @generated from field: string server_name = 5;
-   */
-  serverName: string;
-
-  /**
-   * @generated from field: string database_name = 6;
-   */
-  databaseName: string;
-};
-
-/**
- * Describes the message querysheriff.v1.QueryStatementDetailResponse.
- * Use `create(QueryStatementDetailResponseSchema)` to create a new message.
- */
-export declare const QueryStatementDetailResponseSchema: GenMessage<QueryStatementDetailResponse>;
-
-/**
- * @generated from message querysheriff.v1.QueryStatementSamplesRequest
- */
-export declare type QueryStatementSamplesRequest = Message<"querysheriff.v1.QueryStatementSamplesRequest"> & {
-  /**
-   * @generated from field: uint64 id = 1;
-   */
-  id: bigint;
-
-  /**
-   * @generated from field: google.protobuf.Timestamp from = 2;
-   */
-  from?: Timestamp | undefined;
-
-  /**
-   * @generated from field: google.protobuf.Timestamp to = 3;
-   */
-  to?: Timestamp | undefined;
-
-  /**
-   * @generated from field: int32 limit = 4;
-   */
-  limit: number;
-
-  /**
-   * @generated from field: int32 offset = 5;
-   */
-  offset: number;
-
-  /**
-   * @generated from field: querysheriff.v1.SampleSortColumn sort_column = 6;
-   */
-  sortColumn: SampleSortColumn;
-
-  /**
-   * @generated from field: bool sort_desc = 7;
-   */
-  sortDesc: boolean;
-};
-
-/**
- * Describes the message querysheriff.v1.QueryStatementSamplesRequest.
- * Use `create(QueryStatementSamplesRequestSchema)` to create a new message.
- */
-export declare const QueryStatementSamplesRequestSchema: GenMessage<QueryStatementSamplesRequest>;
-
-/**
- * @generated from message querysheriff.v1.QueryStatementSamplesResponse
- */
-export declare type QueryStatementSamplesResponse = Message<"querysheriff.v1.QueryStatementSamplesResponse"> & {
-  /**
-   * @generated from field: repeated querysheriff.v1.StatementSample samples = 1;
-   */
-  samples: StatementSample[];
-
-  /**
-   * @generated from field: bool has_more = 2;
-   */
-  hasMore: boolean;
-};
-
-/**
- * Describes the message querysheriff.v1.QueryStatementSamplesResponse.
- * Use `create(QueryStatementSamplesResponseSchema)` to create a new message.
- */
-export declare const QueryStatementSamplesResponseSchema: GenMessage<QueryStatementSamplesResponse>;
-
-/**
- * @generated from message querysheriff.v1.StatementSample
- */
-export declare type StatementSample = Message<"querysheriff.v1.StatementSample"> & {
-  /**
-   * @generated from field: uint64 id = 1;
-   */
-  id: bigint;
-
-  /**
-   * @generated from field: google.protobuf.Timestamp occurred_at = 2;
-   */
-  occurredAt?: Timestamp | undefined;
-
-  /**
-   * @generated from field: string query = 3;
-   */
-  query: string;
-
-  /**
-   * @generated from field: map<string, string> tags = 4;
-   */
-  tags: { [key: string]: string };
-
-  /**
-   * @generated from field: bool has_plan = 5;
-   */
-  hasPlan: boolean;
-
-  /**
-   * @generated from field: double duration_ms = 6;
-   */
-  durationMs: number;
-};
-
-/**
- * Describes the message querysheriff.v1.StatementSample.
- * Use `create(StatementSampleSchema)` to create a new message.
- */
-export declare const StatementSampleSchema: GenMessage<StatementSample>;
-
-/**
- * @generated from message querysheriff.v1.GetStatementSamplePlanRequest
- */
-export declare type GetStatementSamplePlanRequest = Message<"querysheriff.v1.GetStatementSamplePlanRequest"> & {
-  /**
-   * @generated from field: uint64 sample_id = 1;
-   */
-  sampleId: bigint;
-};
-
-/**
- * Describes the message querysheriff.v1.GetStatementSamplePlanRequest.
- * Use `create(GetStatementSamplePlanRequestSchema)` to create a new message.
- */
-export declare const GetStatementSamplePlanRequestSchema: GenMessage<GetStatementSamplePlanRequest>;
-
-/**
- * @generated from message querysheriff.v1.GetStatementSamplePlanResponse
- */
-export declare type GetStatementSamplePlanResponse = Message<"querysheriff.v1.GetStatementSamplePlanResponse"> & {
-  /**
-   * @generated from field: string query = 1;
-   */
-  query: string;
-
-  /**
-   * @generated from field: string plan_json = 2;
-   */
-  planJson: string;
-};
-
-/**
- * Describes the message querysheriff.v1.GetStatementSamplePlanResponse.
- * Use `create(GetStatementSamplePlanResponseSchema)` to create a new message.
- */
-export declare const GetStatementSamplePlanResponseSchema: GenMessage<GetStatementSamplePlanResponse>;
-
-/**
- * @generated from message querysheriff.v1.GetStatementSampleTextRequest
- */
-export declare type GetStatementSampleTextRequest = Message<"querysheriff.v1.GetStatementSampleTextRequest"> & {
-  /**
-   * @generated from field: uint64 sample_id = 1;
-   */
-  sampleId: bigint;
-};
-
-/**
- * Describes the message querysheriff.v1.GetStatementSampleTextRequest.
- * Use `create(GetStatementSampleTextRequestSchema)` to create a new message.
- */
-export declare const GetStatementSampleTextRequestSchema: GenMessage<GetStatementSampleTextRequest>;
-
-/**
- * @generated from message querysheriff.v1.GetStatementSampleTextResponse
- */
-export declare type GetStatementSampleTextResponse = Message<"querysheriff.v1.GetStatementSampleTextResponse"> & {
-  /**
-   * @generated from field: string query = 1;
-   */
-  query: string;
-};
-
-/**
- * Describes the message querysheriff.v1.GetStatementSampleTextResponse.
- * Use `create(GetStatementSampleTextResponseSchema)` to create a new message.
- */
-export declare const GetStatementSampleTextResponseSchema: GenMessage<GetStatementSampleTextResponse>;
-
-/**
- * @generated from message querysheriff.v1.GetStatementTextRequest
- */
-export declare type GetStatementTextRequest = Message<"querysheriff.v1.GetStatementTextRequest"> & {
-  /**
-   * @generated from field: uint64 id = 1;
-   */
-  id: bigint;
-};
-
-/**
- * Describes the message querysheriff.v1.GetStatementTextRequest.
- * Use `create(GetStatementTextRequestSchema)` to create a new message.
- */
-export declare const GetStatementTextRequestSchema: GenMessage<GetStatementTextRequest>;
-
-/**
- * @generated from message querysheriff.v1.GetStatementTextResponse
- */
-export declare type GetStatementTextResponse = Message<"querysheriff.v1.GetStatementTextResponse"> & {
-  /**
-   * @generated from field: string query = 1;
-   */
-  query: string;
-};
-
-/**
- * Describes the message querysheriff.v1.GetStatementTextResponse.
- * Use `create(GetStatementTextResponseSchema)` to create a new message.
- */
-export declare const GetStatementTextResponseSchema: GenMessage<GetStatementTextResponse>;
-
-/**
- * @generated from message querysheriff.v1.StatementMetric
- */
-export declare type StatementMetric = Message<"querysheriff.v1.StatementMetric"> & {
-  /**
-   * @generated from field: repeated querysheriff.v1.MetricPoint series = 1;
-   */
-  series: MetricPoint[];
-};
-
-/**
- * Describes the message querysheriff.v1.StatementMetric.
- * Use `create(StatementMetricSchema)` to create a new message.
- */
-export declare const StatementMetricSchema: GenMessage<StatementMetric>;
-
-/**
- * @generated from message querysheriff.v1.MetricPoint
- */
-export declare type MetricPoint = Message<"querysheriff.v1.MetricPoint"> & {
-  /**
-   * @generated from field: google.protobuf.Timestamp at = 1;
-   */
-  at?: Timestamp | undefined;
-
-  /**
-   * @generated from field: double value = 2;
-   */
-  value: number;
-};
-
-/**
- * Describes the message querysheriff.v1.MetricPoint.
- * Use `create(MetricPointSchema)` to create a new message.
- */
-export declare const MetricPointSchema: GenMessage<MetricPoint>;
-
-/**
- * @generated from message querysheriff.v1.StatementStat
- */
-export declare type StatementStat = Message<"querysheriff.v1.StatementStat"> & {
-  /**
-   * @generated from field: uint64 id = 1;
-   */
-  id: bigint;
-
-  /**
-   * @generated from field: string preview = 2;
-   */
-  preview: string;
-
-  /**
-   * @generated from field: string user_name = 3;
-   */
-  userName: string;
-
-  /**
-   * @generated from field: double total_exec_time = 4;
-   */
-  totalExecTime: number;
-
-  /**
-   * @generated from field: double pct_of_total = 5;
-   */
-  pctOfTotal: number;
-
-  /**
-   * @generated from field: int64 calls = 6;
-   */
-  calls: bigint;
-
-  /**
-   * @generated from field: double avg_exec_time = 7;
-   */
-  avgExecTime: number;
-
-  /**
-   * @generated from field: int64 rows = 8;
-   */
-  rows: bigint;
-
-  /**
-   * @generated from field: map<string, string> tags = 9;
-   */
-  tags: { [key: string]: string };
-
-  /**
-   * @generated from field: double pct_io = 10;
-   */
-  pctIo: number;
-};
-
-/**
- * Describes the message querysheriff.v1.StatementStat.
- * Use `create(StatementStatSchema)` to create a new message.
- */
-export declare const StatementStatSchema: GenMessage<StatementStat>;
-
-/**
- * @generated from message querysheriff.v1.StatementDelta
- */
-export declare type StatementDelta = Message<"querysheriff.v1.StatementDelta"> & {
-  /**
-   * @generated from field: string user_name = 1;
-   */
-  userName: string;
-
-  /**
-   * @generated from field: string database_name = 2;
-   */
-  databaseName: string;
-
-  /**
-   * @generated from field: int64 query_id = 3;
-   */
-  queryId: bigint;
-
-  /**
-   * @generated from field: int64 calls = 4;
-   */
-  calls: bigint;
-
-  /**
-   * @generated from field: int64 rows = 5;
-   */
-  rows: bigint;
-
-  /**
-   * @generated from field: double total_exec_time = 6;
-   */
-  totalExecTime: number;
-
-  /**
-   * @generated from field: double total_io_time = 7;
-   */
-  totalIoTime: number;
-};
-
-/**
- * Describes the message querysheriff.v1.StatementDelta.
- * Use `create(StatementDeltaSchema)` to create a new message.
- */
-export declare const StatementDeltaSchema: GenMessage<StatementDelta>;
-
-/**
- * @generated from message querysheriff.v1.ListTagKeysRequest
- */
-export declare type ListTagKeysRequest = Message<"querysheriff.v1.ListTagKeysRequest"> & {
+export declare type GetLatencySeriesRequest = Message<"querysheriff.v1.GetLatencySeriesRequest"> & {
   /**
    * @generated from field: string server_name = 1;
    */
@@ -831,6 +476,213 @@ export declare type ListTagKeysRequest = Message<"querysheriff.v1.ListTagKeysReq
    * @generated from field: google.protobuf.Timestamp to = 4;
    */
   to?: Timestamp | undefined;
+};
+
+/**
+ * Describes the message querysheriff.v1.GetLatencySeriesRequest.
+ * Use `create(GetLatencySeriesRequestSchema)` to create a new message.
+ */
+export declare const GetLatencySeriesRequestSchema: GenMessage<GetLatencySeriesRequest>;
+
+/**
+ * @generated from message querysheriff.v1.GetLatencySeriesResponse
+ */
+export declare type GetLatencySeriesResponse = Message<"querysheriff.v1.GetLatencySeriesResponse"> & {
+  /**
+   * @generated from field: repeated querysheriff.v1.MetricPoint p90_ms = 1;
+   */
+  p90Ms: MetricPoint[];
+
+  /**
+   * @generated from field: repeated querysheriff.v1.MetricPoint p95_ms = 2;
+   */
+  p95Ms: MetricPoint[];
+
+  /**
+   * @generated from field: repeated querysheriff.v1.MetricPoint p99_ms = 3;
+   */
+  p99Ms: MetricPoint[];
+
+  /**
+   * @generated from field: int64 bucket_ms = 4;
+   */
+  bucketMs: bigint;
+};
+
+/**
+ * Describes the message querysheriff.v1.GetLatencySeriesResponse.
+ * Use `create(GetLatencySeriesResponseSchema)` to create a new message.
+ */
+export declare const GetLatencySeriesResponseSchema: GenMessage<GetLatencySeriesResponse>;
+
+/**
+ * @generated from message querysheriff.v1.ListStatementSamplesRequest
+ */
+export declare type ListStatementSamplesRequest = Message<"querysheriff.v1.ListStatementSamplesRequest"> & {
+  /**
+   * @generated from field: string server_name = 1;
+   */
+  serverName: string;
+
+  /**
+   * @generated from field: string database_name = 2;
+   */
+  databaseName: string;
+
+  /**
+   * @generated from field: uint64 statement_id = 3;
+   */
+  statementId: bigint;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp from = 4;
+   */
+  from?: Timestamp | undefined;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp to = 5;
+   */
+  to?: Timestamp | undefined;
+
+  /**
+   * @generated from field: querysheriff.v1.SampleSortColumn sort_column = 6;
+   */
+  sortColumn: SampleSortColumn;
+
+  /**
+   * @generated from field: bool sort_desc = 7;
+   */
+  sortDesc: boolean;
+
+  /**
+   * @generated from field: int32 limit = 8;
+   */
+  limit: number;
+
+  /**
+   * @generated from field: int32 offset = 9;
+   */
+  offset: number;
+};
+
+/**
+ * Describes the message querysheriff.v1.ListStatementSamplesRequest.
+ * Use `create(ListStatementSamplesRequestSchema)` to create a new message.
+ */
+export declare const ListStatementSamplesRequestSchema: GenMessage<ListStatementSamplesRequest>;
+
+/**
+ * @generated from message querysheriff.v1.ListStatementSamplesResponse
+ */
+export declare type ListStatementSamplesResponse = Message<"querysheriff.v1.ListStatementSamplesResponse"> & {
+  /**
+   * @generated from field: repeated querysheriff.v1.StatementSample samples = 1;
+   */
+  samples: StatementSample[];
+
+  /**
+   * @generated from field: bool has_more = 2;
+   */
+  hasMore: boolean;
+};
+
+/**
+ * Describes the message querysheriff.v1.ListStatementSamplesResponse.
+ * Use `create(ListStatementSamplesResponseSchema)` to create a new message.
+ */
+export declare const ListStatementSamplesResponseSchema: GenMessage<ListStatementSamplesResponse>;
+
+/**
+ * @generated from message querysheriff.v1.StatementSample
+ */
+export declare type StatementSample = Message<"querysheriff.v1.StatementSample"> & {
+  /**
+   * @generated from field: uint64 id = 1;
+   */
+  id: bigint;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp occurred_at = 2;
+   */
+  occurredAt?: Timestamp | undefined;
+
+  /**
+   * @generated from field: string preview = 3;
+   */
+  preview: string;
+
+  /**
+   * @generated from field: double duration_ms = 4;
+   */
+  durationMs: number;
+
+  /**
+   * @generated from field: bool has_plan = 5;
+   */
+  hasPlan: boolean;
+
+  /**
+   * @generated from field: map<string, string> tags = 6;
+   */
+  tags: { [key: string]: string };
+};
+
+/**
+ * Describes the message querysheriff.v1.StatementSample.
+ * Use `create(StatementSampleSchema)` to create a new message.
+ */
+export declare const StatementSampleSchema: GenMessage<StatementSample>;
+
+/**
+ * @generated from message querysheriff.v1.GetStatementSampleRequest
+ */
+export declare type GetStatementSampleRequest = Message<"querysheriff.v1.GetStatementSampleRequest"> & {
+  /**
+   * @generated from field: uint64 id = 1;
+   */
+  id: bigint;
+};
+
+/**
+ * Describes the message querysheriff.v1.GetStatementSampleRequest.
+ * Use `create(GetStatementSampleRequestSchema)` to create a new message.
+ */
+export declare const GetStatementSampleRequestSchema: GenMessage<GetStatementSampleRequest>;
+
+/**
+ * @generated from message querysheriff.v1.GetStatementSampleResponse
+ */
+export declare type GetStatementSampleResponse = Message<"querysheriff.v1.GetStatementSampleResponse"> & {
+  /**
+   * @generated from field: string query = 1;
+   */
+  query: string;
+
+  /**
+   * @generated from field: string plan_json = 2;
+   */
+  planJson: string;
+};
+
+/**
+ * Describes the message querysheriff.v1.GetStatementSampleResponse.
+ * Use `create(GetStatementSampleResponseSchema)` to create a new message.
+ */
+export declare const GetStatementSampleResponseSchema: GenMessage<GetStatementSampleResponse>;
+
+/**
+ * @generated from message querysheriff.v1.ListTagKeysRequest
+ */
+export declare type ListTagKeysRequest = Message<"querysheriff.v1.ListTagKeysRequest"> & {
+  /**
+   * @generated from field: string server_name = 1;
+   */
+  serverName: string;
+
+  /**
+   * @generated from field: string database_name = 2;
+   */
+  databaseName: string;
 };
 
 /**
@@ -891,17 +743,7 @@ export declare type ListTagValuesRequest = Message<"querysheriff.v1.ListTagValue
   databaseName: string;
 
   /**
-   * @generated from field: google.protobuf.Timestamp from = 3;
-   */
-  from?: Timestamp | undefined;
-
-  /**
-   * @generated from field: google.protobuf.Timestamp to = 4;
-   */
-  to?: Timestamp | undefined;
-
-  /**
-   * @generated from field: string key = 5;
+   * @generated from field: string key = 3;
    */
   key: string;
 };
@@ -950,36 +792,6 @@ export declare type TagValue = Message<"querysheriff.v1.TagValue"> & {
 export declare const TagValueSchema: GenMessage<TagValue>;
 
 /**
- * @generated from enum querysheriff.v1.TagFilterOperator
- */
-export enum TagFilterOperator {
-  /**
-   * @generated from enum value: TAG_FILTER_OPERATOR_UNSPECIFIED = 0;
-   */
-  UNSPECIFIED = 0,
-
-  /**
-   * @generated from enum value: TAG_FILTER_OPERATOR_EQUAL = 1;
-   */
-  EQUAL = 1,
-
-  /**
-   * @generated from enum value: TAG_FILTER_OPERATOR_NOT_EQUAL = 2;
-   */
-  NOT_EQUAL = 2,
-
-  /**
-   * @generated from enum value: TAG_FILTER_OPERATOR_EXISTS = 3;
-   */
-  EXISTS = 3,
-}
-
-/**
- * Describes the enum querysheriff.v1.TagFilterOperator.
- */
-export declare const TagFilterOperatorSchema: GenEnum<TagFilterOperator>;
-
-/**
  * @generated from enum querysheriff.v1.QueryKind
  */
 export enum QueryKind {
@@ -1008,6 +820,36 @@ export enum QueryKind {
  * Describes the enum querysheriff.v1.QueryKind.
  */
 export declare const QueryKindSchema: GenEnum<QueryKind>;
+
+/**
+ * @generated from enum querysheriff.v1.TagFilterOperator
+ */
+export enum TagFilterOperator {
+  /**
+   * @generated from enum value: TAG_FILTER_OPERATOR_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: TAG_FILTER_OPERATOR_EQUAL = 1;
+   */
+  EQUAL = 1,
+
+  /**
+   * @generated from enum value: TAG_FILTER_OPERATOR_NOT_EQUAL = 2;
+   */
+  NOT_EQUAL = 2,
+
+  /**
+   * @generated from enum value: TAG_FILTER_OPERATOR_EXISTS = 3;
+   */
+  EXISTS = 3,
+}
+
+/**
+ * Describes the enum querysheriff.v1.TagFilterOperator.
+ */
+export declare const TagFilterOperatorSchema: GenEnum<TagFilterOperator>;
 
 /**
  * @generated from enum querysheriff.v1.StatementSortColumn
@@ -1067,11 +909,6 @@ export enum SampleSortColumn {
    * @generated from enum value: SAMPLE_SORT_COLUMN_DURATION = 2;
    */
   DURATION = 2,
-
-  /**
-   * @generated from enum value: SAMPLE_SORT_COLUMN_PLAN = 3;
-   */
-  PLAN = 3,
 }
 
 /**
@@ -1100,76 +937,52 @@ export declare const StatementService: GenService<{
     output: typeof ReportStatementTextsResponseSchema;
   },
   /**
-   * @generated from rpc querysheriff.v1.StatementService.QueryStatements
+   * @generated from rpc querysheriff.v1.StatementService.ListStatements
    */
-  queryStatements: {
+  listStatements: {
     methodKind: "unary";
-    input: typeof QueryStatementsRequestSchema;
-    output: typeof QueryStatementsResponseSchema;
+    input: typeof ListStatementsRequestSchema;
+    output: typeof ListStatementsResponseSchema;
   },
   /**
-   * @generated from rpc querysheriff.v1.StatementService.QueryStatementCallsSeries
+   * @generated from rpc querysheriff.v1.StatementService.GetStatement
    */
-  queryStatementCallsSeries: {
+  getStatement: {
     methodKind: "unary";
-    input: typeof QueryStatementCallsSeriesRequestSchema;
-    output: typeof QueryStatementCallsSeriesResponseSchema;
+    input: typeof GetStatementRequestSchema;
+    output: typeof GetStatementResponseSchema;
   },
   /**
-   * @generated from rpc querysheriff.v1.StatementService.QueryStatementPercentileSeries
+   * @generated from rpc querysheriff.v1.StatementService.GetStatementSeries
    */
-  queryStatementPercentileSeries: {
+  getStatementSeries: {
     methodKind: "unary";
-    input: typeof QueryStatementPercentileSeriesRequestSchema;
-    output: typeof QueryStatementPercentileSeriesResponseSchema;
+    input: typeof GetStatementSeriesRequestSchema;
+    output: typeof GetStatementSeriesResponseSchema;
   },
   /**
-   * @generated from rpc querysheriff.v1.StatementService.QueryStatementTimingSeries
+   * @generated from rpc querysheriff.v1.StatementService.GetLatencySeries
    */
-  queryStatementTimingSeries: {
+  getLatencySeries: {
     methodKind: "unary";
-    input: typeof QueryStatementTimingSeriesRequestSchema;
-    output: typeof QueryStatementTimingSeriesResponseSchema;
+    input: typeof GetLatencySeriesRequestSchema;
+    output: typeof GetLatencySeriesResponseSchema;
   },
   /**
-   * @generated from rpc querysheriff.v1.StatementService.QueryStatementDetail
+   * @generated from rpc querysheriff.v1.StatementService.ListStatementSamples
    */
-  queryStatementDetail: {
+  listStatementSamples: {
     methodKind: "unary";
-    input: typeof QueryStatementDetailRequestSchema;
-    output: typeof QueryStatementDetailResponseSchema;
+    input: typeof ListStatementSamplesRequestSchema;
+    output: typeof ListStatementSamplesResponseSchema;
   },
   /**
-   * @generated from rpc querysheriff.v1.StatementService.QueryStatementSamples
+   * @generated from rpc querysheriff.v1.StatementService.GetStatementSample
    */
-  queryStatementSamples: {
+  getStatementSample: {
     methodKind: "unary";
-    input: typeof QueryStatementSamplesRequestSchema;
-    output: typeof QueryStatementSamplesResponseSchema;
-  },
-  /**
-   * @generated from rpc querysheriff.v1.StatementService.GetStatementSamplePlan
-   */
-  getStatementSamplePlan: {
-    methodKind: "unary";
-    input: typeof GetStatementSamplePlanRequestSchema;
-    output: typeof GetStatementSamplePlanResponseSchema;
-  },
-  /**
-   * @generated from rpc querysheriff.v1.StatementService.GetStatementSampleText
-   */
-  getStatementSampleText: {
-    methodKind: "unary";
-    input: typeof GetStatementSampleTextRequestSchema;
-    output: typeof GetStatementSampleTextResponseSchema;
-  },
-  /**
-   * @generated from rpc querysheriff.v1.StatementService.GetStatementText
-   */
-  getStatementText: {
-    methodKind: "unary";
-    input: typeof GetStatementTextRequestSchema;
-    output: typeof GetStatementTextResponseSchema;
+    input: typeof GetStatementSampleRequestSchema;
+    output: typeof GetStatementSampleResponseSchema;
   },
   /**
    * @generated from rpc querysheriff.v1.StatementService.ListTagKeys

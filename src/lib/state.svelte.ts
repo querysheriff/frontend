@@ -1,7 +1,7 @@
 import { fmtClock } from './format';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import { parseDateTime, getLocalTimeZone, type CalendarDateTime, type DateValue } from '@internationalized/date';
-import type { MonitoredServer } from '$lib/gen/querysheriff/v1/health_pb';
+import type { Server } from '$lib/gen/querysheriff/v1/health_pb';
 import { healthClient } from './connect';
 import { urlSync } from './urlState.svelte';
 
@@ -152,12 +152,12 @@ export const scopeLock = new ScopeLock();
 
 // Servers whose last health check is older than 24h are already excluded by the backend.
 class ServersState {
-	list = $state<MonitoredServer[]>([]);
+	list = $state<Server[]>([]);
 	loaded = $state(false);
 
 	async load() {
 		try {
-			const { servers } = await healthClient.queryServers({});
+			const { servers } = await healthClient.listServers({});
 			this.list = servers;
 			this.reconcile();
 		} catch {
@@ -177,8 +177,8 @@ class ServersState {
 
 	health(server: string): ServerHealth {
 		const found = this.list.find((s) => s.serverName === server);
-		if (!found?.collectedAt) return 'stale';
-		return Date.now() - timestampDate(found.collectedAt).getTime() <= HEALTH_FRESH_MS ? 'ok' : 'stale';
+		if (!found?.lastSeenAt) return 'stale';
+		return Date.now() - timestampDate(found.lastSeenAt).getTime() <= HEALTH_FRESH_MS ? 'ok' : 'stale';
 	}
 
 	reconcile() {

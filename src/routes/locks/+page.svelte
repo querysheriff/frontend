@@ -4,7 +4,7 @@
 		LockWaitSortColumn,
 		type LockParty,
 		type LockWait,
-		type QueryLockWaitSeriesResponse
+		type GetLockWaitSeriesResponse
 	} from '$lib/gen/querysheriff/v1/activity_pb';
 	import { activityClient } from '$lib/connect';
 	import { ctx, serversState } from '$lib/state.svelte';
@@ -24,7 +24,7 @@
 
 	const PAGE_SIZE = 10;
 
-	let series = $state<QueryLockWaitSeriesResponse | undefined>(undefined);
+	let series = $state<GetLockWaitSeriesResponse | undefined>(undefined);
 	let chartRange = $state<{ from: Date; to: Date } | null>(null);
 	let chartLoading = $state(true);
 	let chartError = $state<string | null>(null);
@@ -76,12 +76,12 @@
 	function toRow(w: LockWait): LockWaitRow {
 		return {
 			// Everything that identifies an episode, so one pid's waits on two lock modes stay two rows.
-			key: `${w.waiting?.pid ?? 0}-${tsKey(w.startedWaiting)}-${w.blocking?.pid ?? 0}-${w.lockMode}`,
+			key: `${w.waiting?.pid ?? 0}-${tsKey(w.startedAt)}-${w.blocking?.pid ?? 0}-${w.lockMode}`,
 			waiting: toParty(w.waiting),
 			blocking: toParty(w.blocking),
 			lockMode: w.lockMode,
-			waitMs: durationMs(w.startedWaiting, w.lastSeen),
-			startedWaiting: toDate(w.startedWaiting)
+			waitMs: durationMs(w.startedAt, w.lastSeenAt),
+			startedWaiting: toDate(w.startedAt)
 		};
 	}
 
@@ -91,7 +91,7 @@
 		const request = scope();
 		const { from, to } = ctx.timeRange();
 		chartRange = { from, to };
-		if (!ctx.server) {
+		if (!ctx.server || !ctx.db) {
 			chartLoading = !serversState.loaded;
 			if (serversState.loaded) {
 				series = undefined;
@@ -107,7 +107,7 @@
 		series = undefined;
 
 		activityClient
-			.queryLockWaitSeries(request, { signal: chartAc.signal })
+			.getLockWaitSeries(request, { signal: chartAc.signal })
 			.then((res) => {
 				if (gen !== chartGen) return;
 				series = res;
@@ -124,7 +124,7 @@
 	let waitsGen = 0;
 	let waitsAc: AbortController | null = null;
 	$effect(() => {
-		if (!ctx.server) {
+		if (!ctx.server || !ctx.db) {
 			waitsLoading = !serversState.loaded;
 			if (serversState.loaded) {
 				waitRows = [];
@@ -141,7 +141,7 @@
 		waitsError = null;
 
 		activityClient
-			.queryLockWaits(request, { signal: waitsAc.signal })
+			.listLockWaits(request, { signal: waitsAc.signal })
 			.then((res) => {
 				if (gen !== waitsGen) return;
 				waitRows = res.waits.map(toRow);
@@ -163,7 +163,7 @@
 		const gen = waitsGen;
 		loadingMore = true;
 		try {
-			const res = await activityClient.queryLockWaits(tableRequest(waitRows.length), { signal: waitsAc?.signal });
+			const res = await activityClient.listLockWaits(tableRequest(waitRows.length), { signal: waitsAc?.signal });
 			if (gen !== waitsGen) return;
 			const seen = new Set(waitRows.map((r) => r.key));
 			waitRows = [...waitRows, ...res.waits.map(toRow).filter((r) => !seen.has(r.key))];
@@ -177,7 +177,7 @@
 
 	// Seconds on the wire, milliseconds in the chart, so fmtDuration can label it.
 	const points = $derived<MetricSeriesPoint[]>(
-		(series?.series ?? []).flatMap((p) => (p.at ? [{ at: timestampDate(p.at), value: p.waitSeconds * 1000 }] : []))
+		(series?.waitSeconds ?? []).flatMap((p) => (p.at ? [{ at: timestampDate(p.at), value: p.value * 1000 }] : []))
 	);
 	const bucketMs = $derived(Number(series?.bucketMs ?? 0n));
 	const chartDescription = $derived(

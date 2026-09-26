@@ -45,58 +45,58 @@ export declare type ReportHealthResponse = Message<"querysheriff.v1.ReportHealth
 export declare const ReportHealthResponseSchema: GenMessage<ReportHealthResponse>;
 
 /**
- * @generated from message querysheriff.v1.QueryServersRequest
+ * @generated from message querysheriff.v1.ListServersRequest
  */
-export declare type QueryServersRequest = Message<"querysheriff.v1.QueryServersRequest"> & {
+export declare type ListServersRequest = Message<"querysheriff.v1.ListServersRequest"> & {
 };
 
 /**
- * Describes the message querysheriff.v1.QueryServersRequest.
- * Use `create(QueryServersRequestSchema)` to create a new message.
+ * Describes the message querysheriff.v1.ListServersRequest.
+ * Use `create(ListServersRequestSchema)` to create a new message.
  */
-export declare const QueryServersRequestSchema: GenMessage<QueryServersRequest>;
+export declare const ListServersRequestSchema: GenMessage<ListServersRequest>;
 
 /**
- * @generated from message querysheriff.v1.QueryServersResponse
+ * @generated from message querysheriff.v1.ListServersResponse
  */
-export declare type QueryServersResponse = Message<"querysheriff.v1.QueryServersResponse"> & {
+export declare type ListServersResponse = Message<"querysheriff.v1.ListServersResponse"> & {
   /**
-   * @generated from field: repeated querysheriff.v1.MonitoredServer servers = 1;
+   * @generated from field: repeated querysheriff.v1.Server servers = 1;
    */
-  servers: MonitoredServer[];
+  servers: Server[];
 };
 
 /**
- * Describes the message querysheriff.v1.QueryServersResponse.
- * Use `create(QueryServersResponseSchema)` to create a new message.
+ * Describes the message querysheriff.v1.ListServersResponse.
+ * Use `create(ListServersResponseSchema)` to create a new message.
  */
-export declare const QueryServersResponseSchema: GenMessage<QueryServersResponse>;
+export declare const ListServersResponseSchema: GenMessage<ListServersResponse>;
 
 /**
- * @generated from message querysheriff.v1.MonitoredServer
+ * @generated from message querysheriff.v1.Server
  */
-export declare type MonitoredServer = Message<"querysheriff.v1.MonitoredServer"> & {
+export declare type Server = Message<"querysheriff.v1.Server"> & {
   /**
    * @generated from field: string server_name = 1;
    */
   serverName: string;
 
   /**
-   * @generated from field: google.protobuf.Timestamp collected_at = 2;
-   */
-  collectedAt?: Timestamp | undefined;
-
-  /**
-   * @generated from field: repeated string databases = 3;
+   * @generated from field: repeated string databases = 2;
    */
   databases: string[];
+
+  /**
+   * @generated from field: google.protobuf.Timestamp last_seen_at = 3;
+   */
+  lastSeenAt?: Timestamp | undefined;
 };
 
 /**
- * Describes the message querysheriff.v1.MonitoredServer.
- * Use `create(MonitoredServerSchema)` to create a new message.
+ * Describes the message querysheriff.v1.Server.
+ * Use `create(ServerSchema)` to create a new message.
  */
-export declare const MonitoredServerSchema: GenMessage<MonitoredServer>;
+export declare const ServerSchema: GenMessage<Server>;
 
 /**
  * @generated from service querysheriff.v1.HealthService
@@ -111,12 +111,12 @@ export declare const HealthService: GenService<{
     output: typeof ReportHealthResponseSchema;
   },
   /**
-   * @generated from rpc querysheriff.v1.HealthService.QueryServers
+   * @generated from rpc querysheriff.v1.HealthService.ListServers
    */
-  queryServers: {
+  listServers: {
     methodKind: "unary";
-    input: typeof QueryServersRequestSchema;
-    output: typeof QueryServersResponseSchema;
+    input: typeof ListServersRequestSchema;
+    output: typeof ListServersResponseSchema;
   },
 }>;
 

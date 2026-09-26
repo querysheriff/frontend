@@ -5,9 +5,8 @@
 	import {
 		LogEvent_LogClassification,
 		LogFacetField,
-		LogSortColumn,
+		type GetLogSeriesResponse,
 		type LogFacet,
-		type LogHistogram,
 		type LogRecord
 	} from '$lib/gen/querysheriff/v1/log_pb';
 	import { logClient } from '$lib/connect';
@@ -30,7 +29,7 @@
 	import LogTimelineHeatmap, { heatmapLabelWidth, type HeatmapDetail } from '$lib/components/LogTimelineHeatmap.svelte';
 	import { type HeatmapRow } from '$lib/components/HeatmapCells.svelte';
 	import LogFilterBar from '$lib/components/LogFilterBar.svelte';
-	import LogsTable, { type LogPivot, type LogSort, type LogSortCol } from '$lib/components/LogsTable.svelte';
+	import LogsTable, { type LogPivot } from '$lib/components/LogsTable.svelte';
 	import SectionHeader from '$lib/components/SectionHeader.svelte';
 	import StateBlock from '$lib/components/StateBlock.svelte';
 
@@ -45,16 +44,7 @@
 
 	let search = $state(filters.text);
 
-	let sort = $state<LogSort>({ col: 'at', dir: 'desc' });
-
-	const sortColumnProto: Record<LogSortCol, LogSortColumn> = {
-		at: LogSortColumn.AT,
-		level: LogSortColumn.LEVEL,
-		event: LogSortColumn.EVENT,
-		category: LogSortColumn.CATEGORY,
-		database: LogSortColumn.DATABASE,
-		user: LogSortColumn.USERNAME
-	};
+	let sortDesc = $state(true);
 
 	let records = $state<LogRecord[]>([]);
 	let hasMore = $state(false);
@@ -63,7 +53,7 @@
 	let tableError = $state<string | null>(null);
 
 	// Fetched from its own RPC on scope alone, so nothing the table does redraws the charts.
-	let histogram = $state<LogHistogram | undefined>(undefined);
+	let series = $state<GetLogSeriesResponse | undefined>(undefined);
 	let chartLoading = $state(true);
 	let chartError = $state<string | null>(null);
 	// Seeded rather than null: the first render reads it before the effect below runs.
@@ -88,7 +78,7 @@
 			serverName: ctx.server,
 			from: timestampFromDate(from),
 			to: timestampFromDate(to),
-			filter: filters.text
+			filter: filters.toFilter()
 		};
 	}
 
@@ -105,7 +95,7 @@
 		if (!ctx.server) {
 			chartLoading = !serversState.loaded;
 			if (serversState.loaded) {
-				histogram = undefined;
+				series = undefined;
 				chartError = null;
 			}
 
@@ -120,14 +110,14 @@
 		chartError = null;
 
 		logClient
-			.queryLogSeries(request, { signal })
+			.getLogSeries(request, { signal })
 			.then((res) => {
-				if (mine === chartGen) histogram = res.histogram;
+				if (mine === chartGen) series = res;
 			})
 			.catch((e: unknown) => {
 				if (mine !== chartGen) return;
 				chartError = errMsg(e);
-				histogram = undefined;
+				series = undefined;
 			})
 			.finally(() => {
 				if (mine === chartGen) chartLoading = false;
@@ -137,9 +127,7 @@
 	function logsRequest(offset: number) {
 		return {
 			...scope(),
-			...filters.toRequest(),
-			sortColumn: sortColumnProto[sort.col],
-			sortDesc: sort.dir === 'desc',
+			sortDesc,
 			limit: PAGE_SIZE,
 			offset
 		};
@@ -171,7 +159,7 @@
 		tableError = null;
 
 		logClient
-			.queryLogs(request, { signal: ac.signal })
+			.listLogs(request, { signal: ac.signal })
 			.then((res) => {
 				if (gen !== tableGen) return;
 				records = res.records;
@@ -192,7 +180,7 @@
 	let facetAc: AbortController | null = null;
 
 	$effect(() => {
-		const request = { ...scope(), ...filters.toFacetRequest() };
+		const request = scope();
 
 		if (!ctx.server) {
 			facetsLoading = !serversState.loaded;
@@ -229,7 +217,7 @@
 		loadingMore = true;
 
 		try {
-			const res = await logClient.queryLogs(logsRequest(records.length), { signal: tableAc?.signal });
+			const res = await logClient.listLogs(logsRequest(records.length), { signal: tableAc?.signal });
 			if (gen !== tableGen) return;
 
 			// A live-tail range keeps moving, so an offset page can repeat a row already shown.
@@ -243,12 +231,12 @@
 		}
 	}
 
-	const buckets = $derived(histogram?.buckets ?? []);
-	const bucketMs = $derived(Number(histogram?.bucketMs ?? 0n));
-	const levelTotals = $derived(histogram?.levelTotals ?? []);
+	const buckets = $derived(series?.buckets ?? []);
+	const bucketMs = $derived(Number(series?.bucketMs ?? 0n));
+	const levelTotals = $derived(series?.levelTotals ?? []);
 
 	// Bucket ends: HeatmapCells draws each cell across (at - step, at] and labels the same span.
-	const bucketDates = $derived(buckets.map((b) => (b.bucketEnd ? timestampDate(b.bucketEnd) : new Date(0))));
+	const bucketDates = $derived(buckets.map((b) => (b.at ? timestampDate(b.at) : new Date(0))));
 
 	const severityRows = $derived.by((): HeatmapRow[] => {
 		const totals = new Map(levelTotals.map((c) => [c.level, Number(c.count)]));
@@ -258,7 +246,7 @@
 			label: levelLabel(level),
 			color: levelColor(level),
 			total: totals.get(level) ?? 0,
-			values: buckets.map((b) => Number(b.counts.find((c) => c.level === level)?.count ?? 0))
+			values: buckets.map((b) => Number(b.levels.find((c) => c.level === level)?.count ?? 0))
 		}));
 	});
 
@@ -366,7 +354,7 @@
 
 	<LogFilterBar {filters} {facets} loading={facetsLoading} bind:searchText={search} />
 
-	<LogsTable {records} bind:sort loading={tableLoading && records.length > 0} onPivot={applyPivot} />
+	<LogsTable {records} bind:sortDesc loading={tableLoading && records.length > 0} onPivot={applyPivot} />
 
 	{#if tableLoading && records.length === 0}
 		<StateBlock class="px-4 py-7" message="Loading…" />

@@ -9,7 +9,7 @@ import { file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
  * Describes the file querysheriff/v1/health.proto.
  */
 export const file_querysheriff_v1_health = /*@__PURE__*/
-  fileDesc("ChxxdWVyeXNoZXJpZmYvdjEvaGVhbHRoLnByb3RvEg9xdWVyeXNoZXJpZmYudjEiWgoTUmVwb3J0SGVhbHRoUmVxdWVzdBIwCgxjb2xsZWN0ZWRfYXQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhEKCWRhdGFiYXNlcxgCIAMoCSIWChRSZXBvcnRIZWFsdGhSZXNwb25zZSIVChNRdWVyeVNlcnZlcnNSZXF1ZXN0IkkKFFF1ZXJ5U2VydmVyc1Jlc3BvbnNlEjEKB3NlcnZlcnMYASADKAsyIC5xdWVyeXNoZXJpZmYudjEuTW9uaXRvcmVkU2VydmVyImsKD01vbml0b3JlZFNlcnZlchITCgtzZXJ2ZXJfbmFtZRgBIAEoCRIwCgxjb2xsZWN0ZWRfYXQYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhEKCWRhdGFiYXNlcxgDIAMoCTLNAQoNSGVhbHRoU2VydmljZRJdCgxSZXBvcnRIZWFsdGgSJC5xdWVyeXNoZXJpZmYudjEuUmVwb3J0SGVhbHRoUmVxdWVzdBolLnF1ZXJ5c2hlcmlmZi52MS5SZXBvcnRIZWFsdGhSZXNwb25zZSIAEl0KDFF1ZXJ5U2VydmVycxIkLnF1ZXJ5c2hlcmlmZi52MS5RdWVyeVNlcnZlcnNSZXF1ZXN0GiUucXVlcnlzaGVyaWZmLnYxLlF1ZXJ5U2VydmVyc1Jlc3BvbnNlIgBCRFpCZ2l0aHViLmNvbS9xdWVyeXNoZXJpZmYvYmFja2VuZC9nZW4vcXVlcnlzaGVyaWZmL3YxO3F1ZXJ5c2hlcmlmZnYxYgZwcm90bzM", [file_google_protobuf_timestamp]);
+  fileDesc("ChxxdWVyeXNoZXJpZmYvdjEvaGVhbHRoLnByb3RvEg9xdWVyeXNoZXJpZmYudjEiWgoTUmVwb3J0SGVhbHRoUmVxdWVzdBIwCgxjb2xsZWN0ZWRfYXQYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhEKCWRhdGFiYXNlcxgCIAMoCSIWChRSZXBvcnRIZWFsdGhSZXNwb25zZSIUChJMaXN0U2VydmVyc1JlcXVlc3QiPwoTTGlzdFNlcnZlcnNSZXNwb25zZRIoCgdzZXJ2ZXJzGAEgAygLMhcucXVlcnlzaGVyaWZmLnYxLlNlcnZlciJiCgZTZXJ2ZXISEwoLc2VydmVyX25hbWUYASABKAkSEQoJZGF0YWJhc2VzGAIgAygJEjAKDGxhc3Rfc2Vlbl9hdBgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAyygEKDUhlYWx0aFNlcnZpY2USXQoMUmVwb3J0SGVhbHRoEiQucXVlcnlzaGVyaWZmLnYxLlJlcG9ydEhlYWx0aFJlcXVlc3QaJS5xdWVyeXNoZXJpZmYudjEuUmVwb3J0SGVhbHRoUmVzcG9uc2UiABJaCgtMaXN0U2VydmVycxIjLnF1ZXJ5c2hlcmlmZi52MS5MaXN0U2VydmVyc1JlcXVlc3QaJC5xdWVyeXNoZXJpZmYudjEuTGlzdFNlcnZlcnNSZXNwb25zZSIAQkRaQmdpdGh1Yi5jb20vcXVlcnlzaGVyaWZmL2JhY2tlbmQvZ2VuL3F1ZXJ5c2hlcmlmZi92MTtxdWVyeXNoZXJpZmZ2MWIGcHJvdG8z", [file_google_protobuf_timestamp]);
 
 /**
  * Describes the message querysheriff.v1.ReportHealthRequest.
@@ -26,24 +26,24 @@ export const ReportHealthResponseSchema = /*@__PURE__*/
   messageDesc(file_querysheriff_v1_health, 1);
 
 /**
- * Describes the message querysheriff.v1.QueryServersRequest.
- * Use `create(QueryServersRequestSchema)` to create a new message.
+ * Describes the message querysheriff.v1.ListServersRequest.
+ * Use `create(ListServersRequestSchema)` to create a new message.
  */
-export const QueryServersRequestSchema = /*@__PURE__*/
+export const ListServersRequestSchema = /*@__PURE__*/
   messageDesc(file_querysheriff_v1_health, 2);
 
 /**
- * Describes the message querysheriff.v1.QueryServersResponse.
- * Use `create(QueryServersResponseSchema)` to create a new message.
+ * Describes the message querysheriff.v1.ListServersResponse.
+ * Use `create(ListServersResponseSchema)` to create a new message.
  */
-export const QueryServersResponseSchema = /*@__PURE__*/
+export const ListServersResponseSchema = /*@__PURE__*/
   messageDesc(file_querysheriff_v1_health, 3);
 
 /**
- * Describes the message querysheriff.v1.MonitoredServer.
- * Use `create(MonitoredServerSchema)` to create a new message.
+ * Describes the message querysheriff.v1.Server.
+ * Use `create(ServerSchema)` to create a new message.
  */
-export const MonitoredServerSchema = /*@__PURE__*/
+export const ServerSchema = /*@__PURE__*/
   messageDesc(file_querysheriff_v1_health, 4);
 
 /**

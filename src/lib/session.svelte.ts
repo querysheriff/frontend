@@ -1,5 +1,5 @@
 import type { User } from '$lib/gen/querysheriff/v1/auth_pb';
-import { authClient } from './connect';
+import { authClient, handleSessionEnded } from './connect';
 
 class SessionState {
 	user = $state<User | null>(null);
@@ -7,7 +7,7 @@ class SessionState {
 
 	async load(): Promise<void> {
 		try {
-			const { user } = await authClient.currentUser({});
+			const { user } = await authClient.getCurrentUser({});
 			this.user = user ?? null;
 		} catch {
 			this.user = null;
@@ -44,3 +44,8 @@ class SessionState {
 }
 
 export const session = new SessionState();
+
+// AppShell sends a signed-out user to /login.
+handleSessionEnded(() => {
+	session.user = null;
+});

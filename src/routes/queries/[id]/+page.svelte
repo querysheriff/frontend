@@ -3,12 +3,11 @@
 	import { page } from '$app/state';
 	import { timestampFromDate, timestampDate } from '@bufbuild/protobuf/wkt';
 	import type {
-		QueryStatementCallsSeriesResponse,
-		QueryStatementDetailResponse,
-		QueryStatementTimingSeriesResponse,
-		StatementMetric,
+		GetStatementResponse,
+		GetStatementSeriesResponse,
 		StatementSample
 	} from '$lib/gen/querysheriff/v1/statement_pb';
+	import type { MetricPoint } from '$lib/gen/querysheriff/v1/common_pb';
 	import { SampleSortColumn } from '$lib/gen/querysheriff/v1/statement_pb';
 	import { statementClient } from '$lib/connect';
 	import StateBlock from '$lib/components/StateBlock.svelte';
@@ -33,16 +32,14 @@
 
 	const sampleSortProto: Record<SampleSortCol, SampleSortColumn> = {
 		at: SampleSortColumn.AT,
-		plan: SampleSortColumn.PLAN,
 		dur: SampleSortColumn.DURATION
 	};
 
-	let detail = $state<QueryStatementDetailResponse | undefined>(undefined);
+	let detail = $state<GetStatementResponse | undefined>(undefined);
 	let metaLoading = $state(true);
 	let metaError = $state<string | null>(null);
 
-	let callsSeries = $state<QueryStatementCallsSeriesResponse | undefined>(undefined);
-	let timingSeries = $state<QueryStatementTimingSeriesResponse | undefined>(undefined);
+	let series = $state<GetStatementSeriesResponse | undefined>(undefined);
 	let chartRange = $state<{ from: Date; to: Date } | null>(null);
 	let chartLoading = $state(true);
 	let chartError = $state<string | null>(null);
@@ -55,7 +52,7 @@
 	let sampleSort = $state<{ col: SampleSortCol; dir: 'asc' | 'desc' }>({ col: 'at', dir: 'desc' });
 
 	const sql = new SqlPopoverState((sampleId) =>
-		statementClient.getStatementSampleText({ sampleId }).then((r) => r.query)
+		statementClient.getStatementSample({ id: sampleId }).then((r) => r.query)
 	);
 
 	const id = $derived(page.params.id ?? '');
@@ -65,7 +62,6 @@
 	let metaAc: AbortController | null = null;
 	$effect(() => {
 		const statementId = id;
-		const { from, to } = ctx.timeRange();
 		const gen = ++metaGen;
 		metaAc?.abort();
 		metaAc = new AbortController();
@@ -83,14 +79,7 @@
 		detail = undefined;
 
 		statementClient
-			.queryStatementDetail(
-				{
-					id: BigInt(statementId),
-					from: timestampFromDate(from),
-					to: timestampFromDate(to)
-				},
-				{ signal: ac.signal }
-			)
+			.getStatement({ id: BigInt(statementId) }, { signal: ac.signal })
 			.then((res) => {
 				if (gen === metaGen) detail = res;
 			})
@@ -106,8 +95,9 @@
 
 	let chartGen = 0;
 	let chartAc: AbortController | null = null;
+	// Charts and samples are scoped to the statement's server and database, known once it loads.
 	$effect(() => {
-		const statementId = id;
+		const statement = detail;
 		const { from, to } = ctx.timeRange();
 		chartRange = { from, to };
 		const gen = ++chartGen;
@@ -115,48 +105,44 @@
 		chartAc = new AbortController();
 		const ac = chartAc;
 
-		if (!validId) {
-			chartError = 'Invalid query id';
-			callsSeries = undefined;
-			timingSeries = undefined;
-			chartLoading = false;
+		series = undefined;
+		if (!statement) {
+			chartError = metaError;
+			chartLoading = metaLoading;
 			return;
 		}
 
 		chartLoading = true;
 		chartError = null;
-		callsSeries = undefined;
-		timingSeries = undefined;
 
-		const scope = {
-			statementId: BigInt(statementId),
-			from: timestampFromDate(from),
-			to: timestampFromDate(to)
-		};
-
-		const calls = statementClient.queryStatementCallsSeries({ scope }, { signal: ac.signal }).then((res) => {
-			if (gen === chartGen) callsSeries = res;
-		});
-
-		const timings = statementClient.queryStatementTimingSeries({ scope }, { signal: ac.signal }).then((res) => {
-			if (gen === chartGen) timingSeries = res;
-		});
-
-		Promise.allSettled([calls, timings])
-			.then((results) => {
-				if (gen !== chartGen) return;
-				const failed = results.find((r) => r.status === 'rejected');
-				chartError = failed ? errMsg((failed as PromiseRejectedResult).reason) : null;
+		statementClient
+			.getStatementSeries(
+				{
+					serverName: statement.serverName,
+					databaseName: statement.databaseName,
+					statementId: BigInt(id),
+					from: timestampFromDate(from),
+					to: timestampFromDate(to)
+				},
+				{ signal: ac.signal }
+			)
+			.then((res) => {
+				if (gen === chartGen) series = res;
+			})
+			.catch((e: unknown) => {
+				if (gen === chartGen) chartError = errMsg(e);
 			})
 			.finally(() => {
 				if (gen === chartGen) chartLoading = false;
 			});
 	});
 
-	function sampleRequest(offset: number) {
+	function sampleRequest(statement: GetStatementResponse, offset: number) {
 		const { from, to } = ctx.timeRange();
 		return {
-			id: BigInt(id),
+			serverName: statement.serverName,
+			databaseName: statement.databaseName,
+			statementId: BigInt(id),
 			from: timestampFromDate(from),
 			to: timestampFromDate(to),
 			sortColumn: sampleSortProto[sampleSort.col],
@@ -170,7 +156,7 @@
 		return {
 			id: s.id.toString(),
 			ts: s.occurredAt ? fmtTs(timestampDate(s.occurredAt)) : '—',
-			short: s.query,
+			short: s.preview,
 			tags: s.tags,
 			hasPlan: s.hasPlan,
 			durFmt: fmtDuration(s.durationMs),
@@ -181,17 +167,17 @@
 	let samplesGen = 0;
 	let samplesAc: AbortController | null = null;
 	$effect(() => {
-		const request = validId ? sampleRequest(0) : null;
+		const request = detail ? sampleRequest(detail, 0) : null;
 		const gen = ++samplesGen;
 		samplesAc?.abort();
 		samplesAc = new AbortController();
 		const ac = samplesAc;
 
 		if (!request) {
-			samplesError = 'Invalid query id';
+			samplesError = metaError;
 			samples = [];
 			hasMore = false;
-			samplesLoading = false;
+			samplesLoading = metaLoading;
 			return;
 		}
 
@@ -199,7 +185,7 @@
 		samplesError = null;
 
 		statementClient
-			.queryStatementSamples(request, { signal: ac.signal })
+			.listStatementSamples(request, { signal: ac.signal })
 			.then((res) => {
 				if (gen !== samplesGen) return;
 				samples = res.samples.map(toSampleRow);
@@ -217,11 +203,11 @@
 	});
 
 	async function loadMore() {
-		if (loadingMore || samplesLoading || !hasMore) return;
+		if (!detail || loadingMore || samplesLoading || !hasMore) return;
 		const gen = samplesGen;
 		loadingMore = true;
 		try {
-			const res = await statementClient.queryStatementSamples(sampleRequest(samples.length), {
+			const res = await statementClient.listStatementSamples(sampleRequest(detail, samples.length), {
 				signal: samplesAc?.signal
 			});
 			if (gen !== samplesGen) return;
@@ -253,20 +239,20 @@
 		return kvTags(Object.fromEntries(Object.entries(tagMap).filter(([k, v]) => baseTags[k] !== v)));
 	}
 
-	function toPoints(m?: StatementMetric): MetricSeriesPoint[] {
-		return (m?.series ?? []).flatMap((p) => (p.at ? [{ at: timestampDate(p.at), value: p.value }] : []));
+	function toPoints(points: MetricPoint[] = []): MetricSeriesPoint[] {
+		return points.flatMap((p) => (p.at ? [{ at: timestampDate(p.at), value: p.value }] : []));
 	}
 
-	const bucketMs = $derived(Number(callsSeries?.bucketMs ?? timingSeries?.bucketMs ?? 0n));
-	const callsPoints = $derived(toPoints(callsSeries?.calls));
+	const bucketMs = $derived(Number(series?.bucketMs ?? 0n));
+	const callsPoints = $derived(toPoints(series?.calls));
 	const volumeDescription = $derived(
 		callsPoints.length > 0
 			? `How many times this query ran · ${fmtBucketSize(bucketMs)} buckets`
 			: 'How many times this query ran'
 	);
 	const timing = $derived([
-		{ label: 'avg total', color: 'var(--color-command)', points: toPoints(timingSeries?.avg) },
-		{ label: 'avg IO', color: 'var(--color-teal)', points: toPoints(timingSeries?.avgIo) }
+		{ label: 'avg total', color: 'var(--color-command)', points: toPoints(series?.avgMs) },
+		{ label: 'avg IO', color: 'var(--color-teal)', points: toPoints(series?.avgIoMs) }
 	]);
 </script>
 

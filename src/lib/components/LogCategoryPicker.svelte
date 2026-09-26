@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { CheckIcon, ChevronLeftIcon, ChevronRightIcon, SearchIcon } from '@lucide/svelte';
-	import { LogEvent_LogCategory, LogFacetField, type LogFacet } from '$lib/gen/querysheriff/v1/log_pb';
+	import { LogCategory, LogFacetField, type LogFacet } from '$lib/gen/querysheriff/v1/log_pb';
 	import { fmtCount } from '$lib/format';
 	import {
 		CATEGORY_ORDER,
@@ -35,7 +35,7 @@
 
 	let pickedCategories = $state<string[]>(seed.categories);
 	let pickedEvents = $state<string[]>(seed.events);
-	let openCategory = $state<LogEvent_LogCategory | null>(null);
+	let openCategory = $state<LogCategory | null>(null);
 	let search = $state('');
 	let highlight = $state(0);
 	let searchInput = $state<HTMLInputElement | null>(null);
@@ -48,7 +48,7 @@
 		new Map(facetValues(facets, LogFacetField.CATEGORY).map((v) => [Number(v.value), Number(v.count)]))
 	);
 
-	type EventRow = { value: string; label: string; code: string; count: number; category: LogEvent_LogCategory };
+	type EventRow = { value: string; label: string; code: string; count: number; category: LogCategory };
 
 	const events = $derived(
 		facetValues(facets, LogFacetField.CLASSIFICATION).map((v) => ({
@@ -61,7 +61,7 @@
 	);
 
 	const eventsByCategory = $derived(
-		new Map<LogEvent_LogCategory, EventRow[]>(
+		new Map<LogCategory, EventRow[]>(
 			CATEGORY_ORDER.map((category) => [
 				category,
 				events
@@ -79,7 +79,7 @@
 			count: categoryCounts.get(category) ?? 0,
 			present: (eventsByCategory.get(category) ?? []).length
 		}))
-			.filter((f) => f.category !== LogEvent_LogCategory.UNSPECIFIED || f.count > 0)
+			.filter((f) => f.category !== LogCategory.UNSPECIFIED || f.count > 0)
 			.sort((a, b) => (a.count > 0 ? 0 : 1) - (b.count > 0 ? 0 : 1))
 	);
 
@@ -96,9 +96,7 @@
 	const openEvents = $derived(openCategory === null ? [] : (eventsByCategory.get(openCategory) ?? []));
 
 	type Row =
-		| { kind: 'category'; category: LogEvent_LogCategory }
-		| { kind: 'event'; value: string }
-		| { kind: 'whole-category' };
+		{ kind: 'category'; category: LogCategory } | { kind: 'event'; value: string } | { kind: 'whole-category' };
 
 	const rows = $derived.by((): Row[] => {
 		if (term !== '') return matches.map((e) => ({ kind: 'event', value: e.value }) as Row);
@@ -115,7 +113,7 @@
 		return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
 	}
 
-	function toggleCategory(category: LogEvent_LogCategory) {
+	function toggleCategory(category: LogCategory) {
 		const value = String(category);
 		pickedCategories = toggle(pickedCategories, value);
 
@@ -130,7 +128,7 @@
 		pickedEvents = toggle(pickedEvents, value);
 	}
 
-	function drillInto(category: LogEvent_LogCategory) {
+	function drillInto(category: LogCategory) {
 		openCategory = category;
 		highlight = 0;
 		search = '';

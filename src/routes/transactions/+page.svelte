@@ -2,7 +2,7 @@
 	import { timestampFromDate, timestampDate } from '@bufbuild/protobuf/wkt';
 	import {
 		TransactionSortColumn,
-		type QueryTransactionAgeSeriesResponse,
+		type GetTransactionAgeSeriesResponse,
 		type Transaction
 	} from '$lib/gen/querysheriff/v1/activity_pb';
 	import { activityClient } from '$lib/connect';
@@ -26,7 +26,7 @@
 
 	const PAGE_SIZE = 10;
 
-	let series = $state<QueryTransactionAgeSeriesResponse | undefined>(undefined);
+	let series = $state<GetTransactionAgeSeriesResponse | undefined>(undefined);
 	let chartRange = $state<{ from: Date; to: Date } | null>(null);
 	let chartLoading = $state(true);
 	let chartError = $state<string | null>(null);
@@ -69,12 +69,12 @@
 
 	function toRow(t: Transaction): TransactionRow {
 		return {
-			key: `${t.pid}-${tsKey(t.start)}`,
+			key: `${t.pid}-${tsKey(t.startedAt)}`,
 			pid: t.pid,
 			app: t.applicationName,
-			openMs: durationMs(t.start, t.end),
-			start: toDate(t.start),
-			startTs: t.start,
+			openMs: durationMs(t.startedAt, t.lastSeenAt),
+			start: toDate(t.startedAt),
+			startTs: t.startedAt,
 			events: t.events
 		};
 	}
@@ -85,7 +85,7 @@
 		const request = scope();
 		const { from, to } = ctx.timeRange();
 		chartRange = { from, to };
-		if (!ctx.server) {
+		if (!ctx.server || !ctx.db) {
 			chartLoading = !serversState.loaded;
 			if (serversState.loaded) {
 				series = undefined;
@@ -101,7 +101,7 @@
 		series = undefined;
 
 		activityClient
-			.queryTransactionAgeSeries(request, { signal: chartAc.signal })
+			.getTransactionAgeSeries(request, { signal: chartAc.signal })
 			.then((res) => {
 				if (gen !== chartGen) return;
 				series = res;
@@ -118,7 +118,7 @@
 	let txnGen = 0;
 	let txnAc: AbortController | null = null;
 	$effect(() => {
-		if (!ctx.server) {
+		if (!ctx.server || !ctx.db) {
 			txnLoading = !serversState.loaded;
 			if (serversState.loaded) {
 				txnRows = [];
@@ -135,7 +135,7 @@
 		txnError = null;
 
 		activityClient
-			.queryTransactions(request, { signal: txnAc.signal })
+			.listTransactions(request, { signal: txnAc.signal })
 			.then((res) => {
 				if (gen !== txnGen) return;
 				txnRows = res.transactions.map(toRow);
@@ -157,7 +157,7 @@
 		const gen = txnGen;
 		loadingMore = true;
 		try {
-			const res = await activityClient.queryTransactions(tableRequest(txnRows.length), { signal: txnAc?.signal });
+			const res = await activityClient.listTransactions(tableRequest(txnRows.length), { signal: txnAc?.signal });
 			if (gen !== txnGen) return;
 			const seen = new Set(txnRows.map((r) => r.key));
 			txnRows = [...txnRows, ...res.transactions.map(toRow).filter((r) => !seen.has(r.key))];
@@ -171,7 +171,7 @@
 
 	// Seconds on the wire, milliseconds in the chart, so fmtDuration can label it.
 	const points = $derived<MetricSeriesPoint[]>(
-		(series?.series ?? []).flatMap((p) => (p.at ? [{ at: timestampDate(p.at), value: p.ageSeconds * 1000 }] : []))
+		(series?.ageSeconds ?? []).flatMap((p) => (p.at ? [{ at: timestampDate(p.at), value: p.value * 1000 }] : []))
 	);
 	const bucketMs = $derived(Number(series?.bucketMs ?? 0n));
 	const ageSeries = $derived([{ label: 'max transaction age', color: 'var(--color-warn)', points }]);

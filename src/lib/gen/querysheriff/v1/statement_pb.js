@@ -4,32 +4,33 @@
 
 import { enumDesc, fileDesc, messageDesc, serviceDesc, tsEnum } from "@bufbuild/protobuf/codegenv2";
 import { file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
+import { file_querysheriff_v1_common } from "./common_pb.js";
 
 /**
  * Describes the file querysheriff/v1/statement.proto.
  */
 export const file_querysheriff_v1_statement = /*@__PURE__*/
-  fileDesc("Ch9xdWVyeXNoZXJpZmYvdjEvc3RhdGVtZW50LnByb3RvEg9xdWVyeXNoZXJpZmYudjEiWAoJVGFnRmlsdGVyEgsKA2tleRgBIAEoCRIuCgJvcBgCIAEoDjIiLnF1ZXJ5c2hlcmlmZi52MS5UYWdGaWx0ZXJPcGVyYXRvchIOCgZ2YWx1ZXMYAyADKAkihgEKF1JlcG9ydFN0YXRlbWVudHNSZXF1ZXN0EjAKDGNvbGxlY3RlZF9hdBgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASOQoQc3RhdGVtZW50X2RlbHRhcxgCIAMoCzIfLnF1ZXJ5c2hlcmlmZi52MS5TdGF0ZW1lbnREZWx0YSJaChhSZXBvcnRTdGF0ZW1lbnRzUmVzcG9uc2USPgoSdW5rbm93bl9zdGF0ZW1lbnRzGAEgAygLMiIucXVlcnlzaGVyaWZmLnYxLlN0YXRlbWVudElkZW50aXR5Ik8KEVN0YXRlbWVudElkZW50aXR5EhEKCXVzZXJfbmFtZRgBIAEoCRIVCg1kYXRhYmFzZV9uYW1lGAIgASgJEhAKCHF1ZXJ5X2lkGAMgASgDIlYKG1JlcG9ydFN0YXRlbWVudFRleHRzUmVxdWVzdBI3Cg9zdGF0ZW1lbnRfdGV4dHMYASADKAsyHi5xdWVyeXNoZXJpZmYudjEuU3RhdGVtZW50VGV4dCIeChxSZXBvcnRTdGF0ZW1lbnRUZXh0c1Jlc3BvbnNlIlQKDVN0YXRlbWVudFRleHQSNAoIaWRlbnRpdHkYASABKAsyIi5xdWVyeXNoZXJpZmYudjEuU3RhdGVtZW50SWRlbnRpdHkSDQoFcXVlcnkYAiABKAki8wIKFlF1ZXJ5U3RhdGVtZW50c1JlcXVlc3QSEwoLc2VydmVyX25hbWUYASABKAkSFQoNZGF0YWJhc2VfbmFtZRgCIAEoCRIoCgRmcm9tGAMgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBImCgJ0bxgEIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASEgoKcXVlcnlfdGV4dBgFIAEoCRINCgVsaW1pdBgGIAEoBRIvCgt0YWdfZmlsdGVycxgHIAMoCzIaLnF1ZXJ5c2hlcmlmZi52MS5UYWdGaWx0ZXISKQoFa2luZHMYCCADKA4yGi5xdWVyeXNoZXJpZmYudjEuUXVlcnlLaW5kEg4KBm9mZnNldBgJIAEoBRI5Cgtzb3J0X2NvbHVtbhgKIAEoDjIkLnF1ZXJ5c2hlcmlmZi52MS5TdGF0ZW1lbnRTb3J0Q29sdW1uEhEKCXNvcnRfZGVzYxgLIAEoCCJfChdRdWVyeVN0YXRlbWVudHNSZXNwb25zZRIyCgpzdGF0ZW1lbnRzGAEgAygLMh4ucXVlcnlzaGVyaWZmLnYxLlN0YXRlbWVudFN0YXQSEAoIaGFzX21vcmUYAiABKAgioQEKC1Nlcmllc1Njb3BlEhMKC3NlcnZlcl9uYW1lGAEgASgJEhUKDWRhdGFiYXNlX25hbWUYAiABKAkSFAoMc3RhdGVtZW50X2lkGAMgASgEEigKBGZyb20YBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEiYKAnRvGAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCJPCiBRdWVyeVN0YXRlbWVudENhbGxzU2VyaWVzUmVxdWVzdBIrCgVzY29wZRgBIAEoCzIcLnF1ZXJ5c2hlcmlmZi52MS5TZXJpZXNTY29wZSJnCiFRdWVyeVN0YXRlbWVudENhbGxzU2VyaWVzUmVzcG9uc2USLwoFY2FsbHMYASABKAsyIC5xdWVyeXNoZXJpZmYudjEuU3RhdGVtZW50TWV0cmljEhEKCWJ1Y2tldF9tcxgCIAEoAyJUCiVRdWVyeVN0YXRlbWVudFBlcmNlbnRpbGVTZXJpZXNSZXF1ZXN0EisKBXNjb3BlGAEgASgLMhwucXVlcnlzaGVyaWZmLnYxLlNlcmllc1Njb3BlIsgBCiZRdWVyeVN0YXRlbWVudFBlcmNlbnRpbGVTZXJpZXNSZXNwb25zZRItCgNwOTAYASABKAsyIC5xdWVyeXNoZXJpZmYudjEuU3RhdGVtZW50TWV0cmljEi0KA3A5NRgCIAEoCzIgLnF1ZXJ5c2hlcmlmZi52MS5TdGF0ZW1lbnRNZXRyaWMSLQoDcDk5GAMgASgLMiAucXVlcnlzaGVyaWZmLnYxLlN0YXRlbWVudE1ldHJpYxIRCglidWNrZXRfbXMYBCABKAMiUAohUXVlcnlTdGF0ZW1lbnRUaW1pbmdTZXJpZXNSZXF1ZXN0EisKBXNjb3BlGAEgASgLMhwucXVlcnlzaGVyaWZmLnYxLlNlcmllc1Njb3BlIpgBCiJRdWVyeVN0YXRlbWVudFRpbWluZ1Nlcmllc1Jlc3BvbnNlEi0KA2F2ZxgBIAEoCzIgLnF1ZXJ5c2hlcmlmZi52MS5TdGF0ZW1lbnRNZXRyaWMSMAoGYXZnX2lvGAIgASgLMiAucXVlcnlzaGVyaWZmLnYxLlN0YXRlbWVudE1ldHJpYxIRCglidWNrZXRfbXMYAyABKAMiewobUXVlcnlTdGF0ZW1lbnREZXRhaWxSZXF1ZXN0EgoKAmlkGAEgASgEEigKBGZyb20YAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEiYKAnRvGAMgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCLNAQocUXVlcnlTdGF0ZW1lbnREZXRhaWxSZXNwb25zZRINCgVxdWVyeRgBIAEoCRJFCgR0YWdzGAIgAygLMjcucXVlcnlzaGVyaWZmLnYxLlF1ZXJ5U3RhdGVtZW50RGV0YWlsUmVzcG9uc2UuVGFnc0VudHJ5EhMKC3NlcnZlcl9uYW1lGAUgASgJEhUKDWRhdGFiYXNlX25hbWUYBiABKAkaKwoJVGFnc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEi5gEKHFF1ZXJ5U3RhdGVtZW50U2FtcGxlc1JlcXVlc3QSCgoCaWQYASABKAQSKAoEZnJvbRgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASJgoCdG8YAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEg0KBWxpbWl0GAQgASgFEg4KBm9mZnNldBgFIAEoBRI2Cgtzb3J0X2NvbHVtbhgGIAEoDjIhLnF1ZXJ5c2hlcmlmZi52MS5TYW1wbGVTb3J0Q29sdW1uEhEKCXNvcnRfZGVzYxgHIAEoCCJkCh1RdWVyeVN0YXRlbWVudFNhbXBsZXNSZXNwb25zZRIxCgdzYW1wbGVzGAEgAygLMiAucXVlcnlzaGVyaWZmLnYxLlN0YXRlbWVudFNhbXBsZRIQCghoYXNfbW9yZRgCIAEoCCLrAQoPU3RhdGVtZW50U2FtcGxlEgoKAmlkGAEgASgEEi8KC29jY3VycmVkX2F0GAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBINCgVxdWVyeRgDIAEoCRI4CgR0YWdzGAQgAygLMioucXVlcnlzaGVyaWZmLnYxLlN0YXRlbWVudFNhbXBsZS5UYWdzRW50cnkSEAoIaGFzX3BsYW4YBSABKAgSEwoLZHVyYXRpb25fbXMYBiABKAEaKwoJVGFnc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiMgodR2V0U3RhdGVtZW50U2FtcGxlUGxhblJlcXVlc3QSEQoJc2FtcGxlX2lkGAEgASgEIkIKHkdldFN0YXRlbWVudFNhbXBsZVBsYW5SZXNwb25zZRINCgVxdWVyeRgBIAEoCRIRCglwbGFuX2pzb24YAiABKAkiMgodR2V0U3RhdGVtZW50U2FtcGxlVGV4dFJlcXVlc3QSEQoJc2FtcGxlX2lkGAEgASgEIi8KHkdldFN0YXRlbWVudFNhbXBsZVRleHRSZXNwb25zZRINCgVxdWVyeRgBIAEoCSIlChdHZXRTdGF0ZW1lbnRUZXh0UmVxdWVzdBIKCgJpZBgBIAEoBCIpChhHZXRTdGF0ZW1lbnRUZXh0UmVzcG9uc2USDQoFcXVlcnkYASABKAkiPwoPU3RhdGVtZW50TWV0cmljEiwKBnNlcmllcxgBIAMoCzIcLnF1ZXJ5c2hlcmlmZi52MS5NZXRyaWNQb2ludCJECgtNZXRyaWNQb2ludBImCgJhdBgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASDQoFdmFsdWUYAiABKAEilwIKDVN0YXRlbWVudFN0YXQSCgoCaWQYASABKAQSDwoHcHJldmlldxgCIAEoCRIRCgl1c2VyX25hbWUYAyABKAkSFwoPdG90YWxfZXhlY190aW1lGAQgASgBEhQKDHBjdF9vZl90b3RhbBgFIAEoARINCgVjYWxscxgGIAEoAxIVCg1hdmdfZXhlY190aW1lGAcgASgBEgwKBHJvd3MYCCABKAMSNgoEdGFncxgJIAMoCzIoLnF1ZXJ5c2hlcmlmZi52MS5TdGF0ZW1lbnRTdGF0LlRhZ3NFbnRyeRIOCgZwY3RfaW8YCiABKAEaKwoJVGFnc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEimQEKDlN0YXRlbWVudERlbHRhEhEKCXVzZXJfbmFtZRgBIAEoCRIVCg1kYXRhYmFzZV9uYW1lGAIgASgJEhAKCHF1ZXJ5X2lkGAMgASgDEg0KBWNhbGxzGAQgASgDEgwKBHJvd3MYBSABKAMSFwoPdG90YWxfZXhlY190aW1lGAYgASgBEhUKDXRvdGFsX2lvX3RpbWUYByABKAEikgEKEkxpc3RUYWdLZXlzUmVxdWVzdBITCgtzZXJ2ZXJfbmFtZRgBIAEoCRIVCg1kYXRhYmFzZV9uYW1lGAIgASgJEigKBGZyb20YAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEiYKAnRvGAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCI8ChNMaXN0VGFnS2V5c1Jlc3BvbnNlEiUKBGtleXMYASADKAsyFy5xdWVyeXNoZXJpZmYudjEuVGFnS2V5IioKBlRhZ0tleRILCgNrZXkYASABKAkSEwoLdmFsdWVfY291bnQYAiABKAMioQEKFExpc3RUYWdWYWx1ZXNSZXF1ZXN0EhMKC3NlcnZlcl9uYW1lGAEgASgJEhUKDWRhdGFiYXNlX25hbWUYAiABKAkSKAoEZnJvbRgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASJgoCdG8YBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEgsKA2tleRgFIAEoCSJCChVMaXN0VGFnVmFsdWVzUmVzcG9uc2USKQoGdmFsdWVzGAEgAygLMhkucXVlcnlzaGVyaWZmLnYxLlRhZ1ZhbHVlIjIKCFRhZ1ZhbHVlEg0KBXZhbHVlGAEgASgJEhcKD3N0YXRlbWVudF9jb3VudBgCIAEoAyqaAQoRVGFnRmlsdGVyT3BlcmF0b3ISIwofVEFHX0ZJTFRFUl9PUEVSQVRPUl9VTlNQRUNJRklFRBAAEh0KGVRBR19GSUxURVJfT1BFUkFUT1JfRVFVQUwQARIhCh1UQUdfRklMVEVSX09QRVJBVE9SX05PVF9FUVVBTBACEh4KGlRBR19GSUxURVJfT1BFUkFUT1JfRVhJU1RTEAMqawoJUXVlcnlLaW5kEhoKFlFVRVJZX0tJTkRfVU5TUEVDSUZJRUQQABIUChBRVUVSWV9LSU5EX1JFQURTEAESFQoRUVVFUllfS0lORF9XUklURVMQAhIVChFRVUVSWV9LSU5EX09USEVSUxADKusBChNTdGF0ZW1lbnRTb3J0Q29sdW1uEiUKIVNUQVRFTUVOVF9TT1JUX0NPTFVNTl9VTlNQRUNJRklFRBAAEh0KGVNUQVRFTUVOVF9TT1JUX0NPTFVNTl9BVkcQARIfChtTVEFURU1FTlRfU09SVF9DT0xVTU5fQ0FMTFMQAhInCiNTVEFURU1FTlRfU09SVF9DT0xVTU5fUk9XU19QRVJfQ0FMTBADEiAKHFNUQVRFTUVOVF9TT1JUX0NPTFVNTl9QQ1RfSU8QBBIiCh5TVEFURU1FTlRfU09SVF9DT0xVTU5fUENUX1RJTUUQBSqPAQoQU2FtcGxlU29ydENvbHVtbhIiCh5TQU1QTEVfU09SVF9DT0xVTU5fVU5TUEVDSUZJRUQQABIZChVTQU1QTEVfU09SVF9DT0xVTU5fQVQQARIfChtTQU1QTEVfU09SVF9DT0xVTU5fRFVSQVRJT04QAhIbChdTQU1QTEVfU09SVF9DT0xVTU5fUExBThADMpcMChBTdGF0ZW1lbnRTZXJ2aWNlEmkKEFJlcG9ydFN0YXRlbWVudHMSKC5xdWVyeXNoZXJpZmYudjEuUmVwb3J0U3RhdGVtZW50c1JlcXVlc3QaKS5xdWVyeXNoZXJpZmYudjEuUmVwb3J0U3RhdGVtZW50c1Jlc3BvbnNlIgASdQoUUmVwb3J0U3RhdGVtZW50VGV4dHMSLC5xdWVyeXNoZXJpZmYudjEuUmVwb3J0U3RhdGVtZW50VGV4dHNSZXF1ZXN0Gi0ucXVlcnlzaGVyaWZmLnYxLlJlcG9ydFN0YXRlbWVudFRleHRzUmVzcG9uc2UiABJmCg9RdWVyeVN0YXRlbWVudHMSJy5xdWVyeXNoZXJpZmYudjEuUXVlcnlTdGF0ZW1lbnRzUmVxdWVzdBooLnF1ZXJ5c2hlcmlmZi52MS5RdWVyeVN0YXRlbWVudHNSZXNwb25zZSIAEoQBChlRdWVyeVN0YXRlbWVudENhbGxzU2VyaWVzEjEucXVlcnlzaGVyaWZmLnYxLlF1ZXJ5U3RhdGVtZW50Q2FsbHNTZXJpZXNSZXF1ZXN0GjIucXVlcnlzaGVyaWZmLnYxLlF1ZXJ5U3RhdGVtZW50Q2FsbHNTZXJpZXNSZXNwb25zZSIAEpMBCh5RdWVyeVN0YXRlbWVudFBlcmNlbnRpbGVTZXJpZXMSNi5xdWVyeXNoZXJpZmYudjEuUXVlcnlTdGF0ZW1lbnRQZXJjZW50aWxlU2VyaWVzUmVxdWVzdBo3LnF1ZXJ5c2hlcmlmZi52MS5RdWVyeVN0YXRlbWVudFBlcmNlbnRpbGVTZXJpZXNSZXNwb25zZSIAEocBChpRdWVyeVN0YXRlbWVudFRpbWluZ1NlcmllcxIyLnF1ZXJ5c2hlcmlmZi52MS5RdWVyeVN0YXRlbWVudFRpbWluZ1Nlcmllc1JlcXVlc3QaMy5xdWVyeXNoZXJpZmYudjEuUXVlcnlTdGF0ZW1lbnRUaW1pbmdTZXJpZXNSZXNwb25zZSIAEnUKFFF1ZXJ5U3RhdGVtZW50RGV0YWlsEiwucXVlcnlzaGVyaWZmLnYxLlF1ZXJ5U3RhdGVtZW50RGV0YWlsUmVxdWVzdBotLnF1ZXJ5c2hlcmlmZi52MS5RdWVyeVN0YXRlbWVudERldGFpbFJlc3BvbnNlIgASeAoVUXVlcnlTdGF0ZW1lbnRTYW1wbGVzEi0ucXVlcnlzaGVyaWZmLnYxLlF1ZXJ5U3RhdGVtZW50U2FtcGxlc1JlcXVlc3QaLi5xdWVyeXNoZXJpZmYudjEuUXVlcnlTdGF0ZW1lbnRTYW1wbGVzUmVzcG9uc2UiABJ7ChZHZXRTdGF0ZW1lbnRTYW1wbGVQbGFuEi4ucXVlcnlzaGVyaWZmLnYxLkdldFN0YXRlbWVudFNhbXBsZVBsYW5SZXF1ZXN0Gi8ucXVlcnlzaGVyaWZmLnYxLkdldFN0YXRlbWVudFNhbXBsZVBsYW5SZXNwb25zZSIAEnsKFkdldFN0YXRlbWVudFNhbXBsZVRleHQSLi5xdWVyeXNoZXJpZmYudjEuR2V0U3RhdGVtZW50U2FtcGxlVGV4dFJlcXVlc3QaLy5xdWVyeXNoZXJpZmYudjEuR2V0U3RhdGVtZW50U2FtcGxlVGV4dFJlc3BvbnNlIgASaQoQR2V0U3RhdGVtZW50VGV4dBIoLnF1ZXJ5c2hlcmlmZi52MS5HZXRTdGF0ZW1lbnRUZXh0UmVxdWVzdBopLnF1ZXJ5c2hlcmlmZi52MS5HZXRTdGF0ZW1lbnRUZXh0UmVzcG9uc2UiABJaCgtMaXN0VGFnS2V5cxIjLnF1ZXJ5c2hlcmlmZi52MS5MaXN0VGFnS2V5c1JlcXVlc3QaJC5xdWVyeXNoZXJpZmYudjEuTGlzdFRhZ0tleXNSZXNwb25zZSIAEmAKDUxpc3RUYWdWYWx1ZXMSJS5xdWVyeXNoZXJpZmYudjEuTGlzdFRhZ1ZhbHVlc1JlcXVlc3QaJi5xdWVyeXNoZXJpZmYudjEuTGlzdFRhZ1ZhbHVlc1Jlc3BvbnNlIgBCRFpCZ2l0aHViLmNvbS9xdWVyeXNoZXJpZmYvYmFja2VuZC9nZW4vcXVlcnlzaGVyaWZmL3YxO3F1ZXJ5c2hlcmlmZnYxYgZwcm90bzM", [file_google_protobuf_timestamp]);
-
-/**
- * Describes the message querysheriff.v1.TagFilter.
- * Use `create(TagFilterSchema)` to create a new message.
- */
-export const TagFilterSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 0);
+  fileDesc("Ch9xdWVyeXNoZXJpZmYvdjEvc3RhdGVtZW50LnByb3RvEg9xdWVyeXNoZXJpZmYudjEihgEKF1JlcG9ydFN0YXRlbWVudHNSZXF1ZXN0EjAKDGNvbGxlY3RlZF9hdBgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASOQoQc3RhdGVtZW50X2RlbHRhcxgCIAMoCzIfLnF1ZXJ5c2hlcmlmZi52MS5TdGF0ZW1lbnREZWx0YSJaChhSZXBvcnRTdGF0ZW1lbnRzUmVzcG9uc2USPgoSdW5rbm93bl9zdGF0ZW1lbnRzGAEgAygLMiIucXVlcnlzaGVyaWZmLnYxLlN0YXRlbWVudElkZW50aXR5IpkBCg5TdGF0ZW1lbnREZWx0YRIRCgl1c2VyX25hbWUYASABKAkSFQoNZGF0YWJhc2VfbmFtZRgCIAEoCRIQCghxdWVyeV9pZBgDIAEoAxINCgVjYWxscxgEIAEoAxIMCgRyb3dzGAUgASgDEhcKD3RvdGFsX2V4ZWNfdGltZRgGIAEoARIVCg10b3RhbF9pb190aW1lGAcgASgBIk8KEVN0YXRlbWVudElkZW50aXR5EhEKCXVzZXJfbmFtZRgBIAEoCRIVCg1kYXRhYmFzZV9uYW1lGAIgASgJEhAKCHF1ZXJ5X2lkGAMgASgDIlYKG1JlcG9ydFN0YXRlbWVudFRleHRzUmVxdWVzdBI3Cg9zdGF0ZW1lbnRfdGV4dHMYASADKAsyHi5xdWVyeXNoZXJpZmYudjEuU3RhdGVtZW50VGV4dCIeChxSZXBvcnRTdGF0ZW1lbnRUZXh0c1Jlc3BvbnNlIlQKDVN0YXRlbWVudFRleHQSNAoIaWRlbnRpdHkYASABKAsyIi5xdWVyeXNoZXJpZmYudjEuU3RhdGVtZW50SWRlbnRpdHkSDQoFcXVlcnkYAiABKAkiWAoJVGFnRmlsdGVyEgsKA2tleRgBIAEoCRIuCgJvcBgCIAEoDjIiLnF1ZXJ5c2hlcmlmZi52MS5UYWdGaWx0ZXJPcGVyYXRvchIOCgZ2YWx1ZXMYAyADKAki7gIKFUxpc3RTdGF0ZW1lbnRzUmVxdWVzdBITCgtzZXJ2ZXJfbmFtZRgBIAEoCRIVCg1kYXRhYmFzZV9uYW1lGAIgASgJEigKBGZyb20YAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEiYKAnRvGAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIOCgZzZWFyY2gYBSABKAkSLwoLdGFnX2ZpbHRlcnMYBiADKAsyGi5xdWVyeXNoZXJpZmYudjEuVGFnRmlsdGVyEikKBWtpbmRzGAcgAygOMhoucXVlcnlzaGVyaWZmLnYxLlF1ZXJ5S2luZBI5Cgtzb3J0X2NvbHVtbhgIIAEoDjIkLnF1ZXJ5c2hlcmlmZi52MS5TdGF0ZW1lbnRTb3J0Q29sdW1uEhEKCXNvcnRfZGVzYxgJIAEoCBINCgVsaW1pdBgKIAEoBRIOCgZvZmZzZXQYCyABKAUiXgoWTGlzdFN0YXRlbWVudHNSZXNwb25zZRIyCgpzdGF0ZW1lbnRzGAEgAygLMh4ucXVlcnlzaGVyaWZmLnYxLlN0YXRlbWVudFN0YXQSEAoIaGFzX21vcmUYAiABKAgi8wEKDVN0YXRlbWVudFN0YXQSCgoCaWQYASABKAQSDwoHcHJldmlldxgCIAEoCRIRCgl1c2VyX25hbWUYAyABKAkSNgoEdGFncxgEIAMoCzIoLnF1ZXJ5c2hlcmlmZi52MS5TdGF0ZW1lbnRTdGF0LlRhZ3NFbnRyeRINCgVjYWxscxgFIAEoAxIMCgRyb3dzGAYgASgDEg4KBmF2Z19tcxgHIAEoARIQCghwY3RfdGltZRgIIAEoARIOCgZwY3RfaW8YCSABKAEaKwoJVGFnc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiIQoTR2V0U3RhdGVtZW50UmVxdWVzdBIKCgJpZBgBIAEoBCK9AQoUR2V0U3RhdGVtZW50UmVzcG9uc2USDQoFcXVlcnkYASABKAkSPQoEdGFncxgCIAMoCzIvLnF1ZXJ5c2hlcmlmZi52MS5HZXRTdGF0ZW1lbnRSZXNwb25zZS5UYWdzRW50cnkSEwoLc2VydmVyX25hbWUYAyABKAkSFQoNZGF0YWJhc2VfbmFtZRgEIAEoCRorCglUYWdzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASKvAQoZR2V0U3RhdGVtZW50U2VyaWVzUmVxdWVzdBITCgtzZXJ2ZXJfbmFtZRgBIAEoCRIVCg1kYXRhYmFzZV9uYW1lGAIgASgJEhQKDHN0YXRlbWVudF9pZBgDIAEoBBIoCgRmcm9tGAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBImCgJ0bxgFIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiuwEKGkdldFN0YXRlbWVudFNlcmllc1Jlc3BvbnNlEisKBWNhbGxzGAEgAygLMhwucXVlcnlzaGVyaWZmLnYxLk1ldHJpY1BvaW50EiwKBmF2Z19tcxgCIAMoCzIcLnF1ZXJ5c2hlcmlmZi52MS5NZXRyaWNQb2ludBIvCglhdmdfaW9fbXMYAyADKAsyHC5xdWVyeXNoZXJpZmYudjEuTWV0cmljUG9pbnQSEQoJYnVja2V0X21zGAQgASgDIpcBChdHZXRMYXRlbmN5U2VyaWVzUmVxdWVzdBITCgtzZXJ2ZXJfbmFtZRgBIAEoCRIVCg1kYXRhYmFzZV9uYW1lGAIgASgJEigKBGZyb20YAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEiYKAnRvGAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCK3AQoYR2V0TGF0ZW5jeVNlcmllc1Jlc3BvbnNlEiwKBnA5MF9tcxgBIAMoCzIcLnF1ZXJ5c2hlcmlmZi52MS5NZXRyaWNQb2ludBIsCgZwOTVfbXMYAiADKAsyHC5xdWVyeXNoZXJpZmYudjEuTWV0cmljUG9pbnQSLAoGcDk5X21zGAMgAygLMhwucXVlcnlzaGVyaWZmLnYxLk1ldHJpY1BvaW50EhEKCWJ1Y2tldF9tcxgEIAEoAyKbAgobTGlzdFN0YXRlbWVudFNhbXBsZXNSZXF1ZXN0EhMKC3NlcnZlcl9uYW1lGAEgASgJEhUKDWRhdGFiYXNlX25hbWUYAiABKAkSFAoMc3RhdGVtZW50X2lkGAMgASgEEigKBGZyb20YBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEiYKAnRvGAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBI2Cgtzb3J0X2NvbHVtbhgGIAEoDjIhLnF1ZXJ5c2hlcmlmZi52MS5TYW1wbGVTb3J0Q29sdW1uEhEKCXNvcnRfZGVzYxgHIAEoCBINCgVsaW1pdBgIIAEoBRIOCgZvZmZzZXQYCSABKAUiYwocTGlzdFN0YXRlbWVudFNhbXBsZXNSZXNwb25zZRIxCgdzYW1wbGVzGAEgAygLMiAucXVlcnlzaGVyaWZmLnYxLlN0YXRlbWVudFNhbXBsZRIQCghoYXNfbW9yZRgCIAEoCCLtAQoPU3RhdGVtZW50U2FtcGxlEgoKAmlkGAEgASgEEi8KC29jY3VycmVkX2F0GAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIPCgdwcmV2aWV3GAMgASgJEhMKC2R1cmF0aW9uX21zGAQgASgBEhAKCGhhc19wbGFuGAUgASgIEjgKBHRhZ3MYBiADKAsyKi5xdWVyeXNoZXJpZmYudjEuU3RhdGVtZW50U2FtcGxlLlRhZ3NFbnRyeRorCglUYWdzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASInChlHZXRTdGF0ZW1lbnRTYW1wbGVSZXF1ZXN0EgoKAmlkGAEgASgEIj4KGkdldFN0YXRlbWVudFNhbXBsZVJlc3BvbnNlEg0KBXF1ZXJ5GAEgASgJEhEKCXBsYW5fanNvbhgCIAEoCSJAChJMaXN0VGFnS2V5c1JlcXVlc3QSEwoLc2VydmVyX25hbWUYASABKAkSFQoNZGF0YWJhc2VfbmFtZRgCIAEoCSI8ChNMaXN0VGFnS2V5c1Jlc3BvbnNlEiUKBGtleXMYASADKAsyFy5xdWVyeXNoZXJpZmYudjEuVGFnS2V5IioKBlRhZ0tleRILCgNrZXkYASABKAkSEwoLdmFsdWVfY291bnQYAiABKAMiTwoUTGlzdFRhZ1ZhbHVlc1JlcXVlc3QSEwoLc2VydmVyX25hbWUYASABKAkSFQoNZGF0YWJhc2VfbmFtZRgCIAEoCRILCgNrZXkYAyABKAkiQgoVTGlzdFRhZ1ZhbHVlc1Jlc3BvbnNlEikKBnZhbHVlcxgBIAMoCzIZLnF1ZXJ5c2hlcmlmZi52MS5UYWdWYWx1ZSIyCghUYWdWYWx1ZRINCgV2YWx1ZRgBIAEoCRIXCg9zdGF0ZW1lbnRfY291bnQYAiABKAMqawoJUXVlcnlLaW5kEhoKFlFVRVJZX0tJTkRfVU5TUEVDSUZJRUQQABIUChBRVUVSWV9LSU5EX1JFQURTEAESFQoRUVVFUllfS0lORF9XUklURVMQAhIVChFRVUVSWV9LSU5EX09USEVSUxADKpoBChFUYWdGaWx0ZXJPcGVyYXRvchIjCh9UQUdfRklMVEVSX09QRVJBVE9SX1VOU1BFQ0lGSUVEEAASHQoZVEFHX0ZJTFRFUl9PUEVSQVRPUl9FUVVBTBABEiEKHVRBR19GSUxURVJfT1BFUkFUT1JfTk9UX0VRVUFMEAISHgoaVEFHX0ZJTFRFUl9PUEVSQVRPUl9FWElTVFMQAyrrAQoTU3RhdGVtZW50U29ydENvbHVtbhIlCiFTVEFURU1FTlRfU09SVF9DT0xVTU5fVU5TUEVDSUZJRUQQABIdChlTVEFURU1FTlRfU09SVF9DT0xVTU5fQVZHEAESHwobU1RBVEVNRU5UX1NPUlRfQ09MVU1OX0NBTExTEAISJwojU1RBVEVNRU5UX1NPUlRfQ09MVU1OX1JPV1NfUEVSX0NBTEwQAxIgChxTVEFURU1FTlRfU09SVF9DT0xVTU5fUENUX0lPEAQSIgoeU1RBVEVNRU5UX1NPUlRfQ09MVU1OX1BDVF9USU1FEAUqcgoQU2FtcGxlU29ydENvbHVtbhIiCh5TQU1QTEVfU09SVF9DT0xVTU5fVU5TUEVDSUZJRUQQABIZChVTQU1QTEVfU09SVF9DT0xVTU5fQVQQARIfChtTQU1QTEVfU09SVF9DT0xVTU5fRFVSQVRJT04QAjK6CAoQU3RhdGVtZW50U2VydmljZRJpChBSZXBvcnRTdGF0ZW1lbnRzEigucXVlcnlzaGVyaWZmLnYxLlJlcG9ydFN0YXRlbWVudHNSZXF1ZXN0GikucXVlcnlzaGVyaWZmLnYxLlJlcG9ydFN0YXRlbWVudHNSZXNwb25zZSIAEnUKFFJlcG9ydFN0YXRlbWVudFRleHRzEiwucXVlcnlzaGVyaWZmLnYxLlJlcG9ydFN0YXRlbWVudFRleHRzUmVxdWVzdBotLnF1ZXJ5c2hlcmlmZi52MS5SZXBvcnRTdGF0ZW1lbnRUZXh0c1Jlc3BvbnNlIgASYwoOTGlzdFN0YXRlbWVudHMSJi5xdWVyeXNoZXJpZmYudjEuTGlzdFN0YXRlbWVudHNSZXF1ZXN0GicucXVlcnlzaGVyaWZmLnYxLkxpc3RTdGF0ZW1lbnRzUmVzcG9uc2UiABJdCgxHZXRTdGF0ZW1lbnQSJC5xdWVyeXNoZXJpZmYudjEuR2V0U3RhdGVtZW50UmVxdWVzdBolLnF1ZXJ5c2hlcmlmZi52MS5HZXRTdGF0ZW1lbnRSZXNwb25zZSIAEm8KEkdldFN0YXRlbWVudFNlcmllcxIqLnF1ZXJ5c2hlcmlmZi52MS5HZXRTdGF0ZW1lbnRTZXJpZXNSZXF1ZXN0GisucXVlcnlzaGVyaWZmLnYxLkdldFN0YXRlbWVudFNlcmllc1Jlc3BvbnNlIgASaQoQR2V0TGF0ZW5jeVNlcmllcxIoLnF1ZXJ5c2hlcmlmZi52MS5HZXRMYXRlbmN5U2VyaWVzUmVxdWVzdBopLnF1ZXJ5c2hlcmlmZi52MS5HZXRMYXRlbmN5U2VyaWVzUmVzcG9uc2UiABJ1ChRMaXN0U3RhdGVtZW50U2FtcGxlcxIsLnF1ZXJ5c2hlcmlmZi52MS5MaXN0U3RhdGVtZW50U2FtcGxlc1JlcXVlc3QaLS5xdWVyeXNoZXJpZmYudjEuTGlzdFN0YXRlbWVudFNhbXBsZXNSZXNwb25zZSIAEm8KEkdldFN0YXRlbWVudFNhbXBsZRIqLnF1ZXJ5c2hlcmlmZi52MS5HZXRTdGF0ZW1lbnRTYW1wbGVSZXF1ZXN0GisucXVlcnlzaGVyaWZmLnYxLkdldFN0YXRlbWVudFNhbXBsZVJlc3BvbnNlIgASWgoLTGlzdFRhZ0tleXMSIy5xdWVyeXNoZXJpZmYudjEuTGlzdFRhZ0tleXNSZXF1ZXN0GiQucXVlcnlzaGVyaWZmLnYxLkxpc3RUYWdLZXlzUmVzcG9uc2UiABJgCg1MaXN0VGFnVmFsdWVzEiUucXVlcnlzaGVyaWZmLnYxLkxpc3RUYWdWYWx1ZXNSZXF1ZXN0GiYucXVlcnlzaGVyaWZmLnYxLkxpc3RUYWdWYWx1ZXNSZXNwb25zZSIAQkRaQmdpdGh1Yi5jb20vcXVlcnlzaGVyaWZmL2JhY2tlbmQvZ2VuL3F1ZXJ5c2hlcmlmZi92MTtxdWVyeXNoZXJpZmZ2MWIGcHJvdG8z", [file_google_protobuf_timestamp, file_querysheriff_v1_common]);
 
 /**
  * Describes the message querysheriff.v1.ReportStatementsRequest.
  * Use `create(ReportStatementsRequestSchema)` to create a new message.
  */
 export const ReportStatementsRequestSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 1);
+  messageDesc(file_querysheriff_v1_statement, 0);
 
 /**
  * Describes the message querysheriff.v1.ReportStatementsResponse.
  * Use `create(ReportStatementsResponseSchema)` to create a new message.
  */
 export const ReportStatementsResponseSchema = /*@__PURE__*/
+  messageDesc(file_querysheriff_v1_statement, 1);
+
+/**
+ * Describes the message querysheriff.v1.StatementDelta.
+ * Use `create(StatementDeltaSchema)` to create a new message.
+ */
+export const StatementDeltaSchema = /*@__PURE__*/
   messageDesc(file_querysheriff_v1_statement, 2);
 
 /**
@@ -61,238 +62,175 @@ export const StatementTextSchema = /*@__PURE__*/
   messageDesc(file_querysheriff_v1_statement, 6);
 
 /**
- * Describes the message querysheriff.v1.QueryStatementsRequest.
- * Use `create(QueryStatementsRequestSchema)` to create a new message.
+ * Describes the message querysheriff.v1.TagFilter.
+ * Use `create(TagFilterSchema)` to create a new message.
  */
-export const QueryStatementsRequestSchema = /*@__PURE__*/
+export const TagFilterSchema = /*@__PURE__*/
   messageDesc(file_querysheriff_v1_statement, 7);
 
 /**
- * Describes the message querysheriff.v1.QueryStatementsResponse.
- * Use `create(QueryStatementsResponseSchema)` to create a new message.
+ * Describes the message querysheriff.v1.ListStatementsRequest.
+ * Use `create(ListStatementsRequestSchema)` to create a new message.
  */
-export const QueryStatementsResponseSchema = /*@__PURE__*/
+export const ListStatementsRequestSchema = /*@__PURE__*/
   messageDesc(file_querysheriff_v1_statement, 8);
 
 /**
- * Describes the message querysheriff.v1.SeriesScope.
- * Use `create(SeriesScopeSchema)` to create a new message.
+ * Describes the message querysheriff.v1.ListStatementsResponse.
+ * Use `create(ListStatementsResponseSchema)` to create a new message.
  */
-export const SeriesScopeSchema = /*@__PURE__*/
+export const ListStatementsResponseSchema = /*@__PURE__*/
   messageDesc(file_querysheriff_v1_statement, 9);
-
-/**
- * Describes the message querysheriff.v1.QueryStatementCallsSeriesRequest.
- * Use `create(QueryStatementCallsSeriesRequestSchema)` to create a new message.
- */
-export const QueryStatementCallsSeriesRequestSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 10);
-
-/**
- * Describes the message querysheriff.v1.QueryStatementCallsSeriesResponse.
- * Use `create(QueryStatementCallsSeriesResponseSchema)` to create a new message.
- */
-export const QueryStatementCallsSeriesResponseSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 11);
-
-/**
- * Describes the message querysheriff.v1.QueryStatementPercentileSeriesRequest.
- * Use `create(QueryStatementPercentileSeriesRequestSchema)` to create a new message.
- */
-export const QueryStatementPercentileSeriesRequestSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 12);
-
-/**
- * Describes the message querysheriff.v1.QueryStatementPercentileSeriesResponse.
- * Use `create(QueryStatementPercentileSeriesResponseSchema)` to create a new message.
- */
-export const QueryStatementPercentileSeriesResponseSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 13);
-
-/**
- * Describes the message querysheriff.v1.QueryStatementTimingSeriesRequest.
- * Use `create(QueryStatementTimingSeriesRequestSchema)` to create a new message.
- */
-export const QueryStatementTimingSeriesRequestSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 14);
-
-/**
- * Describes the message querysheriff.v1.QueryStatementTimingSeriesResponse.
- * Use `create(QueryStatementTimingSeriesResponseSchema)` to create a new message.
- */
-export const QueryStatementTimingSeriesResponseSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 15);
-
-/**
- * Describes the message querysheriff.v1.QueryStatementDetailRequest.
- * Use `create(QueryStatementDetailRequestSchema)` to create a new message.
- */
-export const QueryStatementDetailRequestSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 16);
-
-/**
- * Describes the message querysheriff.v1.QueryStatementDetailResponse.
- * Use `create(QueryStatementDetailResponseSchema)` to create a new message.
- */
-export const QueryStatementDetailResponseSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 17);
-
-/**
- * Describes the message querysheriff.v1.QueryStatementSamplesRequest.
- * Use `create(QueryStatementSamplesRequestSchema)` to create a new message.
- */
-export const QueryStatementSamplesRequestSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 18);
-
-/**
- * Describes the message querysheriff.v1.QueryStatementSamplesResponse.
- * Use `create(QueryStatementSamplesResponseSchema)` to create a new message.
- */
-export const QueryStatementSamplesResponseSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 19);
-
-/**
- * Describes the message querysheriff.v1.StatementSample.
- * Use `create(StatementSampleSchema)` to create a new message.
- */
-export const StatementSampleSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 20);
-
-/**
- * Describes the message querysheriff.v1.GetStatementSamplePlanRequest.
- * Use `create(GetStatementSamplePlanRequestSchema)` to create a new message.
- */
-export const GetStatementSamplePlanRequestSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 21);
-
-/**
- * Describes the message querysheriff.v1.GetStatementSamplePlanResponse.
- * Use `create(GetStatementSamplePlanResponseSchema)` to create a new message.
- */
-export const GetStatementSamplePlanResponseSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 22);
-
-/**
- * Describes the message querysheriff.v1.GetStatementSampleTextRequest.
- * Use `create(GetStatementSampleTextRequestSchema)` to create a new message.
- */
-export const GetStatementSampleTextRequestSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 23);
-
-/**
- * Describes the message querysheriff.v1.GetStatementSampleTextResponse.
- * Use `create(GetStatementSampleTextResponseSchema)` to create a new message.
- */
-export const GetStatementSampleTextResponseSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 24);
-
-/**
- * Describes the message querysheriff.v1.GetStatementTextRequest.
- * Use `create(GetStatementTextRequestSchema)` to create a new message.
- */
-export const GetStatementTextRequestSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 25);
-
-/**
- * Describes the message querysheriff.v1.GetStatementTextResponse.
- * Use `create(GetStatementTextResponseSchema)` to create a new message.
- */
-export const GetStatementTextResponseSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 26);
-
-/**
- * Describes the message querysheriff.v1.StatementMetric.
- * Use `create(StatementMetricSchema)` to create a new message.
- */
-export const StatementMetricSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 27);
-
-/**
- * Describes the message querysheriff.v1.MetricPoint.
- * Use `create(MetricPointSchema)` to create a new message.
- */
-export const MetricPointSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 28);
 
 /**
  * Describes the message querysheriff.v1.StatementStat.
  * Use `create(StatementStatSchema)` to create a new message.
  */
 export const StatementStatSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 29);
+  messageDesc(file_querysheriff_v1_statement, 10);
 
 /**
- * Describes the message querysheriff.v1.StatementDelta.
- * Use `create(StatementDeltaSchema)` to create a new message.
+ * Describes the message querysheriff.v1.GetStatementRequest.
+ * Use `create(GetStatementRequestSchema)` to create a new message.
  */
-export const StatementDeltaSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 30);
+export const GetStatementRequestSchema = /*@__PURE__*/
+  messageDesc(file_querysheriff_v1_statement, 11);
+
+/**
+ * Describes the message querysheriff.v1.GetStatementResponse.
+ * Use `create(GetStatementResponseSchema)` to create a new message.
+ */
+export const GetStatementResponseSchema = /*@__PURE__*/
+  messageDesc(file_querysheriff_v1_statement, 12);
+
+/**
+ * Describes the message querysheriff.v1.GetStatementSeriesRequest.
+ * Use `create(GetStatementSeriesRequestSchema)` to create a new message.
+ */
+export const GetStatementSeriesRequestSchema = /*@__PURE__*/
+  messageDesc(file_querysheriff_v1_statement, 13);
+
+/**
+ * Describes the message querysheriff.v1.GetStatementSeriesResponse.
+ * Use `create(GetStatementSeriesResponseSchema)` to create a new message.
+ */
+export const GetStatementSeriesResponseSchema = /*@__PURE__*/
+  messageDesc(file_querysheriff_v1_statement, 14);
+
+/**
+ * Describes the message querysheriff.v1.GetLatencySeriesRequest.
+ * Use `create(GetLatencySeriesRequestSchema)` to create a new message.
+ */
+export const GetLatencySeriesRequestSchema = /*@__PURE__*/
+  messageDesc(file_querysheriff_v1_statement, 15);
+
+/**
+ * Describes the message querysheriff.v1.GetLatencySeriesResponse.
+ * Use `create(GetLatencySeriesResponseSchema)` to create a new message.
+ */
+export const GetLatencySeriesResponseSchema = /*@__PURE__*/
+  messageDesc(file_querysheriff_v1_statement, 16);
+
+/**
+ * Describes the message querysheriff.v1.ListStatementSamplesRequest.
+ * Use `create(ListStatementSamplesRequestSchema)` to create a new message.
+ */
+export const ListStatementSamplesRequestSchema = /*@__PURE__*/
+  messageDesc(file_querysheriff_v1_statement, 17);
+
+/**
+ * Describes the message querysheriff.v1.ListStatementSamplesResponse.
+ * Use `create(ListStatementSamplesResponseSchema)` to create a new message.
+ */
+export const ListStatementSamplesResponseSchema = /*@__PURE__*/
+  messageDesc(file_querysheriff_v1_statement, 18);
+
+/**
+ * Describes the message querysheriff.v1.StatementSample.
+ * Use `create(StatementSampleSchema)` to create a new message.
+ */
+export const StatementSampleSchema = /*@__PURE__*/
+  messageDesc(file_querysheriff_v1_statement, 19);
+
+/**
+ * Describes the message querysheriff.v1.GetStatementSampleRequest.
+ * Use `create(GetStatementSampleRequestSchema)` to create a new message.
+ */
+export const GetStatementSampleRequestSchema = /*@__PURE__*/
+  messageDesc(file_querysheriff_v1_statement, 20);
+
+/**
+ * Describes the message querysheriff.v1.GetStatementSampleResponse.
+ * Use `create(GetStatementSampleResponseSchema)` to create a new message.
+ */
+export const GetStatementSampleResponseSchema = /*@__PURE__*/
+  messageDesc(file_querysheriff_v1_statement, 21);
 
 /**
  * Describes the message querysheriff.v1.ListTagKeysRequest.
  * Use `create(ListTagKeysRequestSchema)` to create a new message.
  */
 export const ListTagKeysRequestSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 31);
+  messageDesc(file_querysheriff_v1_statement, 22);
 
 /**
  * Describes the message querysheriff.v1.ListTagKeysResponse.
  * Use `create(ListTagKeysResponseSchema)` to create a new message.
  */
 export const ListTagKeysResponseSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 32);
+  messageDesc(file_querysheriff_v1_statement, 23);
 
 /**
  * Describes the message querysheriff.v1.TagKey.
  * Use `create(TagKeySchema)` to create a new message.
  */
 export const TagKeySchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 33);
+  messageDesc(file_querysheriff_v1_statement, 24);
 
 /**
  * Describes the message querysheriff.v1.ListTagValuesRequest.
  * Use `create(ListTagValuesRequestSchema)` to create a new message.
  */
 export const ListTagValuesRequestSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 34);
+  messageDesc(file_querysheriff_v1_statement, 25);
 
 /**
  * Describes the message querysheriff.v1.ListTagValuesResponse.
  * Use `create(ListTagValuesResponseSchema)` to create a new message.
  */
 export const ListTagValuesResponseSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 35);
+  messageDesc(file_querysheriff_v1_statement, 26);
 
 /**
  * Describes the message querysheriff.v1.TagValue.
  * Use `create(TagValueSchema)` to create a new message.
  */
 export const TagValueSchema = /*@__PURE__*/
-  messageDesc(file_querysheriff_v1_statement, 36);
-
-/**
- * Describes the enum querysheriff.v1.TagFilterOperator.
- */
-export const TagFilterOperatorSchema = /*@__PURE__*/
-  enumDesc(file_querysheriff_v1_statement, 0);
-
-/**
- * @generated from enum querysheriff.v1.TagFilterOperator
- */
-export const TagFilterOperator = /*@__PURE__*/
-  tsEnum(TagFilterOperatorSchema);
+  messageDesc(file_querysheriff_v1_statement, 27);
 
 /**
  * Describes the enum querysheriff.v1.QueryKind.
  */
 export const QueryKindSchema = /*@__PURE__*/
-  enumDesc(file_querysheriff_v1_statement, 1);
+  enumDesc(file_querysheriff_v1_statement, 0);
 
 /**
  * @generated from enum querysheriff.v1.QueryKind
  */
 export const QueryKind = /*@__PURE__*/
   tsEnum(QueryKindSchema);
+
+/**
+ * Describes the enum querysheriff.v1.TagFilterOperator.
+ */
+export const TagFilterOperatorSchema = /*@__PURE__*/
+  enumDesc(file_querysheriff_v1_statement, 1);
+
+/**
+ * @generated from enum querysheriff.v1.TagFilterOperator
+ */
+export const TagFilterOperator = /*@__PURE__*/
+  tsEnum(TagFilterOperatorSchema);
 
 /**
  * Describes the enum querysheriff.v1.StatementSortColumn.

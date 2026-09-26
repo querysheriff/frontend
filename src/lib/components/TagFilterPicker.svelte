@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { CheckIcon, ChevronLeftIcon, SearchIcon } from '@lucide/svelte';
-	import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 	import { statementClient } from '$lib/connect';
 	import { ctx } from '$lib/state.svelte';
 	import { errMsg } from '$lib/format';
@@ -45,15 +44,7 @@
 	let highlight = $state(0);
 	let searchInput = $state<HTMLInputElement | null>(null);
 
-	const scope = () => {
-		const { from, to } = ctx.timeRange();
-		return {
-			serverName: ctx.server,
-			databaseName: ctx.db,
-			from: timestampFromDate(from),
-			to: timestampFromDate(to)
-		};
-	};
+	const scope = () => ({ serverName: ctx.server, databaseName: ctx.db });
 
 	$effect(() => {
 		searchInput?.focus();

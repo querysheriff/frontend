@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import type { GetStatementSamplePlanResponse } from '$lib/gen/querysheriff/v1/statement_pb';
+	import type { GetStatementSampleResponse } from '$lib/gen/querysheriff/v1/statement_pb';
 	import { statementClient } from '$lib/connect';
 	import { errMsg } from '$lib/format';
 	import PlanViewer from '$lib/components/PlanViewer.svelte';
 
-	let plan = $state<GetStatementSamplePlanResponse | undefined>(undefined);
+	let plan = $state<GetStatementSampleResponse | undefined>(undefined);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 
@@ -24,7 +24,7 @@
 		error = null;
 
 		statementClient
-			.getStatementSamplePlan({ sampleId: BigInt(sid) })
+			.getStatementSample({ id: BigInt(sid) })
 			.then((res) => {
 				if (!cancelled) plan = res;
 			})

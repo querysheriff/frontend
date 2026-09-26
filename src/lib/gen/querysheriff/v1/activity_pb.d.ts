@@ -5,6 +5,7 @@
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
 import type { Message } from "@bufbuild/protobuf";
 import type { Timestamp } from "@bufbuild/protobuf/wkt";
+import type { MetricPoint } from "./common_pb.js";
 
 /**
  * Describes the file querysheriff/v1/activity.proto.
@@ -136,9 +137,9 @@ export declare type ActivitySnapshot = Message<"querysheriff.v1.ActivitySnapshot
 export declare const ActivitySnapshotSchema: GenMessage<ActivitySnapshot>;
 
 /**
- * @generated from message querysheriff.v1.QueryTransactionsRequest
+ * @generated from message querysheriff.v1.ListTransactionsRequest
  */
-export declare type QueryTransactionsRequest = Message<"querysheriff.v1.QueryTransactionsRequest"> & {
+export declare type ListTransactionsRequest = Message<"querysheriff.v1.ListTransactionsRequest"> & {
   /**
    * @generated from field: string server_name = 1;
    */
@@ -160,41 +161,41 @@ export declare type QueryTransactionsRequest = Message<"querysheriff.v1.QueryTra
   to?: Timestamp | undefined;
 
   /**
-   * @generated from field: int32 limit = 5;
+   * @generated from field: int64 min_open_ms = 5;
    */
-  limit: number;
+  minOpenMs: bigint;
 
   /**
-   * @generated from field: int32 offset = 6;
-   */
-  offset: number;
-
-  /**
-   * @generated from field: querysheriff.v1.TransactionSortColumn sort_column = 7;
+   * @generated from field: querysheriff.v1.TransactionSortColumn sort_column = 6;
    */
   sortColumn: TransactionSortColumn;
 
   /**
-   * @generated from field: bool sort_desc = 8;
+   * @generated from field: bool sort_desc = 7;
    */
   sortDesc: boolean;
 
   /**
-   * @generated from field: int64 min_open_ms = 9;
+   * @generated from field: int32 limit = 8;
    */
-  minOpenMs: bigint;
+  limit: number;
+
+  /**
+   * @generated from field: int32 offset = 9;
+   */
+  offset: number;
 };
 
 /**
- * Describes the message querysheriff.v1.QueryTransactionsRequest.
- * Use `create(QueryTransactionsRequestSchema)` to create a new message.
+ * Describes the message querysheriff.v1.ListTransactionsRequest.
+ * Use `create(ListTransactionsRequestSchema)` to create a new message.
  */
-export declare const QueryTransactionsRequestSchema: GenMessage<QueryTransactionsRequest>;
+export declare const ListTransactionsRequestSchema: GenMessage<ListTransactionsRequest>;
 
 /**
- * @generated from message querysheriff.v1.QueryTransactionsResponse
+ * @generated from message querysheriff.v1.ListTransactionsResponse
  */
-export declare type QueryTransactionsResponse = Message<"querysheriff.v1.QueryTransactionsResponse"> & {
+export declare type ListTransactionsResponse = Message<"querysheriff.v1.ListTransactionsResponse"> & {
   /**
    * @generated from field: repeated querysheriff.v1.Transaction transactions = 1;
    */
@@ -207,10 +208,10 @@ export declare type QueryTransactionsResponse = Message<"querysheriff.v1.QueryTr
 };
 
 /**
- * Describes the message querysheriff.v1.QueryTransactionsResponse.
- * Use `create(QueryTransactionsResponseSchema)` to create a new message.
+ * Describes the message querysheriff.v1.ListTransactionsResponse.
+ * Use `create(ListTransactionsResponseSchema)` to create a new message.
  */
-export declare const QueryTransactionsResponseSchema: GenMessage<QueryTransactionsResponse>;
+export declare const ListTransactionsResponseSchema: GenMessage<ListTransactionsResponse>;
 
 /**
  * @generated from message querysheriff.v1.Transaction
@@ -227,17 +228,17 @@ export declare type Transaction = Message<"querysheriff.v1.Transaction"> & {
   applicationName: string;
 
   /**
-   * @generated from field: google.protobuf.Timestamp start = 3;
+   * @generated from field: google.protobuf.Timestamp started_at = 3;
    */
-  start?: Timestamp | undefined;
+  startedAt?: Timestamp | undefined;
 
   /**
-   * @generated from field: google.protobuf.Timestamp end = 4;
+   * @generated from field: google.protobuf.Timestamp last_seen_at = 4;
    */
-  end?: Timestamp | undefined;
+  lastSeenAt?: Timestamp | undefined;
 
   /**
-   * @generated from field: repeated querysheriff.v1.TransactionEvent events = 6;
+   * @generated from field: repeated querysheriff.v1.TransactionEvent events = 5;
    */
   events: TransactionEvent[];
 };
@@ -268,34 +269,29 @@ export declare type TransactionEvent = Message<"querysheriff.v1.TransactionEvent
   status: TransactionEventStatus;
 
   /**
-   * @generated from field: string query = 5;
+   * @generated from field: string query = 4;
    */
   query: string;
 
   /**
-   * @generated from field: string wait_event_type = 7;
+   * @generated from field: google.protobuf.Timestamp query_start = 5;
    */
-  waitEventType: string;
+  queryStart?: Timestamp | undefined;
 
   /**
-   * @generated from field: string wait_event = 8;
-   */
-  waitEvent: string;
-
-  /**
-   * @generated from field: string lock_mode = 9;
-   */
-  lockMode: string;
-
-  /**
-   * @generated from field: map<string, string> query_tags = 10;
+   * @generated from field: map<string, string> query_tags = 6;
    */
   queryTags: { [key: string]: string };
 
   /**
-   * @generated from field: google.protobuf.Timestamp query_start = 11;
+   * @generated from field: string wait_event = 7;
    */
-  queryStart?: Timestamp | undefined;
+  waitEvent: string;
+
+  /**
+   * @generated from field: string lock_mode = 8;
+   */
+  lockMode: string;
 };
 
 /**
@@ -305,9 +301,9 @@ export declare type TransactionEvent = Message<"querysheriff.v1.TransactionEvent
 export declare const TransactionEventSchema: GenMessage<TransactionEvent>;
 
 /**
- * @generated from message querysheriff.v1.QueryLockWaitSeriesRequest
+ * @generated from message querysheriff.v1.GetTransactionAgeSeriesRequest
  */
-export declare type QueryLockWaitSeriesRequest = Message<"querysheriff.v1.QueryLockWaitSeriesRequest"> & {
+export declare type GetTransactionAgeSeriesRequest = Message<"querysheriff.v1.GetTransactionAgeSeriesRequest"> & {
   /**
    * @generated from field: string server_name = 1;
    */
@@ -330,19 +326,19 @@ export declare type QueryLockWaitSeriesRequest = Message<"querysheriff.v1.QueryL
 };
 
 /**
- * Describes the message querysheriff.v1.QueryLockWaitSeriesRequest.
- * Use `create(QueryLockWaitSeriesRequestSchema)` to create a new message.
+ * Describes the message querysheriff.v1.GetTransactionAgeSeriesRequest.
+ * Use `create(GetTransactionAgeSeriesRequestSchema)` to create a new message.
  */
-export declare const QueryLockWaitSeriesRequestSchema: GenMessage<QueryLockWaitSeriesRequest>;
+export declare const GetTransactionAgeSeriesRequestSchema: GenMessage<GetTransactionAgeSeriesRequest>;
 
 /**
- * @generated from message querysheriff.v1.QueryLockWaitSeriesResponse
+ * @generated from message querysheriff.v1.GetTransactionAgeSeriesResponse
  */
-export declare type QueryLockWaitSeriesResponse = Message<"querysheriff.v1.QueryLockWaitSeriesResponse"> & {
+export declare type GetTransactionAgeSeriesResponse = Message<"querysheriff.v1.GetTransactionAgeSeriesResponse"> & {
   /**
-   * @generated from field: repeated querysheriff.v1.LockWaitPoint series = 1;
+   * @generated from field: repeated querysheriff.v1.MetricPoint age_seconds = 1;
    */
-  series: LockWaitPoint[];
+  ageSeconds: MetricPoint[];
 
   /**
    * @generated from field: int64 bucket_ms = 2;
@@ -351,36 +347,15 @@ export declare type QueryLockWaitSeriesResponse = Message<"querysheriff.v1.Query
 };
 
 /**
- * Describes the message querysheriff.v1.QueryLockWaitSeriesResponse.
- * Use `create(QueryLockWaitSeriesResponseSchema)` to create a new message.
+ * Describes the message querysheriff.v1.GetTransactionAgeSeriesResponse.
+ * Use `create(GetTransactionAgeSeriesResponseSchema)` to create a new message.
  */
-export declare const QueryLockWaitSeriesResponseSchema: GenMessage<QueryLockWaitSeriesResponse>;
+export declare const GetTransactionAgeSeriesResponseSchema: GenMessage<GetTransactionAgeSeriesResponse>;
 
 /**
- * @generated from message querysheriff.v1.LockWaitPoint
+ * @generated from message querysheriff.v1.ListLockWaitsRequest
  */
-export declare type LockWaitPoint = Message<"querysheriff.v1.LockWaitPoint"> & {
-  /**
-   * @generated from field: google.protobuf.Timestamp at = 1;
-   */
-  at?: Timestamp | undefined;
-
-  /**
-   * @generated from field: double wait_seconds = 2;
-   */
-  waitSeconds: number;
-};
-
-/**
- * Describes the message querysheriff.v1.LockWaitPoint.
- * Use `create(LockWaitPointSchema)` to create a new message.
- */
-export declare const LockWaitPointSchema: GenMessage<LockWaitPoint>;
-
-/**
- * @generated from message querysheriff.v1.QueryLockWaitsRequest
- */
-export declare type QueryLockWaitsRequest = Message<"querysheriff.v1.QueryLockWaitsRequest"> & {
+export declare type ListLockWaitsRequest = Message<"querysheriff.v1.ListLockWaitsRequest"> & {
   /**
    * @generated from field: string server_name = 1;
    */
@@ -402,36 +377,36 @@ export declare type QueryLockWaitsRequest = Message<"querysheriff.v1.QueryLockWa
   to?: Timestamp | undefined;
 
   /**
-   * @generated from field: int32 limit = 5;
-   */
-  limit: number;
-
-  /**
-   * @generated from field: int32 offset = 6;
-   */
-  offset: number;
-
-  /**
-   * @generated from field: querysheriff.v1.LockWaitSortColumn sort_column = 7;
+   * @generated from field: querysheriff.v1.LockWaitSortColumn sort_column = 5;
    */
   sortColumn: LockWaitSortColumn;
 
   /**
-   * @generated from field: bool sort_desc = 8;
+   * @generated from field: bool sort_desc = 6;
    */
   sortDesc: boolean;
+
+  /**
+   * @generated from field: int32 limit = 7;
+   */
+  limit: number;
+
+  /**
+   * @generated from field: int32 offset = 8;
+   */
+  offset: number;
 };
 
 /**
- * Describes the message querysheriff.v1.QueryLockWaitsRequest.
- * Use `create(QueryLockWaitsRequestSchema)` to create a new message.
+ * Describes the message querysheriff.v1.ListLockWaitsRequest.
+ * Use `create(ListLockWaitsRequestSchema)` to create a new message.
  */
-export declare const QueryLockWaitsRequestSchema: GenMessage<QueryLockWaitsRequest>;
+export declare const ListLockWaitsRequestSchema: GenMessage<ListLockWaitsRequest>;
 
 /**
- * @generated from message querysheriff.v1.QueryLockWaitsResponse
+ * @generated from message querysheriff.v1.ListLockWaitsResponse
  */
-export declare type QueryLockWaitsResponse = Message<"querysheriff.v1.QueryLockWaitsResponse"> & {
+export declare type ListLockWaitsResponse = Message<"querysheriff.v1.ListLockWaitsResponse"> & {
   /**
    * @generated from field: repeated querysheriff.v1.LockWait waits = 1;
    */
@@ -444,10 +419,10 @@ export declare type QueryLockWaitsResponse = Message<"querysheriff.v1.QueryLockW
 };
 
 /**
- * Describes the message querysheriff.v1.QueryLockWaitsResponse.
- * Use `create(QueryLockWaitsResponseSchema)` to create a new message.
+ * Describes the message querysheriff.v1.ListLockWaitsResponse.
+ * Use `create(ListLockWaitsResponseSchema)` to create a new message.
  */
-export declare const QueryLockWaitsResponseSchema: GenMessage<QueryLockWaitsResponse>;
+export declare const ListLockWaitsResponseSchema: GenMessage<ListLockWaitsResponse>;
 
 /**
  * @generated from message querysheriff.v1.LockWait
@@ -464,19 +439,19 @@ export declare type LockWait = Message<"querysheriff.v1.LockWait"> & {
   blocking?: LockParty | undefined;
 
   /**
-   * @generated from field: google.protobuf.Timestamp started_waiting = 3;
-   */
-  startedWaiting?: Timestamp | undefined;
-
-  /**
-   * @generated from field: google.protobuf.Timestamp last_seen = 4;
-   */
-  lastSeen?: Timestamp | undefined;
-
-  /**
-   * @generated from field: string lock_mode = 5;
+   * @generated from field: string lock_mode = 3;
    */
   lockMode: string;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp started_at = 4;
+   */
+  startedAt?: Timestamp | undefined;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp last_seen_at = 5;
+   */
+  lastSeenAt?: Timestamp | undefined;
 };
 
 /**
@@ -517,9 +492,9 @@ export declare type LockParty = Message<"querysheriff.v1.LockParty"> & {
 export declare const LockPartySchema: GenMessage<LockParty>;
 
 /**
- * @generated from message querysheriff.v1.QueryTransactionAgeSeriesRequest
+ * @generated from message querysheriff.v1.GetLockWaitSeriesRequest
  */
-export declare type QueryTransactionAgeSeriesRequest = Message<"querysheriff.v1.QueryTransactionAgeSeriesRequest"> & {
+export declare type GetLockWaitSeriesRequest = Message<"querysheriff.v1.GetLockWaitSeriesRequest"> & {
   /**
    * @generated from field: string server_name = 1;
    */
@@ -542,19 +517,19 @@ export declare type QueryTransactionAgeSeriesRequest = Message<"querysheriff.v1.
 };
 
 /**
- * Describes the message querysheriff.v1.QueryTransactionAgeSeriesRequest.
- * Use `create(QueryTransactionAgeSeriesRequestSchema)` to create a new message.
+ * Describes the message querysheriff.v1.GetLockWaitSeriesRequest.
+ * Use `create(GetLockWaitSeriesRequestSchema)` to create a new message.
  */
-export declare const QueryTransactionAgeSeriesRequestSchema: GenMessage<QueryTransactionAgeSeriesRequest>;
+export declare const GetLockWaitSeriesRequestSchema: GenMessage<GetLockWaitSeriesRequest>;
 
 /**
- * @generated from message querysheriff.v1.QueryTransactionAgeSeriesResponse
+ * @generated from message querysheriff.v1.GetLockWaitSeriesResponse
  */
-export declare type QueryTransactionAgeSeriesResponse = Message<"querysheriff.v1.QueryTransactionAgeSeriesResponse"> & {
+export declare type GetLockWaitSeriesResponse = Message<"querysheriff.v1.GetLockWaitSeriesResponse"> & {
   /**
-   * @generated from field: repeated querysheriff.v1.TransactionAgePoint series = 1;
+   * @generated from field: repeated querysheriff.v1.MetricPoint wait_seconds = 1;
    */
-  series: TransactionAgePoint[];
+  waitSeconds: MetricPoint[];
 
   /**
    * @generated from field: int64 bucket_ms = 2;
@@ -563,61 +538,10 @@ export declare type QueryTransactionAgeSeriesResponse = Message<"querysheriff.v1
 };
 
 /**
- * Describes the message querysheriff.v1.QueryTransactionAgeSeriesResponse.
- * Use `create(QueryTransactionAgeSeriesResponseSchema)` to create a new message.
+ * Describes the message querysheriff.v1.GetLockWaitSeriesResponse.
+ * Use `create(GetLockWaitSeriesResponseSchema)` to create a new message.
  */
-export declare const QueryTransactionAgeSeriesResponseSchema: GenMessage<QueryTransactionAgeSeriesResponse>;
-
-/**
- * @generated from message querysheriff.v1.TransactionAgePoint
- */
-export declare type TransactionAgePoint = Message<"querysheriff.v1.TransactionAgePoint"> & {
-  /**
-   * @generated from field: google.protobuf.Timestamp at = 1;
-   */
-  at?: Timestamp | undefined;
-
-  /**
-   * @generated from field: double age_seconds = 2;
-   */
-  ageSeconds: number;
-};
-
-/**
- * Describes the message querysheriff.v1.TransactionAgePoint.
- * Use `create(TransactionAgePointSchema)` to create a new message.
- */
-export declare const TransactionAgePointSchema: GenMessage<TransactionAgePoint>;
-
-/**
- * @generated from enum querysheriff.v1.TransactionEventStatus
- */
-export enum TransactionEventStatus {
-  /**
-   * @generated from enum value: TRANSACTION_EVENT_STATUS_UNSPECIFIED = 0;
-   */
-  UNSPECIFIED = 0,
-
-  /**
-   * @generated from enum value: TRANSACTION_EVENT_STATUS_ACTIVE = 1;
-   */
-  ACTIVE = 1,
-
-  /**
-   * @generated from enum value: TRANSACTION_EVENT_STATUS_IDLE = 2;
-   */
-  IDLE = 2,
-
-  /**
-   * @generated from enum value: TRANSACTION_EVENT_STATUS_ABORTED = 4;
-   */
-  ABORTED = 4,
-}
-
-/**
- * Describes the enum querysheriff.v1.TransactionEventStatus.
- */
-export declare const TransactionEventStatusSchema: GenEnum<TransactionEventStatus>;
+export declare const GetLockWaitSeriesResponseSchema: GenMessage<GetLockWaitSeriesResponse>;
 
 /**
  * @generated from enum querysheriff.v1.TransactionSortColumn
@@ -643,6 +567,36 @@ export enum TransactionSortColumn {
  * Describes the enum querysheriff.v1.TransactionSortColumn.
  */
 export declare const TransactionSortColumnSchema: GenEnum<TransactionSortColumn>;
+
+/**
+ * @generated from enum querysheriff.v1.TransactionEventStatus
+ */
+export enum TransactionEventStatus {
+  /**
+   * @generated from enum value: TRANSACTION_EVENT_STATUS_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: TRANSACTION_EVENT_STATUS_ACTIVE = 1;
+   */
+  ACTIVE = 1,
+
+  /**
+   * @generated from enum value: TRANSACTION_EVENT_STATUS_IDLE = 2;
+   */
+  IDLE = 2,
+
+  /**
+   * @generated from enum value: TRANSACTION_EVENT_STATUS_ABORTED = 3;
+   */
+  ABORTED = 3,
+}
+
+/**
+ * Describes the enum querysheriff.v1.TransactionEventStatus.
+ */
+export declare const TransactionEventStatusSchema: GenEnum<TransactionEventStatus>;
 
 /**
  * @generated from enum querysheriff.v1.LockWaitSortColumn
@@ -682,36 +636,36 @@ export declare const ActivityService: GenService<{
     output: typeof ReportActivityResponseSchema;
   },
   /**
-   * @generated from rpc querysheriff.v1.ActivityService.QueryTransactions
+   * @generated from rpc querysheriff.v1.ActivityService.ListTransactions
    */
-  queryTransactions: {
+  listTransactions: {
     methodKind: "unary";
-    input: typeof QueryTransactionsRequestSchema;
-    output: typeof QueryTransactionsResponseSchema;
+    input: typeof ListTransactionsRequestSchema;
+    output: typeof ListTransactionsResponseSchema;
   },
   /**
-   * @generated from rpc querysheriff.v1.ActivityService.QueryLockWaits
+   * @generated from rpc querysheriff.v1.ActivityService.GetTransactionAgeSeries
    */
-  queryLockWaits: {
+  getTransactionAgeSeries: {
     methodKind: "unary";
-    input: typeof QueryLockWaitsRequestSchema;
-    output: typeof QueryLockWaitsResponseSchema;
+    input: typeof GetTransactionAgeSeriesRequestSchema;
+    output: typeof GetTransactionAgeSeriesResponseSchema;
   },
   /**
-   * @generated from rpc querysheriff.v1.ActivityService.QueryLockWaitSeries
+   * @generated from rpc querysheriff.v1.ActivityService.ListLockWaits
    */
-  queryLockWaitSeries: {
+  listLockWaits: {
     methodKind: "unary";
-    input: typeof QueryLockWaitSeriesRequestSchema;
-    output: typeof QueryLockWaitSeriesResponseSchema;
+    input: typeof ListLockWaitsRequestSchema;
+    output: typeof ListLockWaitsResponseSchema;
   },
   /**
-   * @generated from rpc querysheriff.v1.ActivityService.QueryTransactionAgeSeries
+   * @generated from rpc querysheriff.v1.ActivityService.GetLockWaitSeries
    */
-  queryTransactionAgeSeries: {
+  getLockWaitSeries: {
     methodKind: "unary";
-    input: typeof QueryTransactionAgeSeriesRequestSchema;
-    output: typeof QueryTransactionAgeSeriesResponseSchema;
+    input: typeof GetLockWaitSeriesRequestSchema;
+    output: typeof GetLockWaitSeriesResponseSchema;
   },
 }>;
 

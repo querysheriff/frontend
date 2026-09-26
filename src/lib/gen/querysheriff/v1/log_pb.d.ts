@@ -696,66 +696,6 @@ export enum LogEvent_LogClassification {
 export declare const LogEvent_LogClassificationSchema: GenEnum<LogEvent_LogClassification>;
 
 /**
- * @generated from enum querysheriff.v1.LogEvent.LogCategory
- */
-export enum LogEvent_LogCategory {
-  /**
-   * @generated from enum value: LOG_CATEGORY_UNSPECIFIED = 0;
-   */
-  UNSPECIFIED = 0,
-
-  /**
-   * @generated from enum value: LOG_CATEGORY_SERVER = 1;
-   */
-  SERVER = 1,
-
-  /**
-   * @generated from enum value: LOG_CATEGORY_CONNECTION = 2;
-   */
-  CONNECTION = 2,
-
-  /**
-   * @generated from enum value: LOG_CATEGORY_WAL_CHECKPOINT = 3;
-   */
-  WAL_CHECKPOINT = 3,
-
-  /**
-   * @generated from enum value: LOG_CATEGORY_AUTOVACUUM = 4;
-   */
-  AUTOVACUUM = 4,
-
-  /**
-   * @generated from enum value: LOG_CATEGORY_LOCK = 5;
-   */
-  LOCK = 5,
-
-  /**
-   * @generated from enum value: LOG_CATEGORY_STATEMENT = 6;
-   */
-  STATEMENT = 6,
-
-  /**
-   * @generated from enum value: LOG_CATEGORY_STANDBY = 7;
-   */
-  STANDBY = 7,
-
-  /**
-   * @generated from enum value: LOG_CATEGORY_CONSTRAINT_VIOLATION = 8;
-   */
-  CONSTRAINT_VIOLATION = 8,
-
-  /**
-   * @generated from enum value: LOG_CATEGORY_APPLICATION_ERROR = 9;
-   */
-  APPLICATION_ERROR = 9,
-}
-
-/**
- * Describes the enum querysheriff.v1.LogEvent.LogCategory.
- */
-export declare const LogEvent_LogCategorySchema: GenEnum<LogEvent_LogCategory>;
-
-/**
  * @generated from message querysheriff.v1.LogStatementSample
  */
 export declare type LogStatementSample = Message<"querysheriff.v1.LogStatementSample"> & {
@@ -797,9 +737,60 @@ export declare type LogStatementSample = Message<"querysheriff.v1.LogStatementSa
 export declare const LogStatementSampleSchema: GenMessage<LogStatementSample>;
 
 /**
- * @generated from message querysheriff.v1.QueryLogsRequest
+ * @generated from message querysheriff.v1.LogFilter
  */
-export declare type QueryLogsRequest = Message<"querysheriff.v1.QueryLogsRequest"> & {
+export declare type LogFilter = Message<"querysheriff.v1.LogFilter"> & {
+  /**
+   * @generated from field: string search = 1;
+   */
+  search: string;
+
+  /**
+   * @generated from field: repeated querysheriff.v1.LogEvent.LogLevel levels = 2;
+   */
+  levels: LogEvent_LogLevel[];
+
+  /**
+   * @generated from field: repeated querysheriff.v1.LogEvent.LogClassification classifications = 3;
+   */
+  classifications: LogEvent_LogClassification[];
+
+  /**
+   * @generated from field: repeated querysheriff.v1.LogCategory categories = 4;
+   */
+  categories: LogCategory[];
+
+  /**
+   * @generated from field: repeated string databases = 5;
+   */
+  databases: string[];
+
+  /**
+   * @generated from field: repeated string usernames = 6;
+   */
+  usernames: string[];
+
+  /**
+   * @generated from field: repeated string application_names = 7;
+   */
+  applicationNames: string[];
+
+  /**
+   * @generated from field: repeated string backend_types = 8;
+   */
+  backendTypes: string[];
+};
+
+/**
+ * Describes the message querysheriff.v1.LogFilter.
+ * Use `create(LogFilterSchema)` to create a new message.
+ */
+export declare const LogFilterSchema: GenMessage<LogFilter>;
+
+/**
+ * @generated from message querysheriff.v1.ListLogsRequest
+ */
+export declare type ListLogsRequest = Message<"querysheriff.v1.ListLogsRequest"> & {
   /**
    * @generated from field: string server_name = 1;
    */
@@ -816,76 +807,36 @@ export declare type QueryLogsRequest = Message<"querysheriff.v1.QueryLogsRequest
   to?: Timestamp | undefined;
 
   /**
-   * @generated from field: string filter = 4;
+   * @generated from field: querysheriff.v1.LogFilter filter = 4;
    */
-  filter: string;
+  filter?: LogFilter | undefined;
 
   /**
-   * @generated from field: repeated querysheriff.v1.LogEvent.LogLevel log_levels = 5;
+   * @generated from field: bool sort_desc = 5;
    */
-  logLevels: LogEvent_LogLevel[];
+  sortDesc: boolean;
 
   /**
-   * @generated from field: repeated querysheriff.v1.LogEvent.LogClassification classifications = 6;
-   */
-  classifications: LogEvent_LogClassification[];
-
-  /**
-   * @generated from field: int32 limit = 7;
+   * @generated from field: int32 limit = 6;
    */
   limit: number;
 
   /**
-   * @generated from field: repeated querysheriff.v1.LogEvent.LogCategory categories = 8;
-   */
-  categories: LogEvent_LogCategory[];
-
-  /**
-   * @generated from field: repeated string databases = 9;
-   */
-  databases: string[];
-
-  /**
-   * @generated from field: repeated string usernames = 10;
-   */
-  usernames: string[];
-
-  /**
-   * @generated from field: repeated string application_names = 11;
-   */
-  applicationNames: string[];
-
-  /**
-   * @generated from field: repeated string backend_types = 12;
-   */
-  backendTypes: string[];
-
-  /**
-   * @generated from field: int32 offset = 13;
+   * @generated from field: int32 offset = 7;
    */
   offset: number;
-
-  /**
-   * @generated from field: querysheriff.v1.LogSortColumn sort_column = 14;
-   */
-  sortColumn: LogSortColumn;
-
-  /**
-   * @generated from field: bool sort_desc = 15;
-   */
-  sortDesc: boolean;
 };
 
 /**
- * Describes the message querysheriff.v1.QueryLogsRequest.
- * Use `create(QueryLogsRequestSchema)` to create a new message.
+ * Describes the message querysheriff.v1.ListLogsRequest.
+ * Use `create(ListLogsRequestSchema)` to create a new message.
  */
-export declare const QueryLogsRequestSchema: GenMessage<QueryLogsRequest>;
+export declare const ListLogsRequestSchema: GenMessage<ListLogsRequest>;
 
 /**
- * @generated from message querysheriff.v1.QueryLogsResponse
+ * @generated from message querysheriff.v1.ListLogsResponse
  */
-export declare type QueryLogsResponse = Message<"querysheriff.v1.QueryLogsResponse"> & {
+export declare type ListLogsResponse = Message<"querysheriff.v1.ListLogsResponse"> & {
   /**
    * @generated from field: repeated querysheriff.v1.LogRecord records = 1;
    */
@@ -898,15 +849,147 @@ export declare type QueryLogsResponse = Message<"querysheriff.v1.QueryLogsRespon
 };
 
 /**
- * Describes the message querysheriff.v1.QueryLogsResponse.
- * Use `create(QueryLogsResponseSchema)` to create a new message.
+ * Describes the message querysheriff.v1.ListLogsResponse.
+ * Use `create(ListLogsResponseSchema)` to create a new message.
  */
-export declare const QueryLogsResponseSchema: GenMessage<QueryLogsResponse>;
+export declare const ListLogsResponseSchema: GenMessage<ListLogsResponse>;
 
 /**
- * @generated from message querysheriff.v1.QueryLogSeriesRequest
+ * @generated from message querysheriff.v1.LogRecord
  */
-export declare type QueryLogSeriesRequest = Message<"querysheriff.v1.QueryLogSeriesRequest"> & {
+export declare type LogRecord = Message<"querysheriff.v1.LogRecord"> & {
+  /**
+   * @generated from field: uint64 id = 1;
+   */
+  id: bigint;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp occurred_at = 2;
+   */
+  occurredAt?: Timestamp | undefined;
+
+  /**
+   * @generated from field: querysheriff.v1.LogEvent.LogLevel log_level = 3;
+   */
+  logLevel: LogEvent_LogLevel;
+
+  /**
+   * @generated from field: querysheriff.v1.LogEvent.LogClassification classification = 4;
+   */
+  classification: LogEvent_LogClassification;
+
+  /**
+   * @generated from field: querysheriff.v1.LogCategory category = 5;
+   */
+  category: LogCategory;
+
+  /**
+   * @generated from field: int32 pid = 6;
+   */
+  pid: number;
+
+  /**
+   * @generated from field: string database_name = 7;
+   */
+  databaseName: string;
+
+  /**
+   * @generated from field: string username = 8;
+   */
+  username: string;
+
+  /**
+   * @generated from field: string application_name = 9;
+   */
+  applicationName: string;
+
+  /**
+   * @generated from field: string backend_type = 10;
+   */
+  backendType: string;
+
+  /**
+   * @generated from field: string message = 11;
+   */
+  message: string;
+
+  /**
+   * @generated from field: string state_code = 12;
+   */
+  stateCode: string;
+
+  /**
+   * @generated from field: string detail = 13;
+   */
+  detail: string;
+
+  /**
+   * @generated from field: string hint = 14;
+   */
+  hint: string;
+
+  /**
+   * @generated from field: string context = 15;
+   */
+  context: string;
+
+  /**
+   * @generated from field: string statement = 16;
+   */
+  statement: string;
+
+  /**
+   * @generated from field: querysheriff.v1.LogRecord.StatementSample statement_sample = 17;
+   */
+  statementSample?: LogRecord_StatementSample | undefined;
+};
+
+/**
+ * Describes the message querysheriff.v1.LogRecord.
+ * Use `create(LogRecordSchema)` to create a new message.
+ */
+export declare const LogRecordSchema: GenMessage<LogRecord>;
+
+/**
+ * @generated from message querysheriff.v1.LogRecord.StatementSample
+ */
+export declare type LogRecord_StatementSample = Message<"querysheriff.v1.LogRecord.StatementSample"> & {
+  /**
+   * @generated from field: uint64 id = 1;
+   */
+  id: bigint;
+
+  /**
+   * @generated from field: uint64 statement_id = 2;
+   */
+  statementId: bigint;
+
+  /**
+   * @generated from field: string query = 3;
+   */
+  query: string;
+
+  /**
+   * @generated from field: double duration_ms = 4;
+   */
+  durationMs: number;
+
+  /**
+   * @generated from field: bool has_plan = 5;
+   */
+  hasPlan: boolean;
+};
+
+/**
+ * Describes the message querysheriff.v1.LogRecord.StatementSample.
+ * Use `create(LogRecord_StatementSampleSchema)` to create a new message.
+ */
+export declare const LogRecord_StatementSampleSchema: GenMessage<LogRecord_StatementSample>;
+
+/**
+ * @generated from message querysheriff.v1.GetLogSeriesRequest
+ */
+export declare type GetLogSeriesRequest = Message<"querysheriff.v1.GetLogSeriesRequest"> & {
   /**
    * @generated from field: string server_name = 1;
    */
@@ -924,31 +1007,15 @@ export declare type QueryLogSeriesRequest = Message<"querysheriff.v1.QueryLogSer
 };
 
 /**
- * Describes the message querysheriff.v1.QueryLogSeriesRequest.
- * Use `create(QueryLogSeriesRequestSchema)` to create a new message.
+ * Describes the message querysheriff.v1.GetLogSeriesRequest.
+ * Use `create(GetLogSeriesRequestSchema)` to create a new message.
  */
-export declare const QueryLogSeriesRequestSchema: GenMessage<QueryLogSeriesRequest>;
+export declare const GetLogSeriesRequestSchema: GenMessage<GetLogSeriesRequest>;
 
 /**
- * @generated from message querysheriff.v1.QueryLogSeriesResponse
+ * @generated from message querysheriff.v1.GetLogSeriesResponse
  */
-export declare type QueryLogSeriesResponse = Message<"querysheriff.v1.QueryLogSeriesResponse"> & {
-  /**
-   * @generated from field: querysheriff.v1.LogHistogram histogram = 1;
-   */
-  histogram?: LogHistogram | undefined;
-};
-
-/**
- * Describes the message querysheriff.v1.QueryLogSeriesResponse.
- * Use `create(QueryLogSeriesResponseSchema)` to create a new message.
- */
-export declare const QueryLogSeriesResponseSchema: GenMessage<QueryLogSeriesResponse>;
-
-/**
- * @generated from message querysheriff.v1.LogHistogram
- */
-export declare type LogHistogram = Message<"querysheriff.v1.LogHistogram"> & {
+export declare type GetLogSeriesResponse = Message<"querysheriff.v1.GetLogSeriesResponse"> & {
   /**
    * @generated from field: repeated querysheriff.v1.LogHistogramBucket buckets = 1;
    */
@@ -963,37 +1030,32 @@ export declare type LogHistogram = Message<"querysheriff.v1.LogHistogram"> & {
    * @generated from field: int64 bucket_ms = 3;
    */
   bucketMs: bigint;
-
-  /**
-   * @generated from field: repeated querysheriff.v1.LogCategoryCount category_totals = 4;
-   */
-  categoryTotals: LogCategoryCount[];
 };
 
 /**
- * Describes the message querysheriff.v1.LogHistogram.
- * Use `create(LogHistogramSchema)` to create a new message.
+ * Describes the message querysheriff.v1.GetLogSeriesResponse.
+ * Use `create(GetLogSeriesResponseSchema)` to create a new message.
  */
-export declare const LogHistogramSchema: GenMessage<LogHistogram>;
+export declare const GetLogSeriesResponseSchema: GenMessage<GetLogSeriesResponse>;
 
 /**
  * @generated from message querysheriff.v1.LogHistogramBucket
  */
 export declare type LogHistogramBucket = Message<"querysheriff.v1.LogHistogramBucket"> & {
   /**
-   * @generated from field: google.protobuf.Timestamp bucket_end = 1;
+   * @generated from field: google.protobuf.Timestamp at = 1;
    */
-  bucketEnd?: Timestamp | undefined;
+  at?: Timestamp | undefined;
 
   /**
-   * @generated from field: repeated querysheriff.v1.LogLevelCount counts = 2;
+   * @generated from field: repeated querysheriff.v1.LogLevelCount levels = 2;
    */
-  counts: LogLevelCount[];
+  levels: LogLevelCount[];
 
   /**
-   * @generated from field: repeated querysheriff.v1.LogCategoryBreakdown categories = 3;
+   * @generated from field: repeated querysheriff.v1.LogCategoryCount categories = 3;
    */
-  categories: LogCategoryBreakdown[];
+  categories: LogCategoryCount[];
 };
 
 /**
@@ -1001,53 +1063,6 @@ export declare type LogHistogramBucket = Message<"querysheriff.v1.LogHistogramBu
  * Use `create(LogHistogramBucketSchema)` to create a new message.
  */
 export declare const LogHistogramBucketSchema: GenMessage<LogHistogramBucket>;
-
-/**
- * @generated from message querysheriff.v1.LogCategoryBreakdown
- */
-export declare type LogCategoryBreakdown = Message<"querysheriff.v1.LogCategoryBreakdown"> & {
-  /**
-   * @generated from field: querysheriff.v1.LogEvent.LogCategory category = 1;
-   */
-  category: LogEvent_LogCategory;
-
-  /**
-   * @generated from field: int64 count = 2;
-   */
-  count: bigint;
-
-  /**
-   * @generated from field: repeated querysheriff.v1.LogClassificationCount classifications = 3;
-   */
-  classifications: LogClassificationCount[];
-};
-
-/**
- * Describes the message querysheriff.v1.LogCategoryBreakdown.
- * Use `create(LogCategoryBreakdownSchema)` to create a new message.
- */
-export declare const LogCategoryBreakdownSchema: GenMessage<LogCategoryBreakdown>;
-
-/**
- * @generated from message querysheriff.v1.LogClassificationCount
- */
-export declare type LogClassificationCount = Message<"querysheriff.v1.LogClassificationCount"> & {
-  /**
-   * @generated from field: querysheriff.v1.LogEvent.LogClassification classification = 1;
-   */
-  classification: LogEvent_LogClassification;
-
-  /**
-   * @generated from field: int64 count = 2;
-   */
-  count: bigint;
-};
-
-/**
- * Describes the message querysheriff.v1.LogClassificationCount.
- * Use `create(LogClassificationCountSchema)` to create a new message.
- */
-export declare const LogClassificationCountSchema: GenMessage<LogClassificationCount>;
 
 /**
  * @generated from message querysheriff.v1.LogLevelCount
@@ -1075,9 +1090,35 @@ export declare const LogLevelCountSchema: GenMessage<LogLevelCount>;
  */
 export declare type LogCategoryCount = Message<"querysheriff.v1.LogCategoryCount"> & {
   /**
-   * @generated from field: querysheriff.v1.LogEvent.LogCategory category = 1;
+   * @generated from field: querysheriff.v1.LogCategory category = 1;
    */
-  category: LogEvent_LogCategory;
+  category: LogCategory;
+
+  /**
+   * @generated from field: int64 count = 2;
+   */
+  count: bigint;
+
+  /**
+   * @generated from field: repeated querysheriff.v1.LogClassificationCount classifications = 3;
+   */
+  classifications: LogClassificationCount[];
+};
+
+/**
+ * Describes the message querysheriff.v1.LogCategoryCount.
+ * Use `create(LogCategoryCountSchema)` to create a new message.
+ */
+export declare const LogCategoryCountSchema: GenMessage<LogCategoryCount>;
+
+/**
+ * @generated from message querysheriff.v1.LogClassificationCount
+ */
+export declare type LogClassificationCount = Message<"querysheriff.v1.LogClassificationCount"> & {
+  /**
+   * @generated from field: querysheriff.v1.LogEvent.LogClassification classification = 1;
+   */
+  classification: LogEvent_LogClassification;
 
   /**
    * @generated from field: int64 count = 2;
@@ -1086,10 +1127,10 @@ export declare type LogCategoryCount = Message<"querysheriff.v1.LogCategoryCount
 };
 
 /**
- * Describes the message querysheriff.v1.LogCategoryCount.
- * Use `create(LogCategoryCountSchema)` to create a new message.
+ * Describes the message querysheriff.v1.LogClassificationCount.
+ * Use `create(LogClassificationCountSchema)` to create a new message.
  */
-export declare const LogCategoryCountSchema: GenMessage<LogCategoryCount>;
+export declare const LogClassificationCountSchema: GenMessage<LogClassificationCount>;
 
 /**
  * @generated from message querysheriff.v1.ListLogFacetsRequest
@@ -1111,39 +1152,9 @@ export declare type ListLogFacetsRequest = Message<"querysheriff.v1.ListLogFacet
   to?: Timestamp | undefined;
 
   /**
-   * @generated from field: string filter = 4;
+   * @generated from field: querysheriff.v1.LogFilter filter = 4;
    */
-  filter: string;
-
-  /**
-   * @generated from field: repeated querysheriff.v1.LogEvent.LogClassification classifications = 5;
-   */
-  classifications: LogEvent_LogClassification[];
-
-  /**
-   * @generated from field: repeated querysheriff.v1.LogEvent.LogCategory categories = 6;
-   */
-  categories: LogEvent_LogCategory[];
-
-  /**
-   * @generated from field: repeated string databases = 7;
-   */
-  databases: string[];
-
-  /**
-   * @generated from field: repeated string usernames = 8;
-   */
-  usernames: string[];
-
-  /**
-   * @generated from field: repeated string application_names = 9;
-   */
-  applicationNames: string[];
-
-  /**
-   * @generated from field: repeated string backend_types = 10;
-   */
-  backendTypes: string[];
+  filter?: LogFilter | undefined;
 };
 
 /**
@@ -1209,9 +1220,9 @@ export declare type LogFacetValue = Message<"querysheriff.v1.LogFacetValue"> & {
   count: bigint;
 
   /**
-   * @generated from field: querysheriff.v1.LogEvent.LogCategory category = 3;
+   * @generated from field: querysheriff.v1.LogCategory category = 3;
    */
-  category: LogEvent_LogCategory;
+  category: LogCategory;
 };
 
 /**
@@ -1221,181 +1232,64 @@ export declare type LogFacetValue = Message<"querysheriff.v1.LogFacetValue"> & {
 export declare const LogFacetValueSchema: GenMessage<LogFacetValue>;
 
 /**
- * @generated from message querysheriff.v1.LogRecord
+ * @generated from enum querysheriff.v1.LogCategory
  */
-export declare type LogRecord = Message<"querysheriff.v1.LogRecord"> & {
+export enum LogCategory {
   /**
-   * @generated from field: uint64 id = 1;
-   */
-  id: bigint;
-
-  /**
-   * @generated from field: google.protobuf.Timestamp occurred_at = 2;
-   */
-  occurredAt?: Timestamp | undefined;
-
-  /**
-   * @generated from field: querysheriff.v1.LogEvent.LogLevel log_level = 3;
-   */
-  logLevel: LogEvent_LogLevel;
-
-  /**
-   * @generated from field: querysheriff.v1.LogEvent.LogClassification classification = 4;
-   */
-  classification: LogEvent_LogClassification;
-
-  /**
-   * @generated from field: int32 pid = 5;
-   */
-  pid: number;
-
-  /**
-   * @generated from field: string database_name = 6;
-   */
-  databaseName: string;
-
-  /**
-   * @generated from field: string username = 7;
-   */
-  username: string;
-
-  /**
-   * @generated from field: string application_name = 8;
-   */
-  applicationName: string;
-
-  /**
-   * @generated from field: string backend_type = 9;
-   */
-  backendType: string;
-
-  /**
-   * @generated from field: string message = 10;
-   */
-  message: string;
-
-  /**
-   * @generated from field: string state_code = 11;
-   */
-  stateCode: string;
-
-  /**
-   * @generated from field: string detail = 12;
-   */
-  detail: string;
-
-  /**
-   * @generated from field: string hint = 13;
-   */
-  hint: string;
-
-  /**
-   * @generated from field: string context = 14;
-   */
-  context: string;
-
-  /**
-   * @generated from field: string statement = 15;
-   */
-  statement: string;
-
-  /**
-   * @generated from field: querysheriff.v1.LogEvent.LogCategory category = 16;
-   */
-  category: LogEvent_LogCategory;
-
-  /**
-   * @generated from field: querysheriff.v1.LogRecordStatementSample statement_sample = 17;
-   */
-  statementSample?: LogRecordStatementSample | undefined;
-};
-
-/**
- * Describes the message querysheriff.v1.LogRecord.
- * Use `create(LogRecordSchema)` to create a new message.
- */
-export declare const LogRecordSchema: GenMessage<LogRecord>;
-
-/**
- * @generated from message querysheriff.v1.LogRecordStatementSample
- */
-export declare type LogRecordStatementSample = Message<"querysheriff.v1.LogRecordStatementSample"> & {
-  /**
-   * @generated from field: uint64 id = 1;
-   */
-  id: bigint;
-
-  /**
-   * @generated from field: string query = 2;
-   */
-  query: string;
-
-  /**
-   * @generated from field: double duration_ms = 3;
-   */
-  durationMs: number;
-
-  /**
-   * @generated from field: bool has_explain_plan = 4;
-   */
-  hasExplainPlan: boolean;
-
-  /**
-   * @generated from field: uint64 statement_id = 5;
-   */
-  statementId: bigint;
-};
-
-/**
- * Describes the message querysheriff.v1.LogRecordStatementSample.
- * Use `create(LogRecordStatementSampleSchema)` to create a new message.
- */
-export declare const LogRecordStatementSampleSchema: GenMessage<LogRecordStatementSample>;
-
-/**
- * @generated from enum querysheriff.v1.LogSortColumn
- */
-export enum LogSortColumn {
-  /**
-   * @generated from enum value: LOG_SORT_COLUMN_UNSPECIFIED = 0;
+   * @generated from enum value: LOG_CATEGORY_UNSPECIFIED = 0;
    */
   UNSPECIFIED = 0,
 
   /**
-   * @generated from enum value: LOG_SORT_COLUMN_AT = 1;
+   * @generated from enum value: LOG_CATEGORY_SERVER = 1;
    */
-  AT = 1,
+  SERVER = 1,
 
   /**
-   * @generated from enum value: LOG_SORT_COLUMN_LEVEL = 2;
+   * @generated from enum value: LOG_CATEGORY_CONNECTION = 2;
    */
-  LEVEL = 2,
+  CONNECTION = 2,
 
   /**
-   * @generated from enum value: LOG_SORT_COLUMN_EVENT = 3;
+   * @generated from enum value: LOG_CATEGORY_WAL_CHECKPOINT = 3;
    */
-  EVENT = 3,
+  WAL_CHECKPOINT = 3,
 
   /**
-   * @generated from enum value: LOG_SORT_COLUMN_CATEGORY = 4;
+   * @generated from enum value: LOG_CATEGORY_AUTOVACUUM = 4;
    */
-  CATEGORY = 4,
+  AUTOVACUUM = 4,
 
   /**
-   * @generated from enum value: LOG_SORT_COLUMN_DATABASE = 5;
+   * @generated from enum value: LOG_CATEGORY_LOCK = 5;
    */
-  DATABASE = 5,
+  LOCK = 5,
 
   /**
-   * @generated from enum value: LOG_SORT_COLUMN_USERNAME = 6;
+   * @generated from enum value: LOG_CATEGORY_STATEMENT = 6;
    */
-  USERNAME = 6,
+  STATEMENT = 6,
+
+  /**
+   * @generated from enum value: LOG_CATEGORY_STANDBY = 7;
+   */
+  STANDBY = 7,
+
+  /**
+   * @generated from enum value: LOG_CATEGORY_CONSTRAINT_VIOLATION = 8;
+   */
+  CONSTRAINT_VIOLATION = 8,
+
+  /**
+   * @generated from enum value: LOG_CATEGORY_APPLICATION_ERROR = 9;
+   */
+  APPLICATION_ERROR = 9,
 }
 
 /**
- * Describes the enum querysheriff.v1.LogSortColumn.
+ * Describes the enum querysheriff.v1.LogCategory.
  */
-export declare const LogSortColumnSchema: GenEnum<LogSortColumn>;
+export declare const LogCategorySchema: GenEnum<LogCategory>;
 
 /**
  * @generated from enum querysheriff.v1.LogFacetField
@@ -1460,20 +1354,20 @@ export declare const LogService: GenService<{
     output: typeof ReportLogsResponseSchema;
   },
   /**
-   * @generated from rpc querysheriff.v1.LogService.QueryLogs
+   * @generated from rpc querysheriff.v1.LogService.ListLogs
    */
-  queryLogs: {
+  listLogs: {
     methodKind: "unary";
-    input: typeof QueryLogsRequestSchema;
-    output: typeof QueryLogsResponseSchema;
+    input: typeof ListLogsRequestSchema;
+    output: typeof ListLogsResponseSchema;
   },
   /**
-   * @generated from rpc querysheriff.v1.LogService.QueryLogSeries
+   * @generated from rpc querysheriff.v1.LogService.GetLogSeries
    */
-  queryLogSeries: {
+  getLogSeries: {
     methodKind: "unary";
-    input: typeof QueryLogSeriesRequestSchema;
-    output: typeof QueryLogSeriesResponseSchema;
+    input: typeof GetLogSeriesRequestSchema;
+    output: typeof GetLogSeriesResponseSchema;
   },
   /**
    * @generated from rpc querysheriff.v1.LogService.ListLogFacets
