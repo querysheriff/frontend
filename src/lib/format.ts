@@ -1,3 +1,5 @@
+import { ConnectError } from '@connectrpc/connect';
+
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function sig3(n: number): string {
@@ -28,44 +30,33 @@ export function fmtCountFull(n: number): string {
 	return Math.round(n).toLocaleString('en-US');
 }
 
+const pad = (n: number, width = 2): string => String(n).padStart(width, '0');
+const monthDay = (d: Date): string => `${MONTHS[d.getMonth()]} ${d.getDate()}`;
+const hourMinute = (d: Date): string => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
 export function fmtRel(sec: number): string {
 	const s = Math.max(0, Math.round(sec));
-	return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+	return `${Math.floor(s / 60)}:${pad(s % 60)}`;
 }
 
-// "2026-06-09 14:00:00" → "Jun 9 14:00:00"
-export function fmtClock(s: string): string {
-	if (!s) return '—';
-	const [d, t] = s.split(/[ T]/);
-	const [, M, D] = d.split('-');
-	return `${MONTHS[+M - 1]} ${+D} ${t}`;
-}
+// "Jun 9 14:05"
+export const fmtClockMinute = (d: Date): string => `${monthDay(d)} ${hourMinute(d)}`;
 
-export function fmtTs(d: Date): string {
-	const p = (n: number, w = 2) => String(n).padStart(w, '0');
-	return (
-		`${MONTHS[d.getMonth()]} ${d.getDate()} ` +
-		`${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}.${p(d.getMilliseconds(), 3)}`
-	);
-}
+// "Jun 9 14:05:09"
+export const fmtClockDate = (d: Date): string => `${fmtClockMinute(d)}:${pad(d.getSeconds())}`;
 
-export function fmtClockDate(d: Date): string {
-	const p = (n: number) => String(n).padStart(2, '0');
-	return `${MONTHS[d.getMonth()]} ${d.getDate()} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
-}
+// "Jun 9 14:05:09.042"
+export const fmtTs = (d: Date): string => `${fmtClockDate(d)}.${pad(d.getMilliseconds(), 3)}`;
 
-export function fmtClockMinute(d: Date): string {
-	const p = (n: number) => String(n).padStart(2, '0');
-	return `${MONTHS[d.getMonth()]} ${d.getDate()} ${p(d.getHours())}:${p(d.getMinutes())}`;
-}
+// "Jun 9, 2026 14:05:09"
+export const fmtDateTime = (d: Date): string =>
+	`${monthDay(d)}, ${d.getFullYear()} ${hourMinute(d)}:${pad(d.getSeconds())}`;
 
 export function fmtBucketRange(end: Date, bucketMs: number): string {
 	const start = new Date(end.getTime() - bucketMs);
-	const p = (n: number) => String(n).padStart(2, '0');
-	const hm = (d: Date) => `${p(d.getHours())}:${p(d.getMinutes())}`;
-	const head = `${MONTHS[start.getMonth()]} ${start.getDate()} ${hm(start)}`;
-	if (start.toDateString() === end.toDateString()) return `${head} – ${hm(end)}`;
-	return `${head} – ${MONTHS[end.getMonth()]} ${end.getDate()} ${hm(end)}`;
+	const head = fmtClockMinute(start);
+	if (start.toDateString() === end.toDateString()) return `${head} – ${hourMinute(end)}`;
+	return `${head} – ${fmtClockMinute(end)}`;
 }
 
 export function fmtBucketSize(bucketMs: number): string {
@@ -78,44 +69,36 @@ export function fmtBucketSize(bucketMs: number): string {
 
 export function fmtAxisTime(value: Date | number): string {
 	const d = value instanceof Date ? value : new Date(value);
-	const p = (n: number) => String(n).padStart(2, '0');
 	if (d.getHours() === 0 && d.getMinutes() === 0) return `${d.getMonth() + 1}/${d.getDate()}`;
-	return `${p(d.getHours())}:${p(d.getMinutes())}`;
+	return hourMinute(d);
 }
 
 const isIdTag = (key: string): boolean => key.endsWith('_id');
 
+export function tagEntries(tags: Record<string, string>): [string, string][] {
+	return Object.entries(tags).sort(([a], [b]) => Number(isIdTag(a)) - Number(isIdTag(b)) || a.localeCompare(b));
+}
+
 export function kvTags(tags: Record<string, string>): string[] {
-	return Object.entries(tags)
-		.sort(([a], [b]) => Number(isIdTag(a)) - Number(isIdTag(b)) || a.localeCompare(b))
-		.map(([k, v]) => `${k}=${v}`);
+	return tagEntries(tags).map(([k, v]) => `${k}=${v}`);
 }
 
 export function truncate(text: string, max: number): string {
 	return text.length > max ? text.slice(0, max) + '...' : text;
 }
 
-export function fmtDateTime(d: Date): string {
-	const p = (n: number) => String(n).padStart(2, '0');
-	return (
-		`${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()} ` +
-		`${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`
-	);
-}
-
 export function errMsg(e: unknown): string {
-	return e instanceof Error ? e.message : String(e);
+	const err = ConnectError.from(e);
+	return err.rawMessage || err.message;
 }
-
-export function cleanErr(e: unknown): string {
-	return errMsg(e).replace(/^\[[a-z_]+\]\s*/, '');
-}
-
-export const sevByMean = (ms: number): string =>
-	ms >= 4000 ? 'var(--color-danger)' : ms >= 800 ? 'var(--color-warn)' : 'var(--color-ok)';
-export const sevByDuration = (ms: number): string =>
-	ms >= 10000 ? 'var(--color-danger)' : ms >= 1000 ? 'var(--color-warn)' : 'var(--color-ok)';
 
 // The vivid warn/ok fills fail text contrast, so text uses their darker variants.
-export const sevText = (sev: string): string =>
-	sev === 'var(--color-warn)' ? 'var(--color-warn-text)' : sev === 'var(--color-ok)' ? 'var(--color-ok-text)' : sev;
+export function durationColor(ms: number, warnMs: number, dangerMs: number): string {
+	if (ms >= dangerMs) return 'var(--color-danger)';
+	if (ms >= warnMs) return 'var(--color-warn-text)';
+	return 'var(--color-ok-text)';
+}
+
+export const avgDurationColor = (ms: number): string => durationColor(ms, 800, 4000);
+
+export const runDurationColor = (ms: number): string => durationColor(ms, 1000, 10_000);

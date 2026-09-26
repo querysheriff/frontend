@@ -5,7 +5,7 @@
 	import ChartFrame from '$lib/components/ChartFrame.svelte';
 	import MetricArea from '$lib/components/MetricArea.svelte';
 	import SeriesPoints from '$lib/components/SeriesPoints.svelte';
-	import { buildMetricMultiChartModel, type MetricSeriesPoint, type MetricSeriesRow } from '$lib/metricChart';
+	import { buildMetricChartModel, type MetricSeriesPoint, type MetricSeriesRow } from '$lib/metricChart';
 	import { createTimeBrush } from '$lib/chartBrush.svelte';
 
 	let {
@@ -17,7 +17,7 @@
 		label,
 		format = fmtCount,
 		formatFull = fmtCountFull,
-		unit = 'calls',
+		unit = '',
 		minYMax = 1
 	}: {
 		data: MetricSeriesPoint[];
@@ -32,7 +32,7 @@
 		minYMax?: number;
 	} = $props();
 
-	const model = $derived(buildMetricMultiChartModel([data], from, to, bucketMs));
+	const model = $derived(buildMetricChartModel([data], from, to, bucketMs));
 
 	// Anchored to the bucket's center, not its `at` edge, so they sit in the middle of its slot.
 	const bucketCenter = $derived.by(() => {
@@ -69,19 +69,13 @@
 	>
 		<Svg>
 			<Grid y={{ class: 'stroke-ink/10' }} />
-			<Axis
-				placement="left"
-				rule
-				ticks={4}
-				{format}
-				tickLabelProps={{ class: 'fill-ink/45 font-mono text-2xs', stroke: 'none' }}
-			/>
+			<Axis placement="left" rule ticks={4} {format} tickLabelProps={{ class: 'fill-ink/45 font-mono text-2xs' }} />
 			<Axis
 				placement="bottom"
 				rule
 				ticks={6}
 				format={fmtAxisTime}
-				tickLabelProps={{ class: 'fill-ink/45 font-mono text-2xs', stroke: 'none' }}
+				tickLabelProps={{ class: 'fill-ink/45 font-mono text-2xs' }}
 			/>
 			<LinearGradient vertical>
 				{#snippet stopsContent()}
@@ -99,7 +93,7 @@
 			</LinearGradient>
 			{#if !brush.brushing}
 				<Highlight lines motion="none" />
-				<SeriesPoints colors={[fill]} values={(d: MetricSeriesRow) => d.values} />
+				<SeriesPoints colors={[fill]} />
 			{/if}
 		</Svg>
 		{#if !brush.brushing}
@@ -122,10 +116,3 @@
 		{/if}
 	</Chart>
 </ChartFrame>
-
-<style>
-	:global(.lc-axis-tick-label),
-	:global(.lc-axis-tick-label tspan) {
-		stroke: none;
-	}
-</style>

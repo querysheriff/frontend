@@ -3,19 +3,21 @@
 
 	let {
 		label,
-		values,
+		op = '=',
+		values = '',
 		active = false,
 		onedit,
 		onremove
 	}: {
 		label: string;
-		values: string;
+		op?: '=' | '!=' | 'exists';
+		values?: string;
 		active?: boolean;
 		onedit: () => void;
 		onremove: () => void;
 	} = $props();
 
-	const description = $derived(`${label} = ${values}`);
+	const description = $derived(op === 'exists' ? `${label} exists` : `${label} ${op} ${values}`);
 </script>
 
 <span
@@ -30,8 +32,10 @@
 		class="flex cursor-pointer items-center gap-1.5 py-1 pr-1.5 pl-2 font-mono text-sm whitespace-nowrap"
 	>
 		<span class="text-ink/70">{label}</span>
-		<span class="font-semibold text-command">=</span>
-		<span class="max-w-[13.75rem] truncate text-ink">{values}</span>
+		<span class="font-semibold {op === '!=' ? 'text-danger' : 'text-command'}">{op}</span>
+		{#if op !== 'exists'}
+			<span class="max-w-[13.75rem] truncate text-ink">{values}</span>
+		{/if}
 	</button>
 	<button
 		type="button"

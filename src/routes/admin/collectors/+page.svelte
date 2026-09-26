@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { PlusIcon, Trash2Icon, TriangleAlertIcon, CopyIcon } from '@lucide/svelte';
-	import Alert from '$lib/components/Alert.svelte';
+	import ErrorBanner from '$lib/components/ErrorBanner.svelte';
 	import FormLabel from '$lib/components/FormLabel.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
 	import { timestampDate } from '@bufbuild/protobuf/wkt';
 	import type { CollectorToken } from '$lib/gen/querysheriff/v1/admin_pb';
 	import { adminClient } from '$lib/connect';
 	import StateBlock from '$lib/components/StateBlock.svelte';
-	import { cleanErr, errMsg, fmtDateTime } from '$lib/format';
+	import { errMsg, fmtDateTime } from '$lib/format';
 	import Button from '$lib/components/Button.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import PageBar from '$lib/components/PageBar.svelte';
@@ -76,7 +76,7 @@
 			modal = 'reveal';
 			await load();
 		} catch (e) {
-			formError = cleanErr(e);
+			formError = errMsg(e);
 		} finally {
 			creating = false;
 		}
@@ -169,7 +169,7 @@
 					onkeydown={(e) => e.key === 'Enter' && create()}
 				/>
 				{#if formError}
-					<Alert message={formError} class="mt-3.5 px-3 py-2.5" />
+					<ErrorBanner message={formError} class="mt-3.5 px-3 py-2.5" />
 				{/if}
 			</div>
 			<div class="flex justify-end gap-2.5 border-t border-line px-5 py-3.5">

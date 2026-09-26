@@ -5,10 +5,6 @@ class DocsState {
 		this.activeId = this.activeId === id ? null : id;
 	};
 
-	open = (id: string): void => {
-		this.activeId = id;
-	};
-
 	close = (): void => {
 		this.activeId = null;
 	};

@@ -2,8 +2,8 @@
 	import { MailIcon, LockIcon, ArrowRightIcon } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
 	import { session } from '$lib/session.svelte';
-	import { cleanErr } from '$lib/format';
-	import Alert from '$lib/components/Alert.svelte';
+	import { errMsg } from '$lib/format';
+	import ErrorBanner from '$lib/components/ErrorBanner.svelte';
 	import FormLabel from '$lib/components/FormLabel.svelte';
 	import QuerySheriffMark from '$lib/icons/QuerySheriffMark.svelte';
 
@@ -13,7 +13,7 @@
 	let submitting = $state(false);
 
 	$effect(() => {
-		if (session.loaded && session.isAuthenticated) goto('/queries');
+		if (session.loaded && session.isAuthenticated) goto('/queries', { replaceState: true });
 	});
 
 	async function submit(e: SubmitEvent) {
@@ -23,10 +23,8 @@
 		submitting = true;
 		try {
 			await session.login(email.trim(), password);
-			goto('/queries');
 		} catch (err) {
-			// Drop the "[code]" prefix Connect errors carry.
-			error = cleanErr(err);
+			error = errMsg(err);
 		} finally {
 			submitting = false;
 		}
@@ -40,8 +38,8 @@
 <div class="flex min-h-screen items-center justify-center bg-paper p-8 font-sans">
 	<div class="w-full max-w-[25.25rem]">
 		<div class="mb-8 flex items-center justify-center gap-3">
-			<QuerySheriffMark class="size-10 flex-none text-command" />
-			<h1 class="font-sans text-[27px] font-bold tracking-[3px] text-ink">QuerySheriff</h1>
+			<QuerySheriffMark class="size-10 flex-none text-ink" />
+			<h1 class="font-sans text-[27px] font-bold text-ink">QuerySheriff</h1>
 		</div>
 
 		<form onsubmit={submit} class="border border-line-card bg-card px-8 pt-8 pb-7">
@@ -73,7 +71,7 @@
 			</div>
 
 			{#if error}
-				<Alert message={error} class="mb-4 px-3 py-2.5 font-sans" />
+				<ErrorBanner message={error} class="mb-4 px-3 py-2.5 font-sans" />
 			{/if}
 
 			<button

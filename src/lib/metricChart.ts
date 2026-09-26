@@ -1,25 +1,33 @@
+import { timestampDate } from '@bufbuild/protobuf/wkt';
+import type { MetricPoint } from '$lib/gen/querysheriff/v1/common_pb';
+
 export type MetricSeriesPoint = { at: Date; value: number };
 
 export type MetricSeriesRow = { at: Date; values: number[] };
 
-export type MetricMultiChartModel = {
+type MetricChartModel = {
 	rows: MetricSeriesRow[];
 	xFrom: Date;
 	xTo: Date;
 	step: number;
 };
 
+export function toSeriesPoints(points: MetricPoint[] = [], scale = 1): MetricSeriesPoint[] {
+	return points.flatMap((p) => (p.at ? [{ at: timestampDate(p.at), value: p.value * scale }] : []));
+}
+
+// A zero step would never advance the grid loop below.
 function resolveStep(fromMs: number, toMs: number, bucketMs: number): number {
 	return bucketMs > 0 ? bucketMs : Math.max(60_000, (toMs - fromMs) / 60);
 }
 
 // Fills every step slot across the range, so a bucket with no data plots as 0.
-export function buildMetricMultiChartModel(
+export function buildMetricChartModel(
 	series: MetricSeriesPoint[][],
 	from: Date,
 	to: Date,
 	bucketMs: number
-): MetricMultiChartModel {
+): MetricChartModel {
 	const fromMs = from.getTime();
 	const toMs = to.getTime();
 	const step = resolveStep(fromMs, toMs, bucketMs);
@@ -33,7 +41,7 @@ export function buildMetricMultiChartModel(
 	const first = Math.min(...times);
 	const last = Math.max(...times);
 	const gridFrom = first - Math.max(0, Math.ceil((first - fromMs) / step)) * step;
-	const gridTo = last + Math.max(0, Math.floor((toMs - last) / step) - 1) * step;
+	const gridTo = last + Math.max(0, Math.floor((toMs - last) / step)) * step;
 	for (let t = gridFrom; t <= gridTo; t += step) times.add(t);
 
 	const lookups = series.map((points) => new Map(points.map((p) => [p.at.getTime(), p.value])));

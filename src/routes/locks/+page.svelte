@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { timestampFromDate, timestampDate } from '@bufbuild/protobuf/wkt';
+	import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 	import {
 		LockWaitSortColumn,
 		type LockParty,
@@ -8,60 +8,34 @@
 	} from '$lib/gen/querysheriff/v1/activity_pb';
 	import { activityClient } from '$lib/connect';
 	import { ctx, serversState } from '$lib/state.svelte';
-	import { errMsg, fmtBucketSize, fmtDuration, kvTags } from '$lib/format';
+	import { Loader, PagedLoader } from '$lib/loader.svelte';
+	import { fmtBucketSize, fmtDuration, kvTags } from '$lib/format';
 	import { durationMs, toDate, tsKey } from '$lib/activity';
-	import type { MetricSeriesPoint } from '$lib/metricChart';
-	import Button from '$lib/components/Button.svelte';
-	import CallsChart from '$lib/components/CallsChart.svelte';
+	import { toSeriesPoints } from '$lib/metricChart';
+	import AreaChart from '$lib/components/AreaChart.svelte';
 	import ChartEmpty from '$lib/components/ChartEmpty.svelte';
 	import ChartPanel from '$lib/components/ChartPanel.svelte';
 	import DocCard from '$lib/components/DocCard.svelte';
+	import LoadMoreFooter from '$lib/components/LoadMoreFooter.svelte';
 	import SectionHeader from '$lib/components/SectionHeader.svelte';
-	import StateBlock from '$lib/components/StateBlock.svelte';
 	import SqlPopover from '$lib/components/SqlPopover.svelte';
+	import type { Sort } from '$lib/components/SortHeader.svelte';
 	import { SqlPopoverState } from '$lib/sqlPopover.svelte';
-	import LockWaitTable, { type LockWaitRow, type LockWaitSortCol } from '$lib/components/LockWaitTable.svelte';
+	import LockWaitTable, { type LockWaitRow } from '$lib/components/LockWaitTable.svelte';
 
 	const PAGE_SIZE = 10;
 
-	let series = $state<GetLockWaitSeriesResponse | undefined>(undefined);
-	let chartRange = $state<{ from: Date; to: Date } | null>(null);
-	let chartLoading = $state(true);
-	let chartError = $state<string | null>(null);
+	let sort = $state<Sort<LockWaitSortColumn>>({ column: LockWaitSortColumn.WAITED, desc: true });
+	let chartRange = $state(ctx.timeRange());
 
-	let waitRows = $state<LockWaitRow[]>([]);
-	let waitsLoading = $state(true);
-	let waitsError = $state<string | null>(null);
-	let hasMore = $state(false);
-	let loadingMore = $state(false);
-	let sort = $state<{ col: LockWaitSortCol; dir: 'asc' | 'desc' }>({ col: 'waited', dir: 'desc' });
+	const series = new Loader<GetLockWaitSeriesResponse>();
+	const waits = new PagedLoader<LockWaitRow>((r) => r.key);
 
 	// Both sides' full text is already on the wire, so no lazy loader.
 	const sql = new SqlPopoverState();
 
-	function scope() {
-		const { from, to } = ctx.timeRange();
-		return {
-			serverName: ctx.server,
-			databaseName: ctx.db,
-			from: timestampFromDate(from),
-			to: timestampFromDate(to)
-		};
-	}
-
-	const sortColumnProto: Record<LockWaitSortCol, LockWaitSortColumn> = {
-		started: LockWaitSortColumn.STARTED,
-		waited: LockWaitSortColumn.WAITED
-	};
-
-	function tableRequest(offset: number) {
-		return {
-			...scope(),
-			sortColumn: sortColumnProto[sort.col],
-			sortDesc: sort.dir === 'desc',
-			limit: PAGE_SIZE,
-			offset
-		};
+	function scope({ from, to } = ctx.timeRange()) {
+		return { serverName: ctx.server, databaseName: ctx.db, from: timestampFromDate(from), to: timestampFromDate(to) };
 	}
 
 	function toParty(p: LockParty | undefined) {
@@ -85,103 +59,29 @@
 		};
 	}
 
-	let chartGen = 0;
-	let chartAc: AbortController | null = null;
 	$effect(() => {
-		const request = scope();
-		const { from, to } = ctx.timeRange();
-		chartRange = { from, to };
-		if (!ctx.server || !ctx.db) {
-			chartLoading = !serversState.loaded;
-			if (serversState.loaded) {
-				series = undefined;
-				chartError = null;
-			}
-			return;
-		}
-		const gen = ++chartGen;
-		chartAc?.abort();
-		chartAc = new AbortController();
-		chartLoading = true;
-		chartError = null;
-		series = undefined;
-
-		activityClient
-			.getLockWaitSeries(request, { signal: chartAc.signal })
-			.then((res) => {
-				if (gen !== chartGen) return;
-				series = res;
-			})
-			.catch((e: unknown) => {
-				if (gen !== chartGen) return;
-				chartError = errMsg(e);
-			})
-			.finally(() => {
-				if (gen === chartGen) chartLoading = false;
-			});
+		const range = ctx.timeRange();
+		chartRange = range;
+		const request = scope(range);
+		if (!ctx.server || !ctx.db) return series.reset(!serversState.loaded, serversState.error);
+		return series.load((signal) => activityClient.getLockWaitSeries(request, { signal }));
 	});
 
-	let waitsGen = 0;
-	let waitsAc: AbortController | null = null;
 	$effect(() => {
-		if (!ctx.server || !ctx.db) {
-			waitsLoading = !serversState.loaded;
-			if (serversState.loaded) {
-				waitRows = [];
-				hasMore = false;
-				waitsError = null;
-			}
-			return;
-		}
-		const request = tableRequest(0);
-		const gen = ++waitsGen;
-		waitsAc?.abort();
-		waitsAc = new AbortController();
-		waitsLoading = true;
-		waitsError = null;
-
-		activityClient
-			.listLockWaits(request, { signal: waitsAc.signal })
-			.then((res) => {
-				if (gen !== waitsGen) return;
-				waitRows = res.waits.map(toRow);
-				hasMore = res.hasMore;
-			})
-			.catch((e: unknown) => {
-				if (gen !== waitsGen) return;
-				waitsError = errMsg(e);
-				waitRows = [];
-				hasMore = false;
-			})
-			.finally(() => {
-				if (gen === waitsGen) waitsLoading = false;
-			});
+		const request = { ...scope(), sortColumn: sort.column, sortDesc: sort.desc, limit: PAGE_SIZE };
+		if (!ctx.server || !ctx.db) return waits.reset(!serversState.loaded, serversState.error);
+		return waits.load((offset, signal) =>
+			activityClient
+				.listLockWaits({ ...request, offset }, { signal })
+				.then((res) => ({ rows: res.waits.map(toRow), hasMore: res.hasMore }))
+		);
 	});
-
-	async function loadMore() {
-		if (loadingMore || waitsLoading || !hasMore) return;
-		const gen = waitsGen;
-		loadingMore = true;
-		try {
-			const res = await activityClient.listLockWaits(tableRequest(waitRows.length), { signal: waitsAc?.signal });
-			if (gen !== waitsGen) return;
-			const seen = new Set(waitRows.map((r) => r.key));
-			waitRows = [...waitRows, ...res.waits.map(toRow).filter((r) => !seen.has(r.key))];
-			hasMore = res.hasMore;
-		} catch (e: unknown) {
-			if (gen === waitsGen) waitsError = errMsg(e);
-		} finally {
-			loadingMore = false;
-		}
-	}
 
 	// Seconds on the wire, milliseconds in the chart, so fmtDuration can label it.
-	const points = $derived<MetricSeriesPoint[]>(
-		(series?.waitSeconds ?? []).flatMap((p) => (p.at ? [{ at: timestampDate(p.at), value: p.value * 1000 }] : []))
-	);
-	const bucketMs = $derived(Number(series?.bucketMs ?? 0n));
+	const points = $derived(toSeriesPoints(series.data?.waitSeconds, 1000));
+	const bucketMs = $derived(Number(series.data?.bucketMs ?? 0n));
 	const chartDescription = $derived(
-		points.length > 0
+		bucketMs > 0
 			? `Time queries spent waiting instead of running · ${fmtBucketSize(bucketMs)} buckets`
 			: 'Time queries spent waiting instead of running'
 	);
@@ -189,8 +89,8 @@
 
 <div class="mb-4 grid gap-4">
 	<ChartPanel docId="l-wait-time" title="Lock wait time" description={chartDescription}>
-		{#if chartRange && points.length > 0}
-			<CallsChart
+		{#if points.length > 0}
+			<AreaChart
 				data={points}
 				from={chartRange.from}
 				to={chartRange.to}
@@ -199,11 +99,10 @@
 				label="waiting"
 				format={fmtDuration}
 				formatFull={fmtDuration}
-				unit=""
 				minYMax={1000}
 			/>
 		{:else}
-			<ChartEmpty message={chartLoading ? 'Loading…' : (chartError ?? 'No lock waits')} />
+			<ChartEmpty message={series.loading ? 'Loading…' : (series.error ?? 'No lock waits')} />
 		{/if}
 	</ChartPanel>
 </div>
@@ -213,21 +112,9 @@
 		<SectionHeader title="Lock waits" description="Each query that got stuck, and the query that blocked it" />
 	</div>
 
-	<LockWaitTable rows={waitRows} bind:sort {sql} loading={waitsLoading && waitRows.length > 0} />
+	<LockWaitTable rows={waits.rows} bind:sort {sql} loading={waits.loading && waits.rows.length > 0} />
 
-	{#if waitsLoading && waitRows.length === 0}
-		<StateBlock class="px-4 py-6" message="Loading…" />
-	{:else if waitsError}
-		<StateBlock kind="error" class="px-4 py-6" message={waitsError} />
-	{:else if waitRows.length === 0}
-		<StateBlock class="px-4 py-6" message="No lock waits in this range" />
-	{:else if hasMore}
-		<div class="border-t border-line-soft p-3 text-center">
-			<Button variant="ghost" onclick={loadMore} disabled={loadingMore}>
-				{loadingMore ? 'Loading…' : 'Load more'}
-			</Button>
-		</div>
-	{/if}
+	<LoadMoreFooter list={waits} empty="No lock waits in this range" />
 </DocCard>
 
 <SqlPopover state={sql} />

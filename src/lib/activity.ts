@@ -1,6 +1,6 @@
 import { timestampDate, type Timestamp } from '@bufbuild/protobuf/wkt';
 import { TransactionEventStatus, type TransactionEvent } from '$lib/gen/querysheriff/v1/activity_pb';
-import { fmtRel } from '$lib/format';
+import { durationColor, fmtRel } from '$lib/format';
 
 export function statusLabel(s: TransactionEventStatus): string {
 	switch (s) {
@@ -15,7 +15,7 @@ export function statusLabel(s: TransactionEventStatus): string {
 	}
 }
 
-export function statusText(s: TransactionEventStatus): string {
+export function statusColor(s: TransactionEventStatus): string {
 	switch (s) {
 		case TransactionEventStatus.ACTIVE:
 			return 'var(--color-ok-text)';
@@ -28,28 +28,15 @@ export function statusText(s: TransactionEventStatus): string {
 
 export const MIN_TRANSACTION_MS = 5000;
 
-const WAIT_OK_MS = 100;
-const WAIT_SEVERE_MS = 5_000;
+export const waitColor = (ms: number): string => durationColor(ms, 100, 5000);
 
-export function waitSeverityText(ms: number): string {
-	if (ms > WAIT_SEVERE_MS) return 'var(--color-danger)';
-	if (ms >= WAIT_OK_MS) return 'var(--color-warn-text)';
-
-	return 'var(--color-ok-text)';
-}
-
-export function transactionAgeText(ms: number): string {
-	if (ms > 120_000) return 'var(--color-danger)';
-	if (ms >= 30_000) return 'var(--color-warn-text)';
-
-	return 'var(--color-ok-text)';
-}
+export const transactionAgeColor = (ms: number): string => durationColor(ms, 30_000, 120_000);
 
 export const durationMs = (from?: Timestamp, to?: Timestamp): number =>
 	from && to ? Math.max(0, timestampDate(to).getTime() - timestampDate(from).getTime()) : 0;
 
-export const relFrom = (start: Timestamp, ts: Timestamp): string =>
-	fmtRel((timestampDate(ts).getTime() - timestampDate(start).getTime()) / 1000);
+export const relFrom = (start: Date, ts: Timestamp): string =>
+	fmtRel((timestampDate(ts).getTime() - start.getTime()) / 1000);
 
 export const toDate = (ts?: Timestamp): Date | null => (ts ? timestampDate(ts) : null);
 

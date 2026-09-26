@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { PlusIcon, SquarePenIcon, Trash2Icon, CheckIcon } from '@lucide/svelte';
-	import Alert from '$lib/components/Alert.svelte';
+	import ErrorBanner from '$lib/components/ErrorBanner.svelte';
 	import FormLabel from '$lib/components/FormLabel.svelte';
 	import TextInput from '$lib/components/TextInput.svelte';
 	import { timestampDate } from '@bufbuild/protobuf/wkt';
 	import type { User } from '$lib/gen/querysheriff/v1/auth_pb';
 	import { adminClient } from '$lib/connect';
 	import StateBlock from '$lib/components/StateBlock.svelte';
-	import { cleanErr, errMsg, fmtDateTime } from '$lib/format';
+	import { errMsg, fmtDateTime } from '$lib/format';
 	import Button from '$lib/components/Button.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import PageBar from '$lib/components/PageBar.svelte';
@@ -25,6 +25,7 @@
 	let umEmail = $state('');
 	let umPassword = $state('');
 	let umServers = $state<string[]>([]);
+	let initialServers = $state<string[]>([]);
 	let userError = $state<string | null>(null);
 	let saving = $state(false);
 
@@ -57,6 +58,7 @@
 		umEmail = '';
 		umPassword = '';
 		umServers = [];
+		initialServers = [];
 		userError = null;
 		modal = 'create';
 	}
@@ -68,6 +70,7 @@
 		umEmail = u.email;
 		umPassword = '';
 		umServers = [...u.allowedServers];
+		initialServers = u.allowedServers;
 		userError = null;
 		modal = 'edit';
 	}
@@ -76,6 +79,11 @@
 		modal = null;
 		umPassword = '';
 	}
+
+	// Includes grants whose collector token was deleted, so they can still be revoked.
+	const serverChoices = $derived(
+		[...new Set([...serverOptions, ...initialServers])].sort((a, b) => a.localeCompare(b))
+	);
 
 	function toggleServer(name: string) {
 		umServers = umServers.includes(name) ? umServers.filter((s) => s !== name) : [...umServers, name];
@@ -104,7 +112,7 @@
 			close();
 			await load();
 		} catch (e) {
-			userError = cleanErr(e);
+			userError = errMsg(e);
 		} finally {
 			saving = false;
 		}
@@ -235,11 +243,11 @@
 				</div>
 			{:else}
 				<span class="mb-2 block font-sans text-2xs font-semibold text-ink/70"> Allowed Servers </span>
-				{#if serverOptions.length === 0}
+				{#if serverChoices.length === 0}
 					<div class="font-mono text-sm text-ink/70">No servers yet — create a collector token first</div>
 				{:else}
 					<div class="flex flex-wrap gap-2">
-						{#each serverOptions as name (name)}
+						{#each serverChoices as name (name)}
 							{@const on = umServers.includes(name)}
 							<button
 								type="button"
@@ -256,7 +264,7 @@
 			{/if}
 
 			{#if userError}
-				<Alert message={userError} class="mt-4 px-3 py-2.5" />
+				<ErrorBanner message={userError} class="mt-4 px-3 py-2.5" />
 			{/if}
 		</div>
 		<div class="flex justify-end gap-2.5 border-t border-line px-5 py-3.5">

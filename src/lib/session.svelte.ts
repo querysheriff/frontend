@@ -1,3 +1,4 @@
+import { Code, ConnectError } from '@connectrpc/connect';
 import type { User } from '$lib/gen/querysheriff/v1/auth_pb';
 import { authClient, handleSessionEnded } from './connect';
 
@@ -25,9 +26,11 @@ class SessionState {
 	async logout(): Promise<void> {
 		try {
 			await authClient.logout({});
-		} finally {
-			this.user = null;
+		} catch (e) {
+			// An already expired session is as signed out as it gets.
+			if (ConnectError.from(e).code !== Code.Unauthenticated) throw e;
 		}
+		this.user = null;
 	}
 
 	get isAuthenticated(): boolean {

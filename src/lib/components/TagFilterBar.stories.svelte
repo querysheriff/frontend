@@ -10,13 +10,14 @@
 </script>
 
 <script lang="ts">
-	import { QueryFilterState, type TagFilter } from '$lib/queryFilter.svelte';
+	import { QueryFilterState } from '$lib/queryFilter.svelte';
+	import type { TagFilter } from '$lib/urlCodec';
 
 	const eq = (key: string, ...values: string[]): TagFilter => ({ key, op: 'eq', values });
 
-	function make(chips: TagFilter[] = [], kinds?: Partial<Record<'reads' | 'writes' | 'others', boolean>>) {
+	function make(tags: TagFilter[] = [], kinds?: Partial<Record<'reads' | 'writes' | 'others', boolean>>) {
 		const s = new QueryFilterState();
-		for (const c of chips) s.add(c);
+		for (const t of tags) s.add(t);
 		if (kinds) Object.assign(s.kinds, kinds);
 		return s;
 	}
@@ -34,9 +35,9 @@
 	const readsOnly = make([], { writes: false, others: false });
 </script>
 
-{#snippet card(tags: QueryFilterState, searchText: string)}
+{#snippet card(filters: QueryFilterState, searchText: string)}
 	<div class="border border-line-card bg-card">
-		<TagFilterBar {tags} {searchText} />
+		<TagFilterBar {filters} {searchText} />
 	</div>
 {/snippet}
 

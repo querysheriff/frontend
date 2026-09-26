@@ -1,63 +1,48 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
-	import { page } from '$app/state';
-	import { timestampFromDate, timestampDate } from '@bufbuild/protobuf/wkt';
-	import type {
-		GetLatencySeriesResponse,
-		GetStatementSeriesResponse,
-		StatementStat
+	import { onDestroy, untrack } from 'svelte';
+	import { timestampFromDate } from '@bufbuild/protobuf/wkt';
+	import {
+		StatementSortColumn,
+		type GetLatencySeriesResponse,
+		type GetStatementSeriesResponse,
+		type StatementStat
 	} from '$lib/gen/querysheriff/v1/statement_pb';
-	import type { MetricPoint } from '$lib/gen/querysheriff/v1/common_pb';
-	import { StatementSortColumn } from '$lib/gen/querysheriff/v1/statement_pb';
 	import { statementClient } from '$lib/connect';
-	import StateBlock from '$lib/components/StateBlock.svelte';
 	import { ctx, serversState } from '$lib/state.svelte';
 	import { urlSync } from '$lib/urlState.svelte';
-	import { QueryFilterState, parseDisplayTag } from '$lib/queryFilter.svelte';
-	import { fmtDuration, fmtBucketSize, sevByMean, kvTags, errMsg } from '$lib/format';
-	import type { MetricSeriesPoint } from '$lib/metricChart';
-	import Button from '$lib/components/Button.svelte';
-	import CallsChart from '$lib/components/CallsChart.svelte';
+	import { QueryFilterState } from '$lib/queryFilter.svelte';
+	import { Loader, PagedLoader } from '$lib/loader.svelte';
+	import { fmtDuration, fmtBucketSize } from '$lib/format';
+	import { toSeriesPoints } from '$lib/metricChart';
+	import AreaChart from '$lib/components/AreaChart.svelte';
 	import ChartPanel from '$lib/components/ChartPanel.svelte';
 	import ChartEmpty from '$lib/components/ChartEmpty.svelte';
 	import DocCard from '$lib/components/DocCard.svelte';
 	import LineChart from '$lib/components/LineChart.svelte';
+	import LoadMoreFooter from '$lib/components/LoadMoreFooter.svelte';
 	import SectionHeader from '$lib/components/SectionHeader.svelte';
 	import SqlPopover from '$lib/components/SqlPopover.svelte';
+	import type { Sort } from '$lib/components/SortHeader.svelte';
 	import { SqlPopoverState } from '$lib/sqlPopover.svelte';
-	import StatementTable, { type StatementRow, type StatementSortCol } from '$lib/components/StatementTable.svelte';
+	import StatementTable from '$lib/components/StatementTable.svelte';
 	import TagFilterBar from '$lib/components/TagFilterBar.svelte';
 
 	const PAGE_SIZE = 50;
 
-	const sortColumnProto: Record<StatementSortCol, StatementSortColumn> = {
-		meanMs: StatementSortColumn.AVG,
-		calls: StatementSortColumn.CALLS,
-		rowsPerCall: StatementSortColumn.ROWS_PER_CALL,
-		pctIo: StatementSortColumn.PCT_IO,
-		pctTime: StatementSortColumn.PCT_TIME
-	};
-
-	let rows = $state<StatementRow[]>([]);
-	let hasMore = $state(false);
-	let tableLoading = $state(true);
-	let loadingMore = $state(false);
-	let tableError = $state<string | null>(null);
-	let sort = $state<{ col: StatementSortCol; dir: 'asc' | 'desc' }>({ col: 'pctTime', dir: 'desc' });
+	let sort = $state<Sort<StatementSortColumn>>({ column: StatementSortColumn.PCT_TIME, desc: true });
+	let chartRange = $state(ctx.timeRange());
 
 	// Fetched separately so the volume chart can paint without waiting on percentiles.
-	let callsSeries = $state<GetStatementSeriesResponse | undefined>(undefined);
-	let percentileSeries = $state<GetLatencySeriesResponse | undefined>(undefined);
-	let chartRange = $state<{ from: Date; to: Date } | null>(null);
-	let chartLoading = $state(true);
-	let chartError = $state<string | null>(null);
+	const calls = new Loader<GetStatementSeriesResponse>();
+	const latency = new Loader<GetLatencySeriesResponse>();
+	const statements = new PagedLoader<StatementStat>((s) => s.id);
 
 	const sql = new SqlPopoverState((id) => statementClient.getStatement({ id }).then((r) => r.query));
 	const filters = new QueryFilterState();
 
-	// During init, not in a $effect: AppShell would otherwise rebuild the query string first and
-	// strip ?q=/?tag= off a deep link.
-	filters.applyQuery(new URLSearchParams(page.url.search));
+	// During init, not in a $effect, or AppShell would rewrite the URL first and drop ?q=/?tag=.
+	// `location`, not page.url: after back/forward page.url misses the shallow URL updates.
+	filters.applyQuery(new URLSearchParams(location.search));
 	onDestroy(urlSync.register(filters));
 
 	let search = $state(filters.text);
@@ -70,179 +55,84 @@
 		return () => clearTimeout(id);
 	});
 
-	function toRow(s: StatementStat): StatementRow {
-		const calls = Number(s.calls);
-		return {
-			id: s.id.toString(),
-			query: s.preview,
-			usr: s.userName,
-			meanMs: s.avgMs,
-			calls,
-			rowsPerCall: calls > 0 ? Number(s.rows) / calls : 0,
-			pctIo: s.pctIo,
-			pctTime: s.pctTime,
-			sev: sevByMean(s.avgMs),
-			tags: kvTags(s.tags)
-		};
-	}
-
-	let chartGen = 0;
-	let chartAc: AbortController | null = null;
+	// Back/forward rewrites the filters under the input.
 	$effect(() => {
-		const { from, to } = ctx.timeRange();
-		chartRange = { from, to };
-		if (!ctx.server || !ctx.db) {
-			chartLoading = !serversState.loaded;
-			if (serversState.loaded) {
-				callsSeries = undefined;
-				percentileSeries = undefined;
-				chartError = null;
-			}
-			return;
-		}
-		const gen = ++chartGen;
-		chartAc?.abort();
-		chartAc = new AbortController();
-		const ac = chartAc;
-		chartLoading = true;
-		chartError = null;
-		callsSeries = undefined;
-		percentileSeries = undefined;
-
-		const scope = {
-			serverName: ctx.server,
-			databaseName: ctx.db,
-			from: timestampFromDate(from),
-			to: timestampFromDate(to)
-		};
-
-		const calls = statementClient.getStatementSeries(scope, { signal: ac.signal }).then((res) => {
-			if (gen === chartGen) callsSeries = res;
-		});
-
-		const percentiles = statementClient.getLatencySeries(scope, { signal: ac.signal }).then((res) => {
-			if (gen === chartGen) percentileSeries = res;
-		});
-
-		Promise.allSettled([calls, percentiles]).then((results) => {
-			if (gen !== chartGen) return;
-			const failed = results.find((r) => r.status === 'rejected');
-			chartError = failed ? errMsg((failed as PromiseRejectedResult).reason) : null;
-			chartLoading = false;
+		const text = filters.text;
+		untrack(() => {
+			if (search.trim() !== text) search = text;
 		});
 	});
 
-	function tableRequest(offset: number) {
-		const { from, to } = ctx.timeRange();
-		return {
-			serverName: ctx.server,
-			databaseName: ctx.db,
-			from: timestampFromDate(from),
-			to: timestampFromDate(to),
-			search: filters.text,
-			tagFilters: filters.toProto(),
-			kinds: filters.kindsProto(),
-			sortColumn: sortColumnProto[sort.col],
-			sortDesc: sort.dir === 'desc',
-			limit: PAGE_SIZE,
-			offset
-		};
+	function scope({ from, to } = ctx.timeRange()) {
+		return { serverName: ctx.server, databaseName: ctx.db, from: timestampFromDate(from), to: timestampFromDate(to) };
 	}
 
-	let tableGen = 0;
-	let tableAc: AbortController | null = null;
 	$effect(() => {
+		const range = ctx.timeRange();
+		chartRange = range;
+		const request = scope(range);
 		if (!ctx.server || !ctx.db) {
-			tableLoading = !serversState.loaded;
-			if (serversState.loaded) {
-				rows = [];
-				hasMore = false;
-				tableError = null;
-			}
+			calls.reset(!serversState.loaded, serversState.error);
+			latency.reset(!serversState.loaded, serversState.error);
 			return;
 		}
-		const request = tableRequest(0);
-		const gen = ++tableGen;
-		tableAc?.abort();
-		tableAc = new AbortController();
-		const ac = tableAc;
-		tableLoading = true;
-		tableError = null;
-		// Rows stay on screen while re-fetching; clearing here would collapse the table and jump the layout.
-
-		statementClient
-			.listStatements(request, { signal: ac.signal })
-			.then((res) => {
-				if (gen !== tableGen) return;
-				rows = res.statements.map(toRow);
-				hasMore = res.hasMore;
-			})
-			.catch((e: unknown) => {
-				if (gen !== tableGen) return;
-				tableError = errMsg(e);
-				rows = [];
-				hasMore = false;
-			})
-			.finally(() => {
-				if (gen === tableGen) tableLoading = false;
-			});
+		const stopCalls = calls.load((signal) => statementClient.getStatementSeries(request, { signal }));
+		const stopLatency = latency.load((signal) => statementClient.getLatencySeries(request, { signal }));
+		return () => {
+			stopCalls();
+			stopLatency();
+		};
 	});
 
-	async function loadMore() {
-		if (loadingMore || tableLoading || !hasMore) return;
-		const gen = tableGen;
-		loadingMore = true;
-		try {
-			const res = await statementClient.listStatements(tableRequest(rows.length), { signal: tableAc?.signal });
-			if (gen !== tableGen) return;
-			const seen = new Set(rows.map((r) => r.id));
-			rows = [...rows, ...res.statements.map(toRow).filter((r) => !seen.has(r.id))];
-			hasMore = res.hasMore;
-		} catch (e: unknown) {
-			if (gen === tableGen) tableError = errMsg(e);
-		} finally {
-			loadingMore = false;
-		}
-	}
+	$effect(() => {
+		const request = {
+			...scope(),
+			...filters.toRequest(),
+			sortColumn: sort.column,
+			sortDesc: sort.desc,
+			limit: PAGE_SIZE
+		};
+		if (!ctx.server || !ctx.db) return statements.reset(!serversState.loaded, serversState.error);
+		return statements.load((offset, signal) =>
+			statementClient
+				.listStatements({ ...request, offset }, { signal })
+				.then((res) => ({ rows: res.statements, hasMore: res.hasMore }))
+		);
+	});
 
-	function toPoints(points: MetricPoint[] = []): MetricSeriesPoint[] {
-		return points.flatMap((p) => (p.at ? [{ at: timestampDate(p.at), value: p.value }] : []));
-	}
-
-	const bucketMs = $derived(Number(callsSeries?.bucketMs ?? percentileSeries?.bucketMs ?? 0n));
-	const callsPoints = $derived(toPoints(callsSeries?.calls));
+	const bucketMs = $derived(Number(calls.data?.bucketMs ?? latency.data?.bucketMs ?? 0n));
+	const callsPoints = $derived(toSeriesPoints(calls.data?.calls));
 	const volumeDescription = $derived(
 		callsPoints.length > 0
 			? `How many times queries ran · ${fmtBucketSize(bucketMs)} buckets`
 			: 'How many times queries ran'
 	);
-	const latency = $derived([
-		{ label: 'p90', color: 'var(--color-steel)', points: toPoints(percentileSeries?.p90Ms) },
-		{ label: 'p95', color: 'var(--color-warn)', points: toPoints(percentileSeries?.p95Ms) },
-		{ label: 'p99', color: 'var(--color-danger)', points: toPoints(percentileSeries?.p99Ms) }
+	const latencySeries = $derived([
+		{ label: 'p90', color: 'var(--color-steel)', points: toSeriesPoints(latency.data?.p90Ms) },
+		{ label: 'p95', color: 'var(--color-warn)', points: toSeriesPoints(latency.data?.p95Ms) },
+		{ label: 'p99', color: 'var(--color-danger)', points: toSeriesPoints(latency.data?.p99Ms) }
 	]);
-
-	// The tag sits inside a row that navigates on click.
-	function filterByTag(e: MouseEvent, text: string) {
-		e.stopPropagation();
-		const filter = parseDisplayTag(text);
-		if (filter) filters.add(filter);
-	}
+	const latencyMessage = $derived.by(() => {
+		if (calls.loading || latency.loading) return 'Loading…';
+		if (latency.error) return latency.error;
+		return callsPoints.length > 0 ? 'No queries took 10 ms or more' : 'No data';
+	});
 </script>
 
 <div class="mb-6 grid gap-4">
 	<ChartPanel docId="q-volume" title="Query volume over time" description={volumeDescription}>
-		{#if chartRange && callsPoints.length > 0}
-			<CallsChart
+		{#if callsPoints.length > 0}
+			<AreaChart
 				data={callsPoints}
 				from={chartRange.from}
 				to={chartRange.to}
 				{bucketMs}
 				fill="var(--color-steel)"
 				label="calls"
+				unit="calls"
 			/>
 		{:else}
-			<ChartEmpty message={chartLoading ? 'Loading…' : (chartError ?? 'No data')} />
+			<ChartEmpty message={calls.loading ? 'Loading…' : (calls.error ?? 'No data')} />
 		{/if}
 	</ChartPanel>
 
@@ -251,14 +141,10 @@
 		title="Query speed over time"
 		description="How long queries of 10 ms or more took — p90 means roughly 9 in 10 finished faster"
 	>
-		{#if chartRange && latency.some((s) => s.points.length > 0)}
-			<LineChart series={latency} from={chartRange.from} to={chartRange.to} {bucketMs} format={fmtDuration} />
+		{#if latencySeries.some((s) => s.points.length > 0)}
+			<LineChart series={latencySeries} from={chartRange.from} to={chartRange.to} {bucketMs} format={fmtDuration} />
 		{:else}
-			<ChartEmpty
-				message={chartLoading
-					? 'Loading…'
-					: (chartError ?? (callsPoints.length > 0 ? 'No queries took 10 ms or more' : 'No data'))}
-			/>
+			<ChartEmpty message={latencyMessage} />
 		{/if}
 	</ChartPanel>
 </div>
@@ -267,30 +153,17 @@
 	<header class="pt-3.5 pr-11 pb-0 pl-4">
 		<SectionHeader title="Queries" description="Grouped by shape, with the most time-consuming first" />
 	</header>
-	<TagFilterBar bind:searchText={search} tags={filters} />
+	<TagFilterBar bind:searchText={search} {filters} />
 
 	<StatementTable
-		{rows}
+		rows={statements.rows}
 		bind:sort
 		{sql}
-		href={(id) => `/queries/${id}`}
-		onFilterTag={filterByTag}
-		loading={tableLoading && rows.length > 0}
+		onFilterTag={(key, value) => filters.add({ key, op: 'eq', values: [value] })}
+		loading={statements.loading && statements.rows.length > 0}
 	/>
 
-	{#if tableLoading && rows.length === 0}
-		<StateBlock class="px-4 py-7" message="Loading…" />
-	{:else if tableError}
-		<StateBlock kind="error" class="px-4 py-7" message={tableError} />
-	{:else if rows.length === 0}
-		<StateBlock class="px-4 py-7" message="No queries found" />
-	{:else if hasMore}
-		<div class="border-t border-line-soft p-3 text-center">
-			<Button variant="ghost" onclick={loadMore} disabled={loadingMore}>
-				{loadingMore ? 'Loading…' : 'Load more'}
-			</Button>
-		</div>
-	{/if}
+	<LoadMoreFooter list={statements} empty="No queries found" />
 </DocCard>
 
 <SqlPopover state={sql} />

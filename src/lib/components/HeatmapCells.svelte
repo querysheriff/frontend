@@ -29,15 +29,15 @@
 		rows,
 		buckets,
 		step,
-		rowHeight,
-		gap = 1
+		rowHeight
 	}: {
 		rows: HeatmapRow[];
 		buckets: Date[];
 		step: number;
 		rowHeight: number;
-		gap?: number;
 	} = $props();
+
+	const GAP = 1;
 
 	const c = getChartContext();
 
@@ -58,14 +58,14 @@
 				// A cell covers its whole bucket, from at-step to at, cut off at the edges of the plot.
 				const left = Math.max(0, Math.min(c.width, Number(c.xScale(new Date(at.getTime() - step)))));
 				const right = Math.max(0, Math.min(c.width, Number(c.xScale(at))));
-				const w = right - left - gap;
+				const w = right - left - GAP;
 				if (w <= 0) return;
 
 				out.push({
 					x: left,
-					y: y + gap,
+					y: y + GAP,
 					w,
-					h: Math.max(1, rowHeight - gap * 2),
+					h: Math.max(1, rowHeight - GAP * 2),
 					fill: row.color,
 					opacity: HEATMAP_STEPS[intensity]
 				});

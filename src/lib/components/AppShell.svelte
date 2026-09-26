@@ -1,36 +1,41 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import { untrack, type Snippet } from 'svelte';
 	import { afterNavigate, goto, pushState, replaceState } from '$app/navigation';
 	import { page } from '$app/state';
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	import ContextBar from '$lib/components/ContextBar.svelte';
+	import DocsDrawer from '$lib/components/DocsDrawer.svelte';
+	import { docs } from '$lib/docs.svelte';
 	import { ctx, serversState } from '$lib/state.svelte';
 	import { urlSync } from '$lib/urlState.svelte';
 	import { session } from '$lib/session.svelte';
 
 	type Props = {
 		children: Snippet;
-		rightPanel?: Snippet;
 		contextBar?: boolean;
-		dbSwitch?: boolean;
+		dbScoped?: boolean;
 		requireSuperAdmin?: boolean;
 	};
 
-	let { children, rightPanel, contextBar = true, dbSwitch = true, requireSuperAdmin = false }: Props = $props();
+	let { children, contextBar = true, dbScoped = true, requireSuperAdmin = false }: Props = $props();
 
 	const REFRESH_MS = 30_000;
 
 	const allowed = $derived(session.isAuthenticated && (!requireSuperAdmin || session.isSuperAdmin));
 
-	// Runs before the effect that writes the URL, so `db` is already dropped on screens that ignore it.
-	$effect(() => {
-		ctx.dbScoped = dbSwitch;
+	// Once, before the children's effects fetch: the layout's props never change.
+	untrack(() => {
+		ctx.dbScoped = dbScoped;
+		if (contextBar) ctx.applyQuery(new URLSearchParams(location.search));
 	});
+
+	// `docs` is a module singleton, so a panel left open would follow you to the next screen.
+	afterNavigate(() => docs.close());
 
 	$effect(() => {
 		if (!session.loaded) return;
-		if (!session.isAuthenticated) goto('/login');
-		else if (requireSuperAdmin && !session.isSuperAdmin) goto('/queries');
+		if (!session.isAuthenticated) goto('/login', { replaceState: true });
+		else if (requireSuperAdmin && !session.isSuperAdmin) goto('/queries', { replaceState: true });
 	});
 
 	$effect(() => {
@@ -40,19 +45,15 @@
 		return () => clearInterval(id);
 	});
 
-	let urlSynced = $state(false);
-	afterNavigate(() => {
-		if (!urlSynced && contextBar) urlSync.applyQuery(page.url.search);
-		urlSynced = true;
-	});
-
-	// Only write once the children have rendered: they register the filter params, and writing before
-	// that drops them from a deep link.
+	// Gated on `allowed`: the children register their filter params only once rendered, and writing
+	// before that would drop them from a deep link.
 	$effect(() => {
-		if (!urlSynced || !contextBar || !allowed) return;
+		if (!contextBar || !allowed) return;
 		const qs = urlSync.queryString();
 		const mode = urlSync.takeMode();
-		if (qs === page.url.search.replace(/^\?/, '')) return;
+		urlSync.remember(page.url.pathname, qs);
+		// Not page.url: it misses every shallow pushState/replaceState, also after back/forward.
+		if (qs === location.search.replace(/^\?/, '')) return;
 		if (mode === 'push') pushState(`?${qs}`, page.state);
 		else replaceState(`?${qs}`, page.state);
 	});
@@ -79,7 +80,7 @@
 		<Sidebar />
 		<div class="flex min-w-0 flex-1 flex-col">
 			{#if contextBar}
-				<ContextBar {dbSwitch} />
+				<ContextBar />
 				<main
 					id="main-content"
 					tabindex="-1"
@@ -93,6 +94,6 @@
 				</main>
 			{/if}
 		</div>
-		{@render rightPanel?.()}
+		<DocsDrawer />
 	</div>
 {/if}

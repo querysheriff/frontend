@@ -1,10 +1,8 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
-	import { page } from '$app/state';
+	import { onDestroy, untrack } from 'svelte';
 	import { timestampFromDate, timestampDate } from '@bufbuild/protobuf/wkt';
 	import {
 		LogEvent_LogClassification,
-		LogFacetField,
 		type GetLogSeriesResponse,
 		type LogFacet,
 		type LogRecord
@@ -13,7 +11,8 @@
 	import { ctx, serversState } from '$lib/state.svelte';
 	import { urlSync } from '$lib/urlState.svelte';
 	import { LogFilterState } from '$lib/logFilter.svelte';
-	import { fmtBucketSize, errMsg } from '$lib/format';
+	import { Loader, PagedLoader } from '$lib/loader.svelte';
+	import { fmtBucketSize } from '$lib/format';
 	import {
 		CATEGORY_ORDER,
 		LEVEL_ROWS,
@@ -23,44 +22,34 @@
 		levelColor,
 		levelLabel
 	} from '$lib/logs';
-	import Button from '$lib/components/Button.svelte';
 	import ChartPanel from '$lib/components/ChartPanel.svelte';
 	import DocCard from '$lib/components/DocCard.svelte';
 	import LogTimelineHeatmap, { heatmapLabelWidth, type HeatmapDetail } from '$lib/components/LogTimelineHeatmap.svelte';
 	import { type HeatmapRow } from '$lib/components/HeatmapCells.svelte';
+	import LoadMoreFooter from '$lib/components/LoadMoreFooter.svelte';
 	import LogFilterBar from '$lib/components/LogFilterBar.svelte';
-	import LogsTable, { type LogPivot } from '$lib/components/LogsTable.svelte';
+	import LogsTable from '$lib/components/LogsTable.svelte';
 	import SectionHeader from '$lib/components/SectionHeader.svelte';
-	import StateBlock from '$lib/components/StateBlock.svelte';
 
 	const PAGE_SIZE = 50;
 
 	const filters = new LogFilterState();
 
-	// During init, not in a $effect: AppShell would otherwise rebuild the query string first and
-	// strip the filter params off a deep link.
-	filters.applyQuery(new URLSearchParams(page.url.search));
+	// During init, not in a $effect, or AppShell would rewrite the URL first and drop the filter params.
+	// `location`, not page.url: after back/forward page.url misses the shallow URL updates.
+	filters.applyQuery(new URLSearchParams(location.search));
 	onDestroy(urlSync.register(filters));
 
 	let search = $state(filters.text);
-
 	let sortDesc = $state(true);
-
-	let records = $state<LogRecord[]>([]);
-	let hasMore = $state(false);
-	let tableLoading = $state(true);
-	let loadingMore = $state(false);
-	let tableError = $state<string | null>(null);
-
-	// Fetched from its own RPC on scope alone, so nothing the table does redraws the charts.
-	let series = $state<GetLogSeriesResponse | undefined>(undefined);
-	let chartLoading = $state(true);
-	let chartError = $state<string | null>(null);
-	// Seeded rather than null: the first render reads it before the effect below runs.
 	let range = $state(ctx.timeRange());
 
-	let facets = $state<LogFacet[] | undefined>(undefined);
-	let facetsLoading = $state(true);
+	// Fetched on server and time range alone, so nothing the table does redraws the charts.
+	const series = new Loader<GetLogSeriesResponse>();
+	const records = new PagedLoader<LogRecord>((r) => r.id);
+	// Without facets the picker still lists categories, just without counts; only the table shows errors.
+	// Kept while reloading, so an open picker keeps its counts.
+	const facets = new Loader<LogFacet[]>();
 
 	$effect(() => {
 		const term = search;
@@ -71,169 +60,47 @@
 		return () => clearTimeout(id);
 	});
 
-	function scope() {
-		const { from, to } = ctx.timeRange();
-
-		return {
-			serverName: ctx.server,
-			from: timestampFromDate(from),
-			to: timestampFromDate(to),
-			filter: filters.toFilter()
-		};
-	}
-
-	let chartGen = 0;
-	let chartAc: AbortController | null = null;
-
-	// Server and time range only: riding along in the table's response made every sort recompute it.
+	// Back/forward rewrites the filters under the input.
 	$effect(() => {
-		const { from, to } = ctx.timeRange();
-		range = { from, to };
-
-		const request = { serverName: ctx.server, from: timestampFromDate(from), to: timestampFromDate(to) };
-
-		if (!ctx.server) {
-			chartLoading = !serversState.loaded;
-			if (serversState.loaded) {
-				series = undefined;
-				chartError = null;
-			}
-
-			return;
-		}
-
-		const mine = ++chartGen;
-		chartAc?.abort();
-		chartAc = new AbortController();
-		const signal = chartAc.signal;
-		chartLoading = true;
-		chartError = null;
-
-		logClient
-			.getLogSeries(request, { signal })
-			.then((res) => {
-				if (mine === chartGen) series = res;
-			})
-			.catch((e: unknown) => {
-				if (mine !== chartGen) return;
-				chartError = errMsg(e);
-				series = undefined;
-			})
-			.finally(() => {
-				if (mine === chartGen) chartLoading = false;
-			});
+		const text = filters.text;
+		untrack(() => {
+			if (search.trim() !== text) search = text;
+		});
 	});
 
-	function logsRequest(offset: number) {
-		return {
-			...scope(),
-			sortDesc,
-			limit: PAGE_SIZE,
-			offset
-		};
+	function scope({ from, to } = ctx.timeRange()) {
+		return { serverName: ctx.server, from: timestampFromDate(from), to: timestampFromDate(to) };
 	}
 
-	let tableGen = 0;
-	let tableAc: AbortController | null = null;
-
 	$effect(() => {
-		// Built before the early return below, so Svelte keeps tracking every filter it reads.
-		const request = logsRequest(0);
-
-		if (!ctx.server) {
-			tableLoading = !serversState.loaded;
-			if (serversState.loaded) {
-				records = [];
-				hasMore = false;
-				tableError = null;
-			}
-
-			return;
-		}
-
-		const gen = ++tableGen;
-		tableAc?.abort();
-		tableAc = new AbortController();
-		const ac = tableAc;
-		tableLoading = true;
-		tableError = null;
-
-		logClient
-			.listLogs(request, { signal: ac.signal })
-			.then((res) => {
-				if (gen !== tableGen) return;
-				records = res.records;
-				hasMore = res.hasMore;
-			})
-			.catch((e: unknown) => {
-				if (gen !== tableGen) return;
-				tableError = errMsg(e);
-				records = [];
-				hasMore = false;
-			})
-			.finally(() => {
-				if (gen === tableGen) tableLoading = false;
-			});
+		const timeRange = ctx.timeRange();
+		range = timeRange;
+		const request = scope(timeRange);
+		if (!ctx.server) return series.reset(!serversState.loaded, serversState.error);
+		return series.load((signal) => logClient.getLogSeries(request, { signal }));
 	});
 
-	let facetGen = 0;
-	let facetAc: AbortController | null = null;
-
 	$effect(() => {
-		const request = scope();
-
-		if (!ctx.server) {
-			facetsLoading = !serversState.loaded;
-			if (serversState.loaded) facets = undefined;
-
-			return;
-		}
-
-		const mine = ++facetGen;
-		facetAc?.abort();
-		facetAc = new AbortController();
-		const signal = facetAc.signal;
-		facetsLoading = true;
-
-		logClient
-			.listLogFacets(request, { signal })
-			.then((res) => {
-				if (mine === facetGen) facets = res.facets;
-			})
-			.catch(() => {
-				// Without facets the picker still lists categories, just without counts; only the table
-				// shows the error.
-				if (mine === facetGen) facets = undefined;
-			})
-			.finally(() => {
-				if (mine === facetGen) facetsLoading = false;
-			});
+		const request = { ...scope(), filter: filters.toFilter(), sortDesc, limit: PAGE_SIZE };
+		if (!ctx.server) return records.reset(!serversState.loaded, serversState.error);
+		return records.load((offset, signal) =>
+			logClient
+				.listLogs({ ...request, offset }, { signal })
+				.then((res) => ({ rows: res.records, hasMore: res.hasMore }))
+		);
 	});
 
-	async function loadMore() {
-		if (loadingMore || tableLoading || !hasMore) return;
+	$effect(() => {
+		const request = { ...scope(), filter: filters.toFilter() };
+		if (!ctx.server) return facets.reset(!serversState.loaded);
+		return facets.load((signal) => logClient.listLogFacets(request, { signal }).then((res) => res.facets), {
+			keepData: true
+		});
+	});
 
-		const gen = tableGen;
-		loadingMore = true;
-
-		try {
-			const res = await logClient.listLogs(logsRequest(records.length), { signal: tableAc?.signal });
-			if (gen !== tableGen) return;
-
-			// A live-tail range keeps moving, so an offset page can repeat a row already shown.
-			const seen = new Set(records.map((r) => r.id));
-			records = [...records, ...res.records.filter((r) => !seen.has(r.id))];
-			hasMore = res.hasMore;
-		} catch (e: unknown) {
-			if (gen === tableGen) tableError = errMsg(e);
-		} finally {
-			loadingMore = false;
-		}
-	}
-
-	const buckets = $derived(series?.buckets ?? []);
-	const bucketMs = $derived(Number(series?.bucketMs ?? 0n));
-	const levelTotals = $derived(series?.levelTotals ?? []);
+	const buckets = $derived(series.data?.buckets ?? []);
+	const bucketMs = $derived(Number(series.data?.bucketMs ?? 0n));
+	const levelTotals = $derived(series.data?.levelTotals ?? []);
 
 	// Bucket ends: HeatmapCells draws each cell across (at - step, at] and labels the same span.
 	const bucketDates = $derived(buckets.map((b) => (b.at ? timestampDate(b.at) : new Date(0))));
@@ -251,7 +118,6 @@
 	});
 
 	const categoryRows = $derived.by((): HeatmapRow[] => {
-		// A plain record rather than a Map, which the Svelte lint rules reserve for state.
 		const totals: Record<number, number> = {};
 		for (const bucket of buckets) {
 			for (const entry of bucket.categories) {
@@ -284,29 +150,12 @@
 
 	const chartMessage = $derived.by(() => {
 		if (buckets.length > 0 && levelTotals.length > 0) return null;
-		if (chartLoading) return 'Loading…';
+		if (series.loading) return 'Loading…';
 
-		return chartError ?? 'No log events';
+		return series.error ?? 'No log events';
 	});
 
 	const bucketNote = $derived(bucketMs > 0 ? ` · ${fmtBucketSize(bucketMs)} buckets` : '');
-
-	function applyPivot(pivot: LogPivot) {
-		if (pivot.kind === 'search') {
-			search = pivot.value;
-			filters.text = pivot.value;
-
-			return;
-		}
-
-		if (pivot.field === LogFacetField.LEVEL) {
-			filters.toggleLevel(Number(pivot.value));
-
-			return;
-		}
-
-		filters.add(pivot.field, pivot.value);
-	}
 </script>
 
 <div class="mb-6 grid gap-4">
@@ -352,21 +201,9 @@
 		/>
 	</header>
 
-	<LogFilterBar {filters} {facets} loading={facetsLoading} bind:searchText={search} />
+	<LogFilterBar {filters} facets={facets.data} loading={facets.loading} bind:searchText={search} />
 
-	<LogsTable {records} bind:sortDesc loading={tableLoading && records.length > 0} onPivot={applyPivot} />
+	<LogsTable records={records.rows} bind:sortDesc loading={records.loading && records.rows.length > 0} />
 
-	{#if tableLoading && records.length === 0}
-		<StateBlock class="px-4 py-7" message="Loading…" />
-	{:else if tableError}
-		<StateBlock kind="error" class="px-4 py-7" message={tableError} />
-	{:else if records.length === 0}
-		<StateBlock class="px-4 py-7" message="No log events match the current filters" />
-	{:else if hasMore}
-		<div class="border-t border-line-soft p-3 text-center">
-			<Button variant="ghost" onclick={loadMore} disabled={loadingMore}>
-				{loadingMore ? 'Loading…' : 'Load more'}
-			</Button>
-		</div>
-	{/if}
+	<LoadMoreFooter list={records} empty="No log events match the current filters" />
 </DocCard>

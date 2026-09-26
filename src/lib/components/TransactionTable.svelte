@@ -1,6 +1,5 @@
 <script module lang="ts">
 	import type { TransactionEvent } from '$lib/gen/querysheriff/v1/activity_pb';
-	import type { Timestamp } from '@bufbuild/protobuf/wkt';
 
 	export type TransactionRow = {
 		key: string;
@@ -8,11 +7,8 @@
 		app: string;
 		openMs: number;
 		start: Date | null;
-		startTs?: Timestamp;
 		events: TransactionEvent[];
 	};
-
-	export type TransactionSortCol = 'started' | 'open';
 </script>
 
 <script lang="ts">
@@ -24,14 +20,15 @@
 		groupEvents,
 		relFrom,
 		statusLabel,
-		statusText,
-		transactionAgeText,
+		statusColor,
+		transactionAgeColor,
 		tsKey,
 		waitText
 	} from '$lib/activity';
+	import { TransactionSortColumn } from '$lib/gen/querysheriff/v1/activity_pb';
 	import type { SqlPopoverState } from '$lib/sqlPopover.svelte';
 	import LoadingOverlay from '$lib/components/LoadingOverlay.svelte';
-	import SortHeader from '$lib/components/SortHeader.svelte';
+	import SortHeader, { type Sort } from '$lib/components/SortHeader.svelte';
 	import Tag from '$lib/components/Tag.svelte';
 	import TagRow from '$lib/components/TagRow.svelte';
 
@@ -42,7 +39,7 @@
 		loading = false
 	}: {
 		rows: TransactionRow[];
-		sort: { col: TransactionSortCol; dir: 'asc' | 'desc' };
+		sort: Sort<TransactionSortColumn>;
 		sql: SqlPopoverState;
 		loading?: boolean;
 	} = $props();
@@ -62,14 +59,14 @@
 	}
 
 	const headDef: {
-		key?: TransactionSortCol;
 		label: string;
+		column?: TransactionSortColumn;
 		align: 'left' | 'right';
 		cls: string;
 		pad?: string;
 	}[] = [
-		{ key: 'started', label: 'Started', align: 'left', cls: 'w-[13rem]', pad: 'pl-9 pr-4' },
-		{ key: 'open', label: 'Open', align: 'right', cls: 'w-[7rem]' },
+		{ label: 'Started', column: TransactionSortColumn.STARTED, align: 'left', cls: 'w-[13rem]', pad: 'pl-9 pr-4' },
+		{ label: 'Open', column: TransactionSortColumn.OPEN, align: 'right', cls: 'w-[7rem]' },
 		{ label: 'PID', align: 'left', cls: 'hidden w-[8rem] sm:table-cell' },
 		{ label: 'Application', align: 'left', cls: '' }
 	];
@@ -79,11 +76,6 @@
 	// Fixed column widths so every row lines up across statements, and baseline alignment because the
 	// 13px status sits next to 14px mono.
 	const timelineGrid = 'grid grid-cols-[6rem_4.5rem_5rem_minmax(0,1fr)] items-baseline gap-x-3 py-1.5';
-
-	function sortBy(key: TransactionSortCol) {
-		if (sort.col === key) sort = { col: key, dir: sort.dir === 'asc' ? 'desc' : 'asc' };
-		else sort = { col: key, dir: 'desc' };
-	}
 </script>
 
 <div class="relative overflow-x-auto">
@@ -91,15 +83,7 @@
 		<thead bind:clientHeight={headHeight}>
 			<tr class="bg-hover-soft">
 				{#each headDef as h (h.label)}
-					{@const key = h.key}
-					<SortHeader
-						label={h.label}
-						align={h.align}
-						class={h.cls}
-						pad={h.pad}
-						dir={key && sort.col === key ? sort.dir : null}
-						onsort={key ? () => sortBy(key) : undefined}
-					/>
+					<SortHeader label={h.label} align={h.align} class={h.cls} pad={h.pad} column={h.column} bind:sort />
 				{/each}
 			</tr>
 		</thead>
@@ -129,7 +113,7 @@
 					</td>
 					<td
 						class="{cell} text-right font-mono text-md leading-[20px] font-semibold whitespace-nowrap"
-						style:color={transactionAgeText(r.openMs)}>{fmtDuration(r.openMs)}</td
+						style:color={transactionAgeColor(r.openMs)}>{fmtDuration(r.openMs)}</td
 					>
 
 					<td class="{cell} hidden font-mono text-md leading-[20px] whitespace-nowrap text-ink sm:table-cell"
@@ -173,17 +157,14 @@
 											{#each g.events as e (tsKey(e.from))}
 												<div class={timelineGrid}>
 													<span class="font-mono text-sm leading-[18px] whitespace-nowrap text-ink/70">
-														{#if r.startTs && e.from && e.to}{relFrom(r.startTs, e.from)}–{relFrom(
-																r.startTs,
-																e.to
-															)}{/if}
+														{#if r.start && e.from && e.to}{relFrom(r.start, e.from)}–{relFrom(r.start, e.to)}{/if}
 													</span>
 													<span class="text-right font-mono text-sm leading-[18px] whitespace-nowrap text-ink/70">
 														{fmtDuration(durationMs(e.from, e.to))}
 													</span>
 													<span
 														class="font-sans text-xs leading-[18px] font-bold whitespace-nowrap"
-														style:color={statusText(e.status)}>{statusLabel(e.status)}</span
+														style:color={statusColor(e.status)}>{statusLabel(e.status)}</span
 													>
 													<span class="truncate font-mono text-sm leading-[18px] text-ink/70">{waitText(e)}</span>
 												</div>
@@ -200,6 +181,6 @@
 	</table>
 
 	{#if loading}
-		<LoadingOverlay message="Loading…" offsetTop={headHeight} />
+		<LoadingOverlay offsetTop={headHeight} />
 	{/if}
 </div>

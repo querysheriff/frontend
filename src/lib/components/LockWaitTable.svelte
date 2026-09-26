@@ -14,16 +14,15 @@
 		waitMs: number;
 		startedWaiting: Date | null;
 	};
-
-	export type LockWaitSortCol = 'waited' | 'started';
 </script>
 
 <script lang="ts">
 	import { fmtDuration, fmtClockDate } from '$lib/format';
-	import { waitSeverityText } from '$lib/activity';
+	import { waitColor } from '$lib/activity';
+	import { LockWaitSortColumn } from '$lib/gen/querysheriff/v1/activity_pb';
 	import type { SqlPopoverState } from '$lib/sqlPopover.svelte';
 	import LoadingOverlay from '$lib/components/LoadingOverlay.svelte';
-	import SortHeader from '$lib/components/SortHeader.svelte';
+	import SortHeader, { type Sort } from '$lib/components/SortHeader.svelte';
 	import Tag from '$lib/components/Tag.svelte';
 	import TagRow from '$lib/components/TagRow.svelte';
 
@@ -34,27 +33,22 @@
 		loading = false
 	}: {
 		rows: LockWaitRow[];
-		sort: { col: LockWaitSortCol; dir: 'asc' | 'desc' };
+		sort: Sort<LockWaitSortColumn>;
 		sql: SqlPopoverState;
 		loading?: boolean;
 	} = $props();
 
 	let headHeight = $state(0);
 
-	const headDef: { key?: LockWaitSortCol; label: string; align: 'left' | 'right'; cls: string }[] = [
-		{ key: 'started', label: 'Started', align: 'left', cls: 'hidden w-[9rem] sm:table-cell' },
-		{ key: 'waited', label: 'Waited', align: 'right', cls: 'w-[6.5rem]' },
+	const headDef: { label: string; column?: LockWaitSortColumn; align: 'left' | 'right'; cls: string }[] = [
+		{ label: 'Started', column: LockWaitSortColumn.STARTED, align: 'left', cls: 'hidden w-[9rem] sm:table-cell' },
+		{ label: 'Waited', column: LockWaitSortColumn.WAITED, align: 'right', cls: 'w-[6.5rem]' },
 		{ label: 'Waiting query', align: 'left', cls: '' },
 		{ label: 'Blocking query', align: 'left', cls: '' },
 		{ label: 'Lock', align: 'left', cls: 'hidden w-[10.5rem] lg:table-cell' }
 	];
 
 	const cell = 'border-b border-line-soft px-4 py-3 align-top';
-
-	function sortBy(key: LockWaitSortCol) {
-		if (sort.col === key) sort = { col: key, dir: sort.dir === 'asc' ? 'desc' : 'asc' };
-		else sort = { col: key, dir: 'desc' };
-	}
 </script>
 
 {#snippet queryCell(party: LockPartyRow)}
@@ -92,14 +86,7 @@
 		<thead bind:clientHeight={headHeight}>
 			<tr class="bg-hover-soft">
 				{#each headDef as h (h.label)}
-					{@const key = h.key}
-					<SortHeader
-						label={h.label}
-						align={h.align}
-						class={h.cls}
-						dir={key && sort.col === key ? sort.dir : null}
-						onsort={key ? () => sortBy(key) : undefined}
-					/>
+					<SortHeader label={h.label} align={h.align} class={h.cls} column={h.column} bind:sort />
 				{/each}
 			</tr>
 		</thead>
@@ -111,7 +98,7 @@
 					>
 					<td
 						class="{cell} text-right font-mono text-md leading-[20px] font-semibold whitespace-nowrap"
-						style:color={waitSeverityText(r.waitMs)}>{fmtDuration(r.waitMs)}</td
+						style:color={waitColor(r.waitMs)}>{fmtDuration(r.waitMs)}</td
 					>
 					{@render queryCell(r.waiting)}
 					{@render queryCell(r.blocking)}
@@ -124,6 +111,6 @@
 	</table>
 
 	{#if loading}
-		<LoadingOverlay message="Loading…" offsetTop={headHeight} />
+		<LoadingOverlay offsetTop={headHeight} />
 	{/if}
 </div>

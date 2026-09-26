@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { LayersIcon, SearchIcon, SlidersHorizontalIcon } from '@lucide/svelte';
 	import { LogFacetField, type LogFacet } from '$lib/gen/querysheriff/v1/log_pb';
-	import LogChip from '$lib/components/LogChip.svelte';
+	import FilterChip from '$lib/components/FilterChip.svelte';
 	import LogCategoryPicker from '$lib/components/LogCategoryPicker.svelte';
 	import LogFacetPicker from '$lib/components/LogFacetPicker.svelte';
 	import type { LogFilterState } from '$lib/logFilter.svelte';
@@ -22,10 +22,8 @@
 
 	let picker = $state<Picker>(null);
 
-	const categoryChipActive = $derived(picker?.kind === 'category');
-
 	function editChip(field: LogFacetField) {
-		if (field === LogFacetField.CATEGORY || field === LogFacetField.CLASSIFICATION) {
+		if (field === LogFacetField.CATEGORY) {
 			picker = picker?.kind === 'category' ? null : { kind: 'category' };
 
 			return;
@@ -60,11 +58,11 @@
 	{/if}
 
 	{#each filters.chips as chip (chip.field)}
-		<LogChip
+		<FilterChip
 			label={chip.label}
 			values={chip.values}
-			active={chip.field === LogFacetField.CATEGORY || chip.field === LogFacetField.CLASSIFICATION
-				? categoryChipActive
+			active={chip.field === LogFacetField.CATEGORY
+				? picker?.kind === 'category'
 				: picker?.kind === 'facet' && picker.field === chip.field}
 			onedit={() => editChip(chip.field)}
 			onremove={() => {

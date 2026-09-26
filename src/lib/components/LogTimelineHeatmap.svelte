@@ -17,7 +17,7 @@
 	import { scaleTime } from 'd3-scale';
 	import { fmtAxisTime, fmtBucketRange, fmtCount, fmtCountFull } from '$lib/format';
 	import HeatmapCells, { type HeatmapRow } from '$lib/components/HeatmapCells.svelte';
-	import { buildMetricMultiChartModel, type MetricSeriesRow } from '$lib/metricChart';
+	import { buildMetricChartModel, type MetricSeriesRow } from '$lib/metricChart';
 	import { createTimeBrush } from '$lib/chartBrush.svelte';
 
 	let {
@@ -31,7 +31,7 @@
 		detail
 	}: {
 		rows: HeatmapRow[];
-		/** Bucket start instants; every row's `values` is aligned with this. */
+		/** Bucket end instants; every row's `values` is aligned with this. */
 		buckets: Date[];
 		from: Date;
 		to: Date;
@@ -46,7 +46,7 @@
 	const DETAIL_LINES = 6;
 
 	const model = $derived(
-		buildMetricMultiChartModel(
+		buildMetricChartModel(
 			rows.map((row) => buckets.map((at, i) => ({ at, value: row.values[i] }))),
 			from,
 			to,
@@ -93,7 +93,7 @@
 				rule
 				ticks={6}
 				format={fmtAxisTime}
-				tickLabelProps={{ class: 'fill-ink/45 font-mono text-2xs', stroke: 'none' }}
+				tickLabelProps={{ class: 'fill-ink/45 font-mono text-2xs' }}
 			/>
 			<HeatmapCells {rows} {buckets} step={model.step} rowHeight={ROW_HEIGHT} />
 			{#if !brush.brushing && !message}

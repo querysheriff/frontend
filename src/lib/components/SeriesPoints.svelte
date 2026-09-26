@@ -1,16 +1,17 @@
-<script lang="ts" generics="T">
+<script lang="ts">
 	import { getChartContext } from 'layerchart';
+	import type { MetricSeriesRow } from '$lib/metricChart';
 
-	let { colors, values }: { colors: string[]; values: (row: T) => number[] } = $props();
+	let { colors }: { colors: string[] } = $props();
 
 	const c = getChartContext();
 
 	const points = $derived.by(() => {
-		const row = c.tooltip.data as T | undefined;
+		const row = c.tooltip.data as MetricSeriesRow | undefined;
 		if (row == null) return [];
 		const cx = Number(c.xGet(row));
 		if (!Number.isFinite(cx)) return [];
-		return values(row).map((v, i) => ({ key: i, cx, cy: Number(c.yScale(v)), fill: colors[i] }));
+		return row.values.map((v, i) => ({ key: i, cx, cy: Number(c.yScale(v)), fill: colors[i] }));
 	});
 </script>
 

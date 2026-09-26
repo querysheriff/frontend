@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { LinkIcon, InfoIcon, XIcon } from '@lucide/svelte';
-	import Alert from '$lib/components/Alert.svelte';
+	import ErrorBanner from '$lib/components/ErrorBanner.svelte';
 	import AlertsTable from '$lib/components/AlertsTable.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import DocCard from '$lib/components/DocCard.svelte';
@@ -71,7 +71,7 @@
 
 <div class="mx-auto w-full max-w-[68.75rem] min-w-0 px-7 pt-7 pb-16">
 	{#if error && servers.length > 0}
-		<Alert message={error} class="mb-5 px-3.5 py-2.5" />
+		<ErrorBanner message={error} class="mb-5 px-3.5 py-2.5" />
 	{/if}
 
 	{#if loading}

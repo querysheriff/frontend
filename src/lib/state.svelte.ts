@@ -1,9 +1,8 @@
 import { browser } from '$app/environment';
-import { fmtClock } from './format';
 import { timestampDate } from '@bufbuild/protobuf/wkt';
-import { parseDateTime, getLocalTimeZone, type CalendarDateTime, type DateValue } from '@internationalized/date';
 import type { Server } from '$lib/gen/querysheriff/v1/health_pb';
 import { healthClient } from './connect';
+import { errMsg } from './format';
 import { urlSync } from './urlState.svelte';
 
 const MINUTE = 60_000;
@@ -24,30 +23,9 @@ const presetMs: Record<string, number> = Object.fromEntries(presets.map((p) => [
 
 const HEALTH_FRESH_MS = 5 * MINUTE;
 
-export type ServerHealth = 'ok' | 'stale';
-
-function todayAt(time: string): string {
-	const d = new Date();
-	const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-	return `${date} ${time}`;
-}
-
-function toInputStr(d: Date): string {
-	const p = (n: number) => String(n).padStart(2, '0');
-	return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
-}
-
-// The bits-ui range picker binds CalendarDateTime, and parseDateTime wants an ISO "T".
-export function rangeStrToDateTime(s: string): CalendarDateTime | undefined {
-	try {
-		return parseDateTime(s.replace(' ', 'T'));
-	} catch {
-		return undefined;
-	}
-}
-
-export function dateTimeToRangeStr(dt: DateValue): string {
-	return toInputStr(dt.toDate(getLocalTimeZone()));
+function todayAt(hours: number, minutes: number, seconds: number): Date {
+	const now = new Date();
+	return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, seconds);
 }
 
 const DEFAULT_SERVER_KEY = 'querysheriff:default-server';
@@ -77,10 +55,12 @@ class ContextState {
 	server = $state(defaultScope.server);
 	db = $state(defaultScope.db);
 	range = $state(DEFAULT_RANGE);
-	customFrom = $state(todayAt('00:00:00'));
-	customTo = $state(todayAt('23:59:59'));
+	customFrom = $state(todayAt(0, 0, 0));
+	customTo = $state(todayAt(23, 59, 59));
 	// False on server-wide screens (LOGS): `db` keeps its value but is not shown or written to the URL.
 	dbScoped = $state(true);
+	// True on a query's detail page: server and db are the query's own and can't be switched.
+	scopeLocked = $state(false);
 
 	get isCustom(): boolean {
 		return this.range === 'custom';
@@ -90,32 +70,20 @@ class ContextState {
 		return presetMap[this.range] ?? presetMap[DEFAULT_RANGE];
 	}
 
-	get customFromLabel(): string {
-		return fmtClock(this.customFrom);
-	}
-
-	get customToLabel(): string {
-		return fmtClock(this.customTo);
+	setCustom(a: Date, b: Date): void {
+		[this.customFrom, this.customTo] = a <= b ? [a, b] : [b, a];
+		this.range = 'custom';
 	}
 
 	zoomTo(from: Date, to: Date): void {
-		this.customFrom = toInputStr(from);
-		this.customTo = toInputStr(to);
-		this.range = 'custom';
+		this.setCustom(from, to);
 		urlSync.pushNext();
 	}
 
 	timeRange(): { from: Date; to: Date } {
-		if (this.range === 'custom') {
-			const from = new Date(this.customFrom.replace(' ', 'T'));
-			const to = new Date(this.customTo.replace(' ', 'T'));
-			if (!isNaN(from.getTime()) && !isNaN(to.getTime()) && from.getTime() <= to.getTime()) {
-				return { from, to };
-			}
-		}
+		if (this.range === 'custom') return { from: this.customFrom, to: this.customTo };
 		const to = new Date();
-		const span = presetMs[this.range] ?? presetMs[DEFAULT_RANGE];
-		return { from: new Date(to.getTime() - span), to };
+		return { from: new Date(to.getTime() - presetMs[this.range]), to };
 	}
 
 	applyQuery(params: URLSearchParams): void {
@@ -124,14 +92,12 @@ class ContextState {
 		if (server) this.server = server;
 		if (db) this.db = db;
 
-		const from = Number(params.get('from'));
-		const to = Number(params.get('to'));
+		const from = new Date(Number(params.get('from')));
+		const to = new Date(Number(params.get('to')));
 		const range = params.get('range');
-		if (params.has('from') && params.has('to') && Number.isFinite(from) && Number.isFinite(to) && from <= to) {
-			this.customFrom = toInputStr(new Date(from));
-			this.customTo = toInputStr(new Date(to));
-			this.range = 'custom';
-		} else if (range && range in presetMs) {
+		if (params.has('from') && params.has('to') && !isNaN(from.getTime()) && !isNaN(to.getTime())) {
+			this.setCustom(from, to);
+		} else if (range && Object.hasOwn(presetMs, range)) {
 			this.range = range;
 		}
 	}
@@ -140,9 +106,8 @@ class ContextState {
 		if (this.server) params.set('server', this.server);
 		if (this.db && this.dbScoped) params.set('db', this.db);
 		if (this.range === 'custom') {
-			const { from, to } = this.timeRange();
-			params.set('from', String(from.getTime()));
-			params.set('to', String(to.getTime()));
+			params.set('from', String(this.customFrom.getTime()));
+			params.set('to', String(this.customTo.getTime()));
 		} else {
 			params.set('range', this.range);
 		}
@@ -153,39 +118,20 @@ export const ctx = new ContextState();
 
 urlSync.register(ctx);
 
-class ScopeLock {
-	server = $state<string | null>(null);
-	db = $state<string | null>(null);
-
-	get locked(): boolean {
-		return this.server !== null;
-	}
-
-	lock(server: string, db: string) {
-		this.server = server;
-		this.db = db;
-	}
-
-	unlock() {
-		this.server = null;
-		this.db = null;
-	}
-}
-
-export const scopeLock = new ScopeLock();
-
 // Servers whose last health check is older than 24h are already excluded by the backend.
 class ServersState {
 	list = $state<Server[]>([]);
 	loaded = $state(false);
+	error = $state<string | null>(null);
 
 	async load() {
 		try {
 			const { servers } = await healthClient.listServers({});
 			this.list = servers;
+			this.error = null;
 			this.reconcile();
-		} catch {
-			/* empty */
+		} catch (e) {
+			this.error = errMsg(e);
 		} finally {
 			this.loaded = true;
 		}
@@ -199,13 +145,13 @@ class ServersState {
 		return this.list.find((s) => s.serverName === server)?.databases ?? [];
 	}
 
-	health(server: string): ServerHealth {
-		const found = this.list.find((s) => s.serverName === server);
-		if (!found?.lastSeenAt) return 'stale';
-		return Date.now() - timestampDate(found.lastSeenAt).getTime() <= HEALTH_FRESH_MS ? 'ok' : 'stale';
+	isHealthy(server: string): boolean {
+		const lastSeenAt = this.list.find((s) => s.serverName === server)?.lastSeenAt;
+		return !!lastSeenAt && Date.now() - timestampDate(lastSeenAt).getTime() <= HEALTH_FRESH_MS;
 	}
 
 	reconcile() {
+		if (ctx.scopeLocked) return;
 		if (!this.names.includes(ctx.server)) {
 			ctx.server = this.names.includes(defaultScope.server) ? defaultScope.server : (this.names[0] ?? '');
 		}

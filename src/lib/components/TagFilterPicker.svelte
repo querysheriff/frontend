@@ -3,8 +3,8 @@
 	import { CheckIcon, ChevronLeftIcon, SearchIcon } from '@lucide/svelte';
 	import { statementClient } from '$lib/connect';
 	import { ctx } from '$lib/state.svelte';
-	import { errMsg } from '$lib/format';
-	import type { TagFilter, TagOp } from '$lib/queryFilter.svelte';
+	import { Loader } from '$lib/loader.svelte';
+	import { OP_SYMBOL, type TagFilter, type TagOp } from '$lib/urlCodec';
 
 	let {
 		initial,
@@ -37,12 +37,13 @@
 	let keySearch = $state('');
 	let valueSearch = $state('');
 
-	let keyRows = $state<KeyRow[]>([]);
-	let valueRows = $state<ValueRow[]>([]);
-	let loading = $state(false);
-	let error = $state<string | null>(null);
 	let highlight = $state(0);
 	let searchInput = $state<HTMLInputElement | null>(null);
+
+	const keys = new Loader<KeyRow[]>();
+	const values = new Loader<ValueRow[]>();
+	const keyRows = $derived(keys.data ?? []);
+	const valueRows = $derived(values.data ?? []);
 
 	const scope = () => ({ serverName: ctx.server, databaseName: ctx.db });
 
@@ -52,56 +53,24 @@
 
 	$effect(() => {
 		if (step !== 'key') return;
-
-		let cancelled = false;
-		const ac = new AbortController();
-		loading = true;
-		error = null;
-
-		statementClient
-			.listTagKeys(scope(), { signal: ac.signal })
-			.then((res) => {
-				if (cancelled) return;
-				keyRows = res.keys.map((k) => ({ key: k.key, valueCount: Number(k.valueCount) }));
-			})
-			.catch((e: unknown) => {
-				if (!cancelled) error = errMsg(e);
-			})
-			.finally(() => {
-				if (!cancelled) loading = false;
-			});
-
-		return () => {
-			cancelled = true;
-			ac.abort();
-		};
+		const request = scope();
+		return keys.load(
+			(signal) =>
+				statementClient
+					.listTagKeys(request, { signal })
+					.then((res) => res.keys.map((k) => ({ key: k.key, valueCount: Number(k.valueCount) }))),
+			{ keepData: true }
+		);
 	});
 
 	$effect(() => {
 		if (step !== 'value' || !key) return;
-
-		let cancelled = false;
-		const ac = new AbortController();
-		loading = true;
-		error = null;
-
-		statementClient
-			.listTagValues({ ...scope(), key }, { signal: ac.signal })
-			.then((res) => {
-				if (cancelled) return;
-				valueRows = res.values.map((v) => ({ value: v.value, statementCount: Number(v.statementCount) }));
-			})
-			.catch((e: unknown) => {
-				if (!cancelled) error = errMsg(e);
-			})
-			.finally(() => {
-				if (!cancelled) loading = false;
-			});
-
-		return () => {
-			cancelled = true;
-			ac.abort();
-		};
+		const request = { ...scope(), key };
+		return values.load((signal) =>
+			statementClient
+				.listTagValues(request, { signal })
+				.then((res) => res.values.map((v) => ({ value: v.value, statementCount: Number(v.statementCount) })))
+		);
 	});
 
 	const visibleKeys = $derived(keyRows.filter((k) => k.key.toLowerCase().includes(keySearch.trim().toLowerCase())));
@@ -217,7 +186,7 @@
 				</button>
 			{:else}
 				<div class="px-2.5 py-2.5 font-mono text-sm text-ink/70">
-					{loading ? 'Loading…' : (error ?? (keyRows.length > 0 ? 'No matching tag keys' : 'No tags found'))}
+					{keys.loading ? 'Loading…' : (keys.error ?? (keyRows.length > 0 ? 'No matching tag keys' : 'No tags found'))}
 				</div>
 			{/each}
 		</div>
@@ -233,19 +202,19 @@
 			</button>
 			<span class="flex-1 font-mono text-sm font-semibold text-ink">{key}</span>
 			<div class="flex border border-line-strong">
-				{#each [{ v: 'eq', l: '=' }, { v: 'ne', l: '!=' }] as const as o (o.v)}
+				{#each ['eq', 'ne'] as const as o (o)}
 					<button
 						type="button"
 						disabled={anyValue}
-						onclick={() => (op = o.v)}
-						title={anyValue ? 'Any value has no negated form' : `Match ${o.l}`}
+						onclick={() => (op = o)}
+						title={anyValue ? 'Any value has no negated form' : `Match ${OP_SYMBOL[o]}`}
 						class="px-2.5 py-1 font-mono text-xs {anyValue
 							? 'cursor-not-allowed text-ink/25'
-							: op === o.v
+							: op === o
 								? 'cursor-pointer bg-command text-paper'
 								: 'cursor-pointer text-ink/70 hover:bg-hover'}"
 					>
-						{o.l}
+						{OP_SYMBOL[o]}
 					</button>
 				{/each}
 			</div>
@@ -300,7 +269,7 @@
 				</button>
 			{:else}
 				<div class="px-2.5 py-2.5 font-mono text-sm text-ink/70">
-					{loading ? 'Loading…' : (error ?? (valueRows.length > 0 ? 'No matching values' : 'No values in this window'))}
+					{values.loading ? 'Loading…' : (values.error ?? (valueRows.length > 0 ? 'No matching values' : 'No values'))}
 				</div>
 			{/each}
 		</div>

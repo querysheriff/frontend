@@ -1,9 +1,9 @@
 <script lang="ts">
-	import DocsShell from '$lib/components/DocsShell.svelte';
+	import AppShell from '$lib/components/AppShell.svelte';
 
 	let { children } = $props();
 </script>
 
-<DocsShell dbSwitch={false}>
+<AppShell dbScoped={false}>
 	{@render children()}
-</DocsShell>
+</AppShell>

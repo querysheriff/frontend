@@ -4,6 +4,7 @@ import { SvelteMap } from 'svelte/reactivity';
 export const POPOVER_WIDTH = 440;
 
 const SHOW_DELAY_MS = 400;
+const FETCH_DELAY_MS = 150;
 const HIDE_GRACE_MS = 140;
 const MARGIN = 12;
 const GAP = 6;
@@ -29,6 +30,7 @@ export class SqlPopoverState {
 	pop = $state<Placement | null>(null);
 	copied = $state(false);
 	#showTimer: ReturnType<typeof setTimeout> | null = null;
+	#fetchTimer: ReturnType<typeof setTimeout> | null = null;
 	#hideTimer: ReturnType<typeof setTimeout> | null = null;
 	#reflowQueued = false;
 	#trigger: HTMLElement | null = null;
@@ -45,6 +47,10 @@ export class SqlPopoverState {
 		if (this.#showTimer) {
 			clearTimeout(this.#showTimer);
 			this.#showTimer = null;
+		}
+		if (this.#fetchTimer) {
+			clearTimeout(this.#fetchTimer);
+			this.#fetchTimer = null;
 		}
 	}
 
@@ -82,7 +88,6 @@ export class SqlPopoverState {
 		const key = String(id);
 		const trigger = e.currentTarget as HTMLElement;
 		this.#activeKey = key;
-		this.#fetch(key, id);
 
 		const open = () => {
 			const text = this.#cache.get(key);
@@ -90,10 +95,16 @@ export class SqlPopoverState {
 		};
 
 		if (this.pop) {
+			this.#fetch(key, id);
 			open();
 			return;
 		}
 
+		// Only after a short hover: sweeping the pointer down a table would request every row.
+		this.#fetchTimer = setTimeout(() => {
+			this.#fetchTimer = null;
+			this.#fetch(key, id);
+		}, FETCH_DELAY_MS);
 		this.#showTimer = setTimeout(() => {
 			this.#showTimer = null;
 			open();

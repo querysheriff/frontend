@@ -1,8 +1,7 @@
-export type DocLink = { label: string; href: string };
-// A block is a paragraph or a bullet list; inline `code` spans are rendered as code.
-export type DocBlock = string | { list: string[] };
-export type DocSection = { heading: string; body: DocBlock[]; link?: DocLink };
-export type DocEntry = { title: string; sections: DocSection[] };
+// A block is a paragraph or a bullet list; inline `code` and **bold** spans are rendered as such.
+type DocBlock = string | { list: string[] };
+type DocSection = { heading: string; body: DocBlock[] };
+type DocEntry = { title: string; sections: DocSection[] };
 
 const docContent: Record<string, DocEntry> = {
 	'q-volume': {
@@ -130,7 +129,7 @@ const docContent: Record<string, DocEntry> = {
 				heading: 'Why this matters',
 				body: [
 					'This table helps you identify which queries are most worth improving.',
-					'You can sort the table by any column. Sorting by **% Time** is often the most useful because it shows which queries use the most database time overall.',
+					'You can sort the table by any numeric column. Sorting by **% Time** is often the most useful because it shows which queries use the most database time overall.',
 					'The query with the highest average time is not always the biggest problem. For example, a query that takes 50 ms but runs millions of times may use much more database time than a query that takes 5 seconds but runs only twice.',
 					'Useful things to look for include:',
 					{
@@ -469,7 +468,7 @@ const docContent: Record<string, DocEntry> = {
 				heading: 'Why this matters',
 				body: [
 					'Some problems only appear in PostgreSQL logs, such as deadlocks, failed connections, constraint violations, and checkpoint warnings.',
-					'Most values can be clicked to filter the table, making it easy to find related events.',
+					'Use the **Category** and **Field** filters above the table to find related events.',
 					'The expanded row also shows the **SQLSTATE** error code when PostgreSQL provides one.'
 				]
 			},
@@ -478,7 +477,7 @@ const docContent: Record<string, DocEntry> = {
 				body: [
 					'PostgreSQL only records events enabled by its logging configuration, so an empty table does not always mean nothing happened.',
 					'The collector reads PostgreSQL logs and sends new entries to QuerySheriff shortly after they are written.',
-					'Logs cover the whole PostgreSQL server, not just one database, so the database selector is disabled on this page.'
+					'Logs cover the whole PostgreSQL server, not just one database, so the database selector is hidden on this page.'
 				]
 			}
 		]
@@ -502,8 +501,8 @@ const docContent: Record<string, DocEntry> = {
 							'**Transaction open too long**: a transaction has been open for 10 minutes, busy or idle'
 						]
 					},
-					'The lock, query and transaction alerts show the full queries, with their tags, and the SQL that terminates the offending session.',
-					'**Weekly report** arrives on Monday at 08:00 UTC: the 10 busiest queries of the last week, each linking back here. It is skipped in a week with no query activity.'
+					'The lock, query and transaction alerts show the queries (up to 1000 characters), with their tags, and the SQL that terminates the offending session.',
+					'**Weekly report** arrives on Monday at 08:00 UTC: the 10 busiest queries of the last week, each linking to its page here when the dashboard URL is configured. It is skipped in a week with no query activity.'
 				]
 			}
 		]

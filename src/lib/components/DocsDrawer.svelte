@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { XIcon, ExternalLinkIcon } from '@lucide/svelte';
+	import { XIcon } from '@lucide/svelte';
 	import { docs } from '$lib/docs.svelte';
 	import { docEntry } from '$lib/docsContent';
 
 	const entry = $derived(docs.activeId ? docEntry(docs.activeId) : null);
 
 	function onKeydown(e: KeyboardEvent) {
-		if (e.key === 'Escape' && docs.activeId) docs.close();
+		// A popup that handled this Escape (a bits-ui select or dialog) has already prevented it.
+		if (e.key === 'Escape' && !e.defaultPrevented && docs.activeId) docs.close();
 	}
 
 	// Light inline markup: `code` spans render as <code> and **bold** as <strong>.
@@ -39,7 +40,7 @@
 {#if entry}
 	<aside
 		aria-labelledby="docs-title"
-		class="sticky top-0 flex h-screen w-[21rem] flex-none flex-col border-l border-line bg-card"
+		class="sticky top-0 flex h-screen w-[21rem] max-w-full flex-none flex-col border-l border-line bg-card max-md:fixed max-md:right-0 max-md:z-50 max-md:shadow-drawer"
 	>
 		<header class="flex min-h-[4.25rem] items-center justify-between gap-3 border-b border-line px-5 py-3.5">
 			<h2 id="docs-title" class="min-w-0 font-sans text-lg leading-[1.15] font-bold text-ink">
@@ -72,16 +73,6 @@
 							</ul>
 						{/if}
 					{/each}
-					{#if section.link}
-						<a
-							href={section.link.href}
-							target="_blank"
-							rel="noopener noreferrer"
-							class="mt-1 inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-command hover:underline"
-						>
-							{section.link.label}<ExternalLinkIcon class="size-3.5" />
-						</a>
-					{/if}
 				</section>
 			{/each}
 		</div>

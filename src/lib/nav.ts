@@ -1,78 +1,48 @@
-export interface NavItem {
-	key: string;
-	label: string;
-	href: string;
-}
+type NavItem = { label: string; href: string; description: string };
 
-// `query-detail` is a sub-view of Queries (reached by clicking a row), so it is not listed here.
 export const navItems: NavItem[] = [
-	{ key: 'slow-queries', label: 'Queries', href: '/queries' },
-	{ key: 'locks', label: 'Locks', href: '/locks' },
-	{ key: 'transactions', label: 'Transactions', href: '/transactions' },
-	{ key: 'logs', label: 'Logs', href: '/logs' },
-	{ key: 'alerts', label: 'Alerts', href: '/alerts' }
+	{
+		label: 'Queries',
+		href: '/queries',
+		description: 'How often queries ran, how long they took, and how each one compares'
+	},
+	{
+		label: 'Locks',
+		href: '/locks',
+		description: 'How much time queries spent stuck waiting, and what was holding them up'
+	},
+	{
+		label: 'Transactions',
+		href: '/transactions',
+		description: 'How long transactions stayed open, and what they were doing all that time'
+	},
+	{ label: 'Logs', href: '/logs', description: 'What PostgreSQL logged on this server, by severity and category' },
+	{
+		label: 'Alerts',
+		href: '/alerts',
+		description: 'Slack notifications and per-alert toggles for each monitored server'
+	}
 ];
 
 export const adminItems: NavItem[] = [
-	{ key: 'admin-collectors', label: 'Collectors', href: '/admin/collectors' },
-	{ key: 'admin-users', label: 'Users', href: '/admin/users' }
-];
-
-export const screenMeta: Record<string, { title: string; description: string }> = {
-	'slow-queries': {
-		title: 'Queries',
-		description: 'How often queries ran, how long they took, and how each one compares'
-	},
-	'query-detail': {
-		title: 'Query detail',
-		description: 'How often this query ran, how long it took, and real samples'
-	},
-	locks: {
-		title: 'Locks',
-		description: 'How much time queries spent stuck waiting, and what was holding them up'
-	},
-	transactions: {
-		title: 'Transactions',
-		description: 'How long transactions stayed open, and what they were doing all that time'
-	},
-	logs: {
-		title: 'Logs',
-		description: 'What PostgreSQL logged on this server, by severity and category'
-	},
-	alerts: {
-		title: 'Alerts',
-		description: 'Slack notifications and per-alert toggles for each monitored server'
-	},
-	'admin-collectors': {
-		title: 'Collectors',
+	{
+		label: 'Collectors',
+		href: '/admin/collectors',
 		description: 'Access tokens that let collectors report into querysheriff'
 	},
-	'admin-users': {
-		title: 'Users',
-		description: 'User accounts and which servers each one can see'
-	}
+	{ label: 'Users', href: '/admin/users', description: 'User accounts and which servers each one can see' }
+];
+
+// A sub-view of Queries, reached by clicking a row, so it has no sidebar entry.
+const queryDetail = {
+	title: 'Query detail',
+	description: 'How often this query ran, how long it took, and real samples'
 };
 
-export function screenKeyForPath(pathname: string): string {
-	if (pathname.startsWith('/queries/')) return 'query-detail';
-	if (pathname.startsWith('/locks')) return 'locks';
-	if (pathname.startsWith('/transactions')) return 'transactions';
-	if (pathname.startsWith('/logs')) return 'logs';
-	if (pathname.startsWith('/alerts')) return 'alerts';
-	if (pathname.startsWith('/admin/collectors')) return 'admin-collectors';
-	if (pathname.startsWith('/admin/users')) return 'admin-users';
-	return 'slow-queries';
+export function screenFor(pathname: string): { title: string; description: string } {
+	if (pathname.startsWith('/queries/')) return queryDetail;
+	const item = [...navItems, ...adminItems].find((i) => pathname.startsWith(i.href)) ?? navItems[0];
+	return { title: item.label, description: item.description };
 }
 
-export function screenTitle(pathname: string): string {
-	return screenMeta[screenKeyForPath(pathname)]?.title ?? '';
-}
-
-export function screenDescription(pathname: string): string {
-	return screenMeta[screenKeyForPath(pathname)]?.description ?? '';
-}
-
-export function isNavActive(item: NavItem, pathname: string): boolean {
-	if (item.key === 'slow-queries') return pathname === '/' || pathname.startsWith('/queries');
-	return pathname.startsWith(item.href);
-}
+export const isNavActive = (item: NavItem, pathname: string): boolean => pathname.startsWith(item.href);

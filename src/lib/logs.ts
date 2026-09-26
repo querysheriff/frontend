@@ -35,60 +35,24 @@ function tint(color: string, pct: number): string {
 	return `color-mix(in oklab, ${color} ${pct}%, transparent)`;
 }
 
-type PillStyle = {
-	color: string;
-	background: string;
-	border: string;
-	hoverColor: string;
-	hoverBackground: string;
-	hoverBorder: string;
-};
-
-function deepen(color: string): string {
-	return `color-mix(in oklab, ${color} 80%, var(--color-ink))`;
-}
-
-function tagHover(background: string) {
-	return {
-		hoverColor: 'var(--color-command)',
-		hoverBackground: background,
-		hoverBorder: '1px solid var(--color-accent-line)'
-	};
-}
+type PillStyle = { color: string; background: string; border: string };
 
 export function levelBadge(level: LogEvent_LogLevel): PillStyle {
 	const m = META[level] ?? META[LogEvent_LogLevel.LOG];
 
 	if (m.tier === 'severe') {
-		return {
-			color: 'var(--color-paper)',
-			background: m.color,
-			border: `1px solid ${m.color}`,
-			hoverColor: 'var(--color-paper)',
-			hoverBackground: deepen(m.color),
-			hoverBorder: `1px solid ${deepen(m.color)}`
-		};
+		return { color: 'var(--color-paper)', background: m.color, border: `1px solid ${m.color}` };
 	}
 
 	if (m.tier === 'warn') {
-		const background = tint(m.color, 16);
-
 		return {
 			color: 'var(--color-warn-text)',
-			background,
-			border: `1px solid ${tint(m.color, 50)}`,
-			...tagHover(background)
+			background: tint(m.color, 16),
+			border: `1px solid ${tint(m.color, 50)}`
 		};
 	}
 
-	const background = tint(m.color, 10);
-
-	return {
-		color: m.color,
-		background,
-		border: `1px solid ${tint(m.color, 45)}`,
-		...tagHover(background)
-	};
+	return { color: m.color, background: tint(m.color, 10), border: `1px solid ${tint(m.color, 45)}` };
 }
 
 export function classificationLabel(c: LogEvent_LogClassification): string {
@@ -147,14 +111,8 @@ export function categoryColor(category: LogCategory): string {
 
 export function categoryBadge(category: LogCategory): PillStyle {
 	const color = categoryColor(category);
-	const background = tint(color, 10);
 
-	return {
-		color,
-		background,
-		border: `1px solid ${tint(color, 40)}`,
-		...tagHover(background)
-	};
+	return { color, background: tint(color, 10), border: `1px solid ${tint(color, 40)}` };
 }
 
 /** Most serious first, not `log_min_messages` order, which ranks LOG above ERROR. */

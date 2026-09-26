@@ -4,7 +4,8 @@
 	import { LogOutIcon, XIcon } from '@lucide/svelte';
 	import { Dialog } from 'bits-ui';
 	import { page } from '$app/state';
-	import { afterNavigate, goto } from '$app/navigation';
+	import { afterNavigate } from '$app/navigation';
+	import { errMsg } from '$lib/format';
 	import { navItems, adminItems, isNavActive } from '$lib/nav';
 	import { session } from '$lib/session.svelte';
 	import { sidebar } from '$lib/sidebar.svelte';
@@ -27,16 +28,19 @@
 	});
 
 	async function handleLogout() {
-		await session.logout();
-		goto('/login');
+		try {
+			await session.logout();
+		} catch (e) {
+			alert(`Sign out failed: ${errMsg(e)}`);
+		}
 	}
 </script>
 
 {#snippet body()}
-	<!-- Height matches the ContextBar (min-h-[4.25rem]) so this border lines up with the section header's. -->
+	<!-- Height matches the PageBar (min-h-[4.25rem]) so this border lines up with the section header's. -->
 	<div class="flex h-[4.25rem] items-center gap-3 border-b border-line px-5">
-		<QuerySheriffMark class="size-8 flex-none text-command" />
-		<span class="font-sans text-2xl font-bold tracking-[2.5px] text-ink">QuerySheriff</span>
+		<QuerySheriffMark class="size-8 flex-none text-ink" />
+		<span class="font-sans text-2xl font-bold text-ink">QuerySheriff</span>
 		<button
 			type="button"
 			aria-label="Close navigation"
@@ -48,7 +52,7 @@
 	</div>
 
 	<nav class="flex flex-col gap-0.5 px-2 py-2.5">
-		{#each navItems as item (item.key)}
+		{#each navItems as item (item.href)}
 			<a href={item.href} title={item.label} class={navClass(isNavActive(item, page.url.pathname))}>
 				<span class="font-sans text-lg font-semibold">{item.label}</span>
 			</a>
@@ -59,7 +63,7 @@
 		<div class="mt-auto border-t border-line px-2 pt-2 pb-1">
 			<div class="px-3.5 pt-2 pb-2 font-sans text-2xs font-bold text-ink/70">Admin</div>
 			<div class="flex flex-col gap-0.5">
-				{#each adminItems as item (item.key)}
+				{#each adminItems as item (item.href)}
 					<a href={item.href} title={item.label} class={navClass(isNavActive(item, page.url.pathname))}>
 						<span class="font-sans text-lg font-semibold">{item.label}</span>
 					</a>

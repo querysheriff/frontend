@@ -1,4 +1,8 @@
-<script lang="ts">
+<script module lang="ts">
+	export type Sort<C> = { column: C; desc: boolean };
+</script>
+
+<script lang="ts" generics="C">
 	import { clsx } from 'clsx';
 	import { ArrowUpIcon, ArrowDownIcon, ArrowUpDownIcon } from '@lucide/svelte';
 
@@ -7,25 +11,32 @@
 		align = 'left',
 		class: klass = '',
 		pad = 'px-4',
-		dir = null,
-		onsort
+		column,
+		sort = $bindable()
 	}: {
 		label: string;
 		align?: 'left' | 'right';
 		class?: string;
 		pad?: string;
-		dir?: 'asc' | 'desc' | null;
-		onsort?: () => void;
+		column?: C;
+		sort?: Sort<C>;
 	} = $props();
 
+	const sortable = $derived(column !== undefined && sort !== undefined);
+	const dir = $derived(sort && sort.column === column ? (sort.desc ? 'desc' : 'asc') : null);
 	const box = $derived(clsx('block py-2.5', pad, align === 'right' ? 'text-right' : 'text-left'));
+
+	function toggle() {
+		if (column === undefined || !sort) return;
+		sort = { column, desc: sort.column !== column || !sort.desc };
+	}
 </script>
 
 {#snippet content()}
 	<!-- Absolute so the icon never consumes layout width and the label stays flush with its values. -->
 	<span class="relative inline-flex items-center align-middle">
 		<span>{label}</span>
-		{#if onsort}
+		{#if sortable}
 			<span
 				class={clsx(
 					'pointer-events-none absolute inset-y-0 flex items-center',
@@ -48,13 +59,13 @@
 
 <th
 	scope="col"
-	aria-sort={onsort ? (dir === 'asc' ? 'ascending' : dir === 'desc' ? 'descending' : 'none') : undefined}
+	aria-sort={sortable ? (dir === 'asc' ? 'ascending' : dir === 'desc' ? 'descending' : 'none') : undefined}
 	class={clsx('border-b border-line font-sans text-xs font-semibold whitespace-nowrap text-ink/70', klass)}
 >
-	{#if onsort}
+	{#if sortable}
 		<button
 			type="button"
-			onclick={onsort}
+			onclick={toggle}
 			class="{box} group/sort w-full cursor-pointer select-none focus-visible:text-command"
 		>
 			{@render content()}

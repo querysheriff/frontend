@@ -5,13 +5,12 @@
 
 	type Props = {
 		title: string;
-		description?: string;
 		onclose: () => void;
 		children: Snippet;
 		maxWidth?: string;
 	};
 
-	let { title, description, onclose, children, maxWidth = '480px' }: Props = $props();
+	let { title, onclose, children, maxWidth = '480px' }: Props = $props();
 </script>
 
 <Dialog.Root
@@ -28,7 +27,6 @@
 		>
 			<div class="flex items-center justify-between gap-3 border-b border-line px-5 py-4">
 				<Dialog.Title class="font-sans text-xl font-bold text-ink">{title}</Dialog.Title>
-				<Dialog.Description class="sr-only">{description ?? title}</Dialog.Description>
 				<Dialog.Close aria-label="Close" class="cursor-pointer leading-none text-ink/55 hover:text-danger">
 					<XIcon class="size-4" />
 				</Dialog.Close>

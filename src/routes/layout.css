@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 @theme {
-	/* Breakpoints — only the steps the app actually uses (Tailwind's defaults). */
+	/* Tailwind's default breakpoints, pinned in px. */
 	--breakpoint-sm: 640px;
 	--breakpoint-md: 768px;
 	--breakpoint-lg: 1024px;
@@ -11,7 +11,7 @@
 	--color-card: #fbf8f1;
 	--color-shell: #efe8db;
 
-	/* Text & lines (used with opacity, e.g. text-ink/45, border-ink/14) */
+	/* Text; also the base of the line-* and hover-* scale below. */
 	--color-ink: #3a2a1f;
 
 	/* Accent */
@@ -44,8 +44,7 @@
 	--color-hover-strong: color-mix(in oklab, var(--color-ink) 10%, transparent);
 	--color-scrim: color-mix(in oklab, var(--color-ink) 40%, transparent);
 
-	/* Accent (command) tints — soft/base backgrounds + a border weight. */
-	--color-accent-soft: color-mix(in oklab, var(--color-command) 6%, transparent);
+	/* Accent (command) tints — a background and a border weight. */
 	--color-accent: color-mix(in oklab, var(--color-command) 10%, transparent);
 	--color-accent-line: color-mix(in oklab, var(--color-command) 50%, transparent);
 
@@ -53,13 +52,12 @@
 	--shadow-popover: 0 10px 28px color-mix(in oklab, var(--color-ink) 20%, transparent);
 	--shadow-modal: 0 24px 60px color-mix(in oklab, var(--color-ink) 32%, transparent);
 	--shadow-dropdown: 0 8px 24px color-mix(in oklab, var(--color-ink) 18%, transparent);
-	--shadow-tooltip: 0 8px 22px color-mix(in oklab, var(--color-ink) 30%, transparent);
 	--shadow-drawer: 0 0 40px color-mix(in oklab, var(--color-ink) 28%, transparent);
 	--shadow-sql: 0 14px 36px color-mix(in oklab, var(--color-ink) 32%, transparent);
 	--shadow-chart: 0 4px 16px color-mix(in oklab, var(--color-ink) 10%, transparent);
 	--shadow-knob: 0 1px 2px color-mix(in oklab, var(--color-ink) 30%, transparent);
 
-	/* Text scale — rem, font-size only; line-height stays explicit via leading-*. */
+	/* Text scale (rem). xs–2xl keep Tailwind's default line-heights; set leading-* where it matters. */
 	--text-2xs: 0.75rem; /* 12px */
 	--text-xs: 0.8125rem; /* 13px */
 	--text-sm: 0.875rem; /* 14px */
@@ -98,7 +96,7 @@
 		height: 11px;
 	}
 	::-webkit-scrollbar-thumb {
-		background: rgba(58, 42, 31, 0.28);
+		background: color-mix(in oklab, var(--color-ink) 28%, transparent);
 		border: 3px solid var(--color-paper);
 	}
 	::-webkit-scrollbar-track {
@@ -106,12 +104,8 @@
 	}
 }
 
-@keyframes qs-pulse {
-	0%,
-	100% {
-		opacity: 1;
-	}
-	50% {
-		opacity: 0.35;
-	}
+/* layerchart strokes its tick labels; the app's charts want plain text. */
+.lc-axis-tick-label,
+.lc-axis-tick-label tspan {
+	stroke: none;
 }

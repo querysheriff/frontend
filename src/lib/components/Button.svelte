@@ -1,12 +1,10 @@
-<script module lang="ts">
-	export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
-	export type ButtonSize = 'sm' | 'md';
-</script>
-
 <script lang="ts">
 	import { clsx } from 'clsx';
 	import type { Snippet } from 'svelte';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
+
+	type ButtonVariant = 'primary' | 'secondary' | 'ghost';
+	type ButtonSize = 'sm' | 'md';
 
 	let {
 		variant = 'primary',
@@ -26,9 +24,9 @@
 		'inline-flex cursor-pointer items-center justify-center gap-1.5 font-sans whitespace-nowrap transition-colors disabled:cursor-default disabled:opacity-60';
 
 	const variants: Record<ButtonVariant, string> = {
-		primary: 'bg-command font-bold text-paper hover:bg-danger',
-		secondary: 'border border-line-strong font-bold text-ink/70 hover:bg-hover',
-		ghost: 'border border-line-card font-semibold text-ink/70 hover:bg-hover hover:text-command'
+		primary: 'bg-command font-bold text-paper enabled:hover:bg-danger',
+		secondary: 'border border-line-strong font-bold text-ink/70 enabled:hover:bg-hover',
+		ghost: 'border border-line-card font-semibold text-ink/70 enabled:hover:bg-hover enabled:hover:text-command'
 	};
 
 	const sizes: Record<ButtonSize, string> = {

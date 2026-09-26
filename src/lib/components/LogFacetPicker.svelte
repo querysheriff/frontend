@@ -211,7 +211,7 @@
 
 		{#if truncated}
 			<div class="border-t border-line px-3 py-1.5 font-sans text-xs text-ink/70">
-				Showing the most frequent values only — use search to narrow further
+				Showing the most frequent values only
 			</div>
 		{/if}
 

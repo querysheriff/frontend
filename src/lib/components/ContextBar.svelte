@@ -2,37 +2,29 @@
 	import { DatabaseIcon, ClockIcon, ChevronDownIcon, CheckIcon, ArrowRightIcon, StarIcon } from '@lucide/svelte';
 	import { Select, Popover } from 'bits-ui';
 	import type { DateRange } from 'bits-ui';
-	import { page } from '$app/state';
-	import { screenDescription, screenTitle } from '$lib/nav';
-	import {
-		ctx,
-		defaultScope,
-		scopeLock,
-		serversState,
-		presets,
-		rangeStrToDateTime,
-		dateTimeToRangeStr
-	} from '$lib/state.svelte';
-	import SidebarToggle from '$lib/components/SidebarToggle.svelte';
+	import { fromDate, getLocalTimeZone, toCalendarDateTime } from '@internationalized/date';
+	import { ctx, defaultScope, serversState, presets } from '$lib/state.svelte';
+	import { fmtClockDate } from '$lib/format';
+	import PageBar from '$lib/components/PageBar.svelte';
 	import DateTimeRangeField from '$lib/components/DateTimeRangeField.svelte';
-
-	let { dbSwitch = true }: { dbSwitch?: boolean } = $props();
 
 	let timeOpen = $state(false);
 	let draftRange = $state<DateRange>(currentRange());
 
 	function currentRange(): DateRange {
-		return { start: rangeStrToDateTime(ctx.customFrom), end: rangeStrToDateTime(ctx.customTo) };
+		const tz = getLocalTimeZone();
+		return {
+			start: toCalendarDateTime(fromDate(ctx.customFrom, tz)),
+			end: toCalendarDateTime(fromDate(ctx.customTo, tz))
+		};
 	}
 
-	const title = $derived(screenTitle(page.url.pathname));
-	const description = $derived(screenDescription(page.url.pathname));
-	const activeServer = $derived(scopeLock.server ?? ctx.server);
-	const selfHealth = $derived(serversState.health(activeServer));
+	const healthDot = (server: string): string => (serversState.isHealthy(server) ? 'bg-ok' : 'bg-warn');
+	const healthTitle = (server: string): string =>
+		serversState.isHealthy(server)
+			? 'Collector healthy · reported within 5 minutes'
+			: 'Collector not responding · no health check in over 5 minutes';
 
-	function healthClass(server: string): string {
-		return serversState.health(server) === 'ok' ? 'bg-ok' : 'bg-warn';
-	}
 	function selectServer(name: string) {
 		ctx.server = name;
 		serversState.reconcile();
@@ -44,9 +36,8 @@
 	function applyCustom() {
 		const { start, end } = draftRange;
 		if (!start || !end) return;
-		ctx.customFrom = dateTimeToRangeStr(start);
-		ctx.customTo = dateTimeToRangeStr(end);
-		ctx.range = 'custom';
+		const tz = getLocalTimeZone();
+		ctx.setCustom(start.toDate(tz), end.toDate(tz));
 		timeOpen = false;
 	}
 
@@ -55,55 +46,32 @@
 	const itemCls =
 		'flex w-full cursor-pointer items-center gap-2.5 px-2.5 py-2 font-mono text-sm text-ink hover:bg-hover data-[highlighted]:bg-hover';
 	const labelCls = 'px-2.5 pt-1.5 pb-1 font-sans text-2xs font-semibold text-ink/70';
-	const dotTitle = (ok: boolean) =>
-		ok
-			? 'Collector healthy · reported within 5 minutes'
-			: 'Collector not responding · no health check in over 5 minutes';
 </script>
 
-<div
-	class="sticky top-0 z-30 flex min-h-[4.25rem] flex-wrap items-center gap-2.5 border-b border-line bg-paper/70 px-4 py-3.5 backdrop-blur-[3px] backdrop-saturate-[1.1] sm:px-5 md:gap-5 md:px-7"
->
-	<SidebarToggle />
-
-	<div class="flex min-w-0 flex-1 flex-col gap-0.5">
-		<div class="flex items-baseline gap-2.5">
-			<h1 class="truncate font-sans text-xl leading-[1.15] font-bold text-ink">
-				{title}
-			</h1>
-		</div>
-		<p class="truncate text-xs leading-[1.2] text-ink/70">{description}</p>
-	</div>
-
-	<div class="flex flex-wrap items-center gap-2.5">
+<PageBar>
+	{#snippet actions()}
 		<div class="flex border border-line-card bg-card">
-			{#if scopeLock.locked}
+			{#if ctx.scopeLocked}
 				<div
 					class="flex items-center gap-2 border-r border-line px-3 py-2"
-					title="This query lives on {scopeLock.server} — the server is fixed here"
+					title="This query lives on {ctx.server} — the server is fixed here"
 				>
-					<span
-						class="h-2 w-2 rounded-full {selfHealth === 'ok' ? 'bg-ok' : 'bg-warn'}"
-						title={dotTitle(selfHealth === 'ok')}
-					></span>
-					<span class="font-mono text-sm font-medium text-ink">{scopeLock.server}</span>
+					<span class="h-2 w-2 rounded-full {healthDot(ctx.server)}" title={healthTitle(ctx.server)}></span>
+					<span class="font-mono text-sm font-medium text-ink">{ctx.server}</span>
 				</div>
 				<div
 					class="flex items-center gap-2 px-3 py-2"
-					title="This query lives in {scopeLock.db} — the database is fixed here"
+					title="This query lives in {ctx.db} — the database is fixed here"
 				>
 					<DatabaseIcon class="size-3.5 flex-none text-steel" />
-					<span class="font-mono text-sm font-medium text-ink">{scopeLock.db}</span>
+					<span class="font-mono text-sm font-medium text-ink">{ctx.db}</span>
 				</div>
 			{:else}
 				<Select.Root type="single" value={ctx.server} onValueChange={selectServer}>
 					<Select.Trigger>
 						{#snippet child({ props })}
 							<button {...props} class={triggerCls} aria-label="Select Postgres server">
-								<span
-									class="h-2 w-2 rounded-full {selfHealth === 'ok' ? 'bg-ok' : 'bg-warn'}"
-									title={dotTitle(selfHealth === 'ok')}
-								></span>
+								<span class="h-2 w-2 rounded-full {healthDot(ctx.server)}" title={healthTitle(ctx.server)}></span>
 								<span class="font-mono text-sm font-medium text-ink">{ctx.server || '—'}</span>
 								<ChevronDownIcon class="size-3.5 text-ink/55" />
 							</button>
@@ -116,7 +84,7 @@
 								<Select.Item value={s} label={s}>
 									{#snippet child({ props, selected })}
 										<div {...props} class="{itemCls} {selected ? 'font-semibold' : ''}">
-											<span class="h-2 w-2 rounded-full {healthClass(s)}"></span>
+											<span class="h-2 w-2 rounded-full {healthDot(s)}"></span>
 											<span class="flex-1 text-left">{s}</span>
 											{#if selected}<CheckIcon class="size-3.5 text-command" />{/if}
 										</div>
@@ -129,7 +97,7 @@
 					</Select.Portal>
 				</Select.Root>
 
-				{#if dbSwitch}
+				{#if ctx.dbScoped}
 					<Select.Root type="single" value={ctx.db} onValueChange={(v) => (ctx.db = v)}>
 						<Select.Trigger>
 							{#snippet child({ props })}
@@ -190,9 +158,9 @@
 						<ClockIcon class="size-3.5 flex-none text-warn" />
 						{#if ctx.isCustom}
 							<span class="flex items-center gap-1.5 font-mono text-sm font-medium whitespace-nowrap text-ink">
-								{ctx.customFromLabel}
+								{fmtClockDate(ctx.customFrom)}
 								<ArrowRightIcon class="size-3 flex-none text-ink/55" />
-								{ctx.customToLabel}
+								{fmtClockDate(ctx.customTo)}
 							</span>
 						{:else}
 							<span class="font-mono text-sm font-medium whitespace-nowrap text-ink">{ctx.timeLabel}</span>
@@ -236,5 +204,5 @@
 				</Popover.Content>
 			</Popover.Portal>
 		</Popover.Root>
-	</div>
-</div>
+	{/snippet}
+</PageBar>

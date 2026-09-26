@@ -5,7 +5,7 @@
 	import { fmtAxisTime, fmtClockMinute } from '$lib/format';
 	import ChartFrame from '$lib/components/ChartFrame.svelte';
 	import SeriesPoints from '$lib/components/SeriesPoints.svelte';
-	import { buildMetricMultiChartModel, type MetricSeriesPoint, type MetricSeriesRow } from '$lib/metricChart';
+	import { buildMetricChartModel, type MetricSeriesPoint, type MetricSeriesRow } from '$lib/metricChart';
 	import { createTimeBrush } from '$lib/chartBrush.svelte';
 
 	type Series = { label: string; color: string; points: MetricSeriesPoint[] };
@@ -16,7 +16,6 @@
 		to,
 		bucketMs,
 		format,
-		// An all-zero series would otherwise get a 0–1 domain, labelling the axis in fractions.
 		minYMax = 0
 	}: {
 		series: Series[];
@@ -28,7 +27,7 @@
 	} = $props();
 
 	const model = $derived(
-		buildMetricMultiChartModel(
+		buildMetricChartModel(
 			series.map((s) => s.points),
 			from,
 			to,
@@ -66,26 +65,24 @@
 	>
 		<Svg>
 			<Grid y={{ class: 'stroke-ink/10' }} />
-			<Axis
-				placement="left"
-				rule
-				ticks={4}
-				{format}
-				tickLabelProps={{ class: 'fill-ink/45 font-mono text-2xs', stroke: 'none' }}
-			/>
+			<Axis placement="left" rule ticks={4} {format} tickLabelProps={{ class: 'fill-ink/45 font-mono text-2xs' }} />
 			<Axis
 				placement="bottom"
 				rule
 				ticks={6}
 				format={fmtAxisTime}
-				tickLabelProps={{ class: 'fill-ink/45 font-mono text-2xs', stroke: 'none' }}
+				tickLabelProps={{ class: 'fill-ink/45 font-mono text-2xs' }}
 			/>
 			{#each series as s, i (s.label)}
-				<Spline y={(d: MetricSeriesRow) => d.values[i]} curve={curveLinear} stroke={s.color} stroke-width={2} />
+				<Spline
+					y={(d: MetricSeriesRow) => d.values[i]}
+					curve={curveLinear}
+					style="stroke: {s.color}; stroke-width: 2"
+				/>
 			{/each}
 			{#if !brush.brushing}
 				<Highlight lines motion="none" />
-				<SeriesPoints colors={series.map((s) => s.color)} values={(d: MetricSeriesRow) => d.values} />
+				<SeriesPoints colors={series.map((s) => s.color)} />
 			{/if}
 		</Svg>
 		{#if !brush.brushing}
@@ -115,10 +112,3 @@
 		{/if}
 	</Chart>
 </ChartFrame>
-
-<style>
-	:global(.lc-axis-tick-label),
-	:global(.lc-axis-tick-label tspan) {
-		stroke: none;
-	}
-</style>

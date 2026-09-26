@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
-	import { screenDescription, screenTitle } from '$lib/nav';
+	import { screenFor } from '$lib/nav';
 	import SidebarToggle from '$lib/components/SidebarToggle.svelte';
 
 	type Props = {
@@ -10,8 +10,7 @@
 
 	let { actions }: Props = $props();
 
-	const title = $derived(screenTitle(page.url.pathname));
-	const description = $derived(screenDescription(page.url.pathname));
+	const screen = $derived(screenFor(page.url.pathname));
 </script>
 
 <div
@@ -22,10 +21,10 @@
 	<div class="flex min-w-0 flex-1 flex-col gap-0.5">
 		<div class="flex items-baseline gap-2.5">
 			<h1 class="truncate font-sans text-xl leading-[1.15] font-bold text-ink">
-				{title}
+				{screen.title}
 			</h1>
 		</div>
-		<p class="truncate text-xs leading-[1.2] text-ink/70">{description}</p>
+		<p class="truncate text-xs leading-[1.2] text-ink/70">{screen.description}</p>
 	</div>
 	{#if actions}
 		<div class="flex flex-wrap items-center gap-2.5">

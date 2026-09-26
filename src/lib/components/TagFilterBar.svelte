@@ -1,22 +1,23 @@
 <script lang="ts">
 	import { SearchIcon } from '@lucide/svelte';
-	import TagChip from '$lib/components/TagChip.svelte';
+	import FilterChip from '$lib/components/FilterChip.svelte';
 	import TagFilterPicker from '$lib/components/TagFilterPicker.svelte';
-	import { type TagFilter, type KindKey, type QueryFilterState } from '$lib/queryFilter.svelte';
+	import type { KindKey, QueryFilterState } from '$lib/queryFilter.svelte';
+	import { OP_SYMBOL, type TagFilter } from '$lib/urlCodec';
 
 	let {
 		searchText = $bindable(),
-		tags
+		filters
 	}: {
 		searchText: string;
-		tags: QueryFilterState;
+		filters: QueryFilterState;
 	} = $props();
 
 	type Picker = { mode: 'add' } | { mode: 'edit'; index: number } | null;
 
 	let picker = $state<Picker>(null);
 
-	const editing = $derived(picker?.mode === 'edit' ? tags.chips[picker.index] : undefined);
+	const editing = $derived(picker?.mode === 'edit' ? filters.tags[picker.index] : undefined);
 
 	const kindOptions: { key: KindKey; label: string }[] = [
 		{ key: 'reads', label: 'Reads' },
@@ -25,21 +26,23 @@
 	];
 
 	function commit(filter: TagFilter) {
-		if (picker?.mode === 'edit') tags.replace(picker.index, filter);
-		else tags.add(filter);
+		if (picker?.mode === 'edit') filters.replace(picker.index, filter);
+		else filters.add(filter);
 		picker = null;
 	}
 </script>
 
 <div class="flex flex-wrap items-center gap-2 border-b border-line p-3.5">
-	{#each tags.chips as filter, i (filter.key + filter.op + filter.values.join(','))}
-		<TagChip
-			{filter}
+	{#each filters.tags as filter, i (i)}
+		<FilterChip
+			label={filter.key}
+			op={OP_SYMBOL[filter.op]}
+			values={filter.values.join(' or ')}
 			active={picker?.mode === 'edit' && picker.index === i}
 			onedit={() => (picker = picker?.mode === 'edit' && picker.index === i ? null : { mode: 'edit', index: i })}
 			onremove={() => {
 				if (picker?.mode === 'edit' && picker.index === i) picker = null;
-				tags.remove(i);
+				filters.remove(i);
 			}}
 		/>
 	{/each}
@@ -72,11 +75,11 @@
 		{/if}
 	</div>
 
-	{#if tags.chips.length > 0}
+	{#if filters.tags.length > 0}
 		<button
 			type="button"
 			onclick={() => {
-				tags.clear();
+				filters.clear();
 				picker = null;
 			}}
 			class="translate-y-[1px] cursor-pointer px-1.5 py-1 font-mono text-xs text-ink/70 hover:text-danger"
@@ -95,8 +98,8 @@
 				>
 					<input
 						type="checkbox"
-						checked={tags.kinds[opt.key]}
-						onchange={(e) => (tags.kinds[opt.key] = e.currentTarget.checked)}
+						checked={filters.kinds[opt.key]}
+						onchange={(e) => (filters.kinds[opt.key] = e.currentTarget.checked)}
 						class="m-0 block size-3.5 shrink-0 cursor-pointer accent-command"
 					/>
 					<span class="leading-none">{opt.label}</span>

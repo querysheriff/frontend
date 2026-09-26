@@ -1,182 +1,112 @@
 import type { MessageInitShape } from '@bufbuild/protobuf';
-import { LogEvent_LogLevel, LogFacetField, type LogFilterSchema } from '$lib/gen/querysheriff/v1/log_pb';
+import { LogFacetField, type LogFilterSchema } from '$lib/gen/querysheriff/v1/log_pb';
 import { FACET_FIELDS, facetValueLabel } from './logs';
+import { decodeList, encodeList } from './urlCodec';
 import type { UrlParams } from './urlState.svelte';
 
 /** One applied filter. Values within a field are ORed, fields are ANDed. */
-export type LogFacetFilter = { field: LogFacetField; values: string[] };
+type LogFacetFilter = { field: LogFacetField; values: string[] };
 
-export type LogFilterChip = { field: LogFacetField; label: string; values: string };
+type LogFilterChip = { field: LogFacetField; label: string; values: string };
 
-const URL_KEY_BY_FIELD = new Map(FACET_FIELDS.map((f) => [f.field, f.urlKey]));
+const ENUM_FIELDS = [LogFacetField.LEVEL, LogFacetField.CATEGORY, LogFacetField.CLASSIFICATION];
 
-const CATEGORY_FIELDS = [LogFacetField.CATEGORY, LogFacetField.CLASSIFICATION];
+function parseValues(field: LogFacetField, raw: string): string[] {
+	const values = decodeList(raw);
 
-// Values are user data — an application name can contain a comma — so the separator escapes.
-function encodeValue(value: string): string {
-	return value.replace(/([\\,])/g, '\\$1');
+	return ENUM_FIELDS.includes(field) ? values.filter((v) => /^\d+$/.test(v)) : values;
 }
 
-function splitValues(raw: string): string[] {
-	const out: string[] = [];
-	let current = '';
+const fieldLabel = (field: LogFacetField): string => FACET_FIELDS.find((f) => f.field === field)?.label ?? '';
 
-	for (let i = 0; i < raw.length; i++) {
-		if (raw[i] === '\\' && i + 1 < raw.length) {
-			current += raw[++i];
-		} else if (raw[i] === ',') {
-			out.push(current);
-			current = '';
-		} else {
-			current += raw[i];
-		}
-	}
-	out.push(current);
-
-	// An empty first segment is a real value — background workers have no database — so only a trailing
-	// empty one, left over from the split, is dropped.
-	while (out.length > 1 && out[out.length - 1] === '') out.pop();
-
-	return out;
-}
-
-// splitValues('') yields [''], which Number() would turn into a filter for level 0.
-function enumValues(raw: string | null): number[] {
-	if (!raw) return [];
-
-	return splitValues(raw)
-		.map(Number)
-		.filter((n) => Number.isInteger(n));
-}
+const describe = (field: LogFacetField, values: string[]): string =>
+	values.map((v) => facetValueLabel(field, v)).join(' or ');
 
 export class LogFilterState implements UrlParams {
 	text = $state('');
-	levels = $state<LogEvent_LogLevel[]>([]);
-	facets = $state<LogFacetFilter[]>([]);
+	#selected = $state.raw<LogFacetFilter[]>([]);
 
 	applyQuery(params: URLSearchParams): void {
 		this.text = params.get('q') ?? '';
-		this.levels = enumValues(params.get('lvl'));
 
-		const facets: LogFacetFilter[] = [];
+		const selected: LogFacetFilter[] = [];
 		for (const { field, urlKey } of FACET_FIELDS) {
-			if (field === LogFacetField.LEVEL) continue;
-
 			const raw = params.get(urlKey);
 			if (raw === null) continue;
 
-			facets.push({ field, values: splitValues(raw) });
+			const values = parseValues(field, raw);
+			if (values.length > 0) selected.push({ field, values });
 		}
-		this.facets = facets;
+		this.#selected = selected;
 	}
 
 	writeQuery(params: URLSearchParams): void {
 		if (this.text) params.set('q', this.text);
-		if (this.levels.length > 0) params.set('lvl', this.levels.join(','));
 
-		for (const facet of this.facets) {
-			const key = URL_KEY_BY_FIELD.get(facet.field);
-			if (key) params.set(key, facet.values.map(encodeValue).join(','));
+		for (const { field, urlKey } of FACET_FIELDS) {
+			const values = this.valuesFor(field);
+			if (values.length > 0) params.set(urlKey, encodeList(values));
 		}
 	}
 
 	/** Categories and event types collapse into one chip: the backend unions them, so two would read as AND. */
 	get chips(): LogFilterChip[] {
-		const label = (field: LogFacetField): string => FACET_FIELDS.find((f) => f.field === field)?.label ?? '';
-
-		const describe = (field: LogFacetField, values: string[]): string =>
-			values.map((v) => facetValueLabel(field, v)).join(' or ');
-
 		const chips: LogFilterChip[] = [];
 
-		if (this.levels.length > 0) {
+		const levels = this.valuesFor(LogFacetField.LEVEL);
+		if (levels.length > 0) {
 			chips.push({
 				field: LogFacetField.LEVEL,
-				label: label(LogFacetField.LEVEL),
-				values: describe(LogFacetField.LEVEL, this.levels.map(String))
+				label: fieldLabel(LogFacetField.LEVEL),
+				values: describe(LogFacetField.LEVEL, levels)
 			});
 		}
 
 		const categories = this.valuesFor(LogFacetField.CATEGORY);
 		const events = this.valuesFor(LogFacetField.CLASSIFICATION);
-
 		if (categories.length > 0 || events.length > 0) {
 			chips.push({
 				field: LogFacetField.CATEGORY,
-				label: label(categories.length > 0 ? LogFacetField.CATEGORY : LogFacetField.CLASSIFICATION),
+				label: fieldLabel(categories.length > 0 ? LogFacetField.CATEGORY : LogFacetField.CLASSIFICATION),
 				values: [describe(LogFacetField.CATEGORY, categories), describe(LogFacetField.CLASSIFICATION, events)]
 					.filter(Boolean)
 					.join(' or ')
 			});
 		}
 
-		for (const facet of this.facets) {
-			if (CATEGORY_FIELDS.includes(facet.field)) continue;
-
-			chips.push({ field: facet.field, label: label(facet.field), values: describe(facet.field, facet.values) });
+		for (const { field, values } of this.#selected) {
+			if (ENUM_FIELDS.includes(field)) continue;
+			chips.push({ field, label: fieldLabel(field), values: describe(field, values) });
 		}
 
 		return chips;
 	}
 
 	valuesFor(field: LogFacetField): string[] {
-		if (field === LogFacetField.LEVEL) return this.levels.map(String);
-
-		return this.facets.find((f) => f.field === field)?.values ?? [];
+		return this.#selected.find((f) => f.field === field)?.values ?? [];
 	}
 
 	set(field: LogFacetField, values: string[]): void {
-		if (field === LogFacetField.LEVEL) {
-			this.levels = values.map(Number).filter((n) => Number.isInteger(n));
-
-			return;
-		}
-
-		if (values.length === 0) {
-			this.facets = this.facets.filter((f) => f.field !== field);
-
-			return;
-		}
-
-		const at = this.facets.findIndex((f) => f.field === field);
-		if (at < 0) {
-			this.facets = [...this.facets, { field, values }];
-
-			return;
-		}
-
-		this.facets = this.facets.map((f, i) => (i === at ? { field, values } : f));
-	}
-
-	add(field: LogFacetField, value: string): void {
-		const current = this.valuesFor(field);
-		if (current.includes(value)) return;
-
-		this.set(field, [...current, value]);
+		const at = this.#selected.findIndex((f) => f.field === field);
+		if (values.length === 0) this.#selected = this.#selected.filter((f) => f.field !== field);
+		else if (at < 0) this.#selected = [...this.#selected, { field, values }];
+		else this.#selected = this.#selected.map((f, i) => (i === at ? { field, values } : f));
 	}
 
 	remove(field: LogFacetField): void {
-		if (field === LogFacetField.CATEGORY) {
-			this.set(LogFacetField.CLASSIFICATION, []);
-		}
-
+		if (field === LogFacetField.CATEGORY) this.set(LogFacetField.CLASSIFICATION, []);
 		this.set(field, []);
 	}
 
-	toggleLevel(level: LogEvent_LogLevel): void {
-		this.levels = this.levels.includes(level) ? this.levels.filter((l) => l !== level) : [...this.levels, level];
-	}
-
 	clear(): void {
-		this.levels = [];
-		this.facets = [];
+		this.#selected = [];
 	}
 
 	/** Categories go over the wire as categories: the backend owns the mapping. */
 	toFilter(): MessageInitShape<typeof LogFilterSchema> {
 		return {
 			search: this.text,
-			levels: [...this.levels],
+			levels: this.valuesFor(LogFacetField.LEVEL).map(Number),
 			classifications: this.valuesFor(LogFacetField.CLASSIFICATION).map(Number),
 			categories: this.valuesFor(LogFacetField.CATEGORY).map(Number),
 			databases: this.valuesFor(LogFacetField.DATABASE),

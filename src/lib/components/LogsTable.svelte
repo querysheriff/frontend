@@ -1,16 +1,9 @@
-<script module lang="ts">
-	import { LogFacetField } from '$lib/gen/querysheriff/v1/log_pb';
-
-	/** What a cell can pivot the filter on. `search` covers PID, which is free text, not a facet. */
-	export type LogPivot = { kind: 'facet'; field: LogFacetField; value: string } | { kind: 'search'; value: string };
-</script>
-
 <script lang="ts">
 	import { clsx } from 'clsx';
 	import { ChevronDownIcon, ChevronRightIcon, ExternalLinkIcon } from '@lucide/svelte';
 	import { timestampDate } from '@bufbuild/protobuf/wkt';
 	import type { LogRecord } from '$lib/gen/querysheriff/v1/log_pb';
-	import { fmtDuration, fmtTs, sevByDuration, sevText, truncate } from '$lib/format';
+	import { fmtDuration, fmtTs, runDurationColor, truncate } from '$lib/format';
 	import {
 		categoryBadge,
 		categoryLabel,
@@ -27,13 +20,11 @@
 	let {
 		records,
 		sortDesc = $bindable(),
-		loading = false,
-		onPivot
+		loading = false
 	}: {
 		records: LogRecord[];
 		sortDesc: boolean;
 		loading?: boolean;
-		onPivot: (pivot: LogPivot) => void;
 	} = $props();
 
 	let expanded = $state<Record<string, boolean>>({});
@@ -51,12 +42,6 @@
 			e.preventDefault();
 			toggleRow(r);
 		}
-	}
-
-	// The row is a click-to-expand target, so every pivot has to stop the click reaching it.
-	function pivot(e: MouseEvent, p: LogPivot) {
-		e.stopPropagation();
-		onPivot(p);
 	}
 
 	const tsFmt = (r: LogRecord): string => (r.occurredAt ? fmtTs(timestampDate(r.occurredAt)) : '—');
@@ -88,22 +73,16 @@
 	];
 
 	const cell = 'border-b border-line-soft px-4 py-3 align-top leading-[20px]';
-	const pivotCls = 'inline-block max-w-full cursor-pointer truncate align-top hover:text-command';
-	const badgeCls = 'pill inline-flex h-5 max-w-full translate-y-px items-center align-top leading-none';
+	const badgeCls = 'inline-flex h-5 max-w-full translate-y-px items-center align-top leading-none';
 	const panelLabel = 'mb-1 font-sans text-2xs font-semibold text-ink/70';
 
 	const hasDetail = (r: LogRecord): boolean =>
 		!!(messageOf(r) || r.statementSample || r.stateCode || r.detail || r.hint || r.context || r.statement);
 </script>
 
-{#snippet pivotValue(value: string, field: LogFacetField)}
+{#snippet plainValue(value: string)}
 	{#if value}
-		<button
-			type="button"
-			onclick={(e) => pivot(e, { kind: 'facet', field, value })}
-			title="Filter by {value}"
-			class="{pivotCls} text-sm text-ink/75">{value}</button
-		>
+		<span title={value} class="inline-block max-w-full truncate align-top text-sm text-ink/75">{value}</span>
 	{:else}
 		<span class="text-sm text-ink/45">—</span>
 	{/if}
@@ -117,8 +96,8 @@
 					label="At"
 					class="w-[11.75rem]"
 					pad="pl-9 pr-4"
-					dir={sortDesc ? 'desc' : 'asc'}
-					onsort={() => (sortDesc = !sortDesc)}
+					column="at"
+					bind:sort={() => ({ column: 'at', desc: sortDesc }), (next) => (sortDesc = next.desc)}
 				/>
 				{#each headDef as col (col.label)}
 					<SortHeader label={col.label} class={col.cls} />
@@ -155,27 +134,19 @@
 					</td>
 
 					<td class={cell}>
-						<button
-							type="button"
-							onclick={(e) => pivot(e, { kind: 'facet', field: LogFacetField.LEVEL, value: String(r.logLevel) })}
-							title="Filter by {levelLabel(r.logLevel)}"
-							class="{badgeCls} cursor-pointer px-2 font-sans text-2xs font-bold whitespace-nowrap"
-							style:--pill-fg={lb.color}
-							style:--pill-bg={lb.background}
-							style:--pill-border={lb.border}
-							style:--pill-fg-hover={lb.hoverColor}
-							style:--pill-bg-hover={lb.hoverBackground}
-							style:--pill-border-hover={lb.hoverBorder}>{levelLabel(r.logLevel)}</button
+						<span
+							class="{badgeCls} px-2 font-sans text-2xs font-bold whitespace-nowrap"
+							style:color={lb.color}
+							style:background={lb.background}
+							style:border={lb.border}>{levelLabel(r.logLevel)}</span
 						>
 					</td>
 
 					<td class="{cell} overflow-hidden">
-						<button
-							type="button"
-							onclick={(e) =>
-								pivot(e, { kind: 'facet', field: LogFacetField.CLASSIFICATION, value: String(r.classification) })}
-							title={classificationCode(r.classification) || 'Filter by this event type'}
-							class="{pivotCls} text-sm text-ink">{classificationLabel(r.classification)}</button
+						<span
+							title={classificationCode(r.classification) || undefined}
+							class="inline-block max-w-full truncate align-top text-sm text-ink"
+							>{classificationLabel(r.classification)}</span
 						>
 						{#if summary}
 							<span class="mt-0.5 block truncate font-mono text-xs leading-[18px] text-ink/70">{summary}</span>
@@ -183,26 +154,20 @@
 					</td>
 
 					<td class="{cell} hidden overflow-hidden lg:table-cell">
-						<button
-							type="button"
-							onclick={(e) => pivot(e, { kind: 'facet', field: LogFacetField.CATEGORY, value: String(r.category) })}
-							title="Filter by {categoryLabel(r.category)}"
-							class="{badgeCls} cursor-pointer truncate px-2 font-sans text-2xs font-semibold"
-							style:--pill-fg={cb.color}
-							style:--pill-bg={cb.background}
-							style:--pill-border={cb.border}
-							style:--pill-fg-hover={cb.hoverColor}
-							style:--pill-bg-hover={cb.hoverBackground}
-							style:--pill-border-hover={cb.hoverBorder}>{categoryLabel(r.category)}</button
+						<span
+							class="{badgeCls} truncate px-2 font-sans text-2xs font-semibold"
+							style:color={cb.color}
+							style:background={cb.background}
+							style:border={cb.border}>{categoryLabel(r.category)}</span
 						>
 					</td>
 
 					<td class="{cell} hidden overflow-hidden sm:table-cell">
-						{@render pivotValue(r.databaseName, LogFacetField.DATABASE)}
+						{@render plainValue(r.databaseName)}
 					</td>
 
 					<td class="{cell} hidden overflow-hidden lg:table-cell">
-						{@render pivotValue(r.username, LogFacetField.USERNAME)}
+						{@render plainValue(r.username)}
 					</td>
 				</tr>
 
@@ -223,14 +188,12 @@
 									<div class="mb-3.5">
 										<div class={panelLabel}>Sampled statement</div>
 										<div class="flex flex-wrap items-baseline gap-x-4 gap-y-1.5">
-											<span
-												class="font-mono text-md font-semibold"
-												style:color={sevText(sevByDuration(sample.durationMs))}>{fmtDuration(sample.durationMs)}</span
+											<span class="font-mono text-md font-semibold" style:color={runDurationColor(sample.durationMs)}
+												>{fmtDuration(sample.durationMs)}</span
 											>
 											{#if sample.statementId}
 												<a
 													href="/queries/{sample.statementId}"
-													onclick={(e) => e.stopPropagation()}
 													class="font-sans text-xs font-semibold text-command hover:underline">Open query</a
 												>
 												{#if sample.hasPlan}
@@ -238,13 +201,11 @@
 														href="/queries/{sample.statementId}/plan/{sample.id}"
 														target="_blank"
 														rel="noopener"
-														onclick={(e) => e.stopPropagation()}
 														class="inline-flex items-center gap-1.5 font-sans text-xs font-semibold text-command hover:underline"
 														>View plan<ExternalLinkIcon class="size-3 stroke-[2.2]" /></a
 													>
 												{/if}
 											{:else}
-												<!-- statement_id is null without compute_query_id, so nothing to link to. -->
 												<span class="font-sans text-xs text-ink/70">
 													Not matched to a known query — enable
 													<code class="font-mono">compute_query_id</code> to link these
@@ -286,45 +247,12 @@
 								{/if}
 
 								<div class="flex flex-wrap gap-x-6 gap-y-1.5 border-t border-line-soft pt-3 font-mono text-xs">
-									<span class="text-ink/70"
-										>PID
-										<button
-											type="button"
-											onclick={(e) => pivot(e, { kind: 'search', value: String(r.pid) })}
-											disabled={!r.pid}
-											title="Find every event from this process"
-											class={r.pid ? 'cursor-pointer text-ink hover:text-command' : 'text-ink/45'}
-											>{r.pid || '—'}</button
-										></span
-									>
-									<span class="text-ink/70"
-										>Application
-										{#if r.applicationName}
-											<button
-												type="button"
-												onclick={(e) =>
-													pivot(e, { kind: 'facet', field: LogFacetField.APPLICATION_NAME, value: r.applicationName })}
-												title="Filter by {r.applicationName}"
-												class="cursor-pointer text-ink hover:text-command">{r.applicationName}</button
-											>
-										{:else}
-											<span class="text-ink/45">—</span>
-										{/if}</span
-									>
-									<span class="text-ink/70"
-										>Backend
-										{#if r.backendType}
-											<button
-												type="button"
-												onclick={(e) =>
-													pivot(e, { kind: 'facet', field: LogFacetField.BACKEND_TYPE, value: r.backendType })}
-												title="Filter by {r.backendType}"
-												class="cursor-pointer text-ink hover:text-command">{r.backendType}</button
-											>
-										{:else}
-											<span class="text-ink/45">—</span>
-										{/if}</span
-									>
+									{#each [{ label: 'PID', value: r.pid ? String(r.pid) : '' }, { label: 'Application', value: r.applicationName }, { label: 'Backend', value: r.backendType }] as field (field.label)}
+										<span class="text-ink/70"
+											>{field.label}
+											<span class={field.value ? 'text-ink' : 'text-ink/45'}>{field.value || '—'}</span></span
+										>
+									{/each}
 								</div>
 
 								{#if !hasDetail(r)}
@@ -339,22 +267,6 @@
 	</table>
 
 	{#if loading}
-		<LoadingOverlay message="Loading…" offsetTop={headHeight} />
+		<LoadingOverlay offsetTop={headHeight} />
 	{/if}
 </div>
-
-<style>
-	/* Pill colours are data-driven, so they arrive as custom properties. `style:background` plus a
-	   `hover:` utility cannot work: an inline style beats any class rule. */
-	.pill {
-		color: var(--pill-fg);
-		background: var(--pill-bg);
-		border: var(--pill-border);
-	}
-
-	.pill:hover {
-		color: var(--pill-fg-hover);
-		background: var(--pill-bg-hover);
-		border: var(--pill-border-hover);
-	}
-</style>
