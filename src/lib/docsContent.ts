@@ -501,14 +501,8 @@ const docContent: Record<string, DocEntry> = {
 							'**Transaction open too long**: a transaction has been open for 10 minutes, busy or idle'
 						]
 					},
-					'The other two arrive on a schedule:',
-					{
-						list: [
-							'**Daily slow query report**: at 08:00 UTC, the queries that ran at least 10 times in the last day averaging a second or more',
-							'**Weekly report**: on Monday at 08:00 UTC, p99 query time, queries run and errors logged against the week before, plus the busiest queries'
-						]
-					},
-					'Both reports link back to each query here. The daily one is skipped on a day with nothing slow to show.'
+					'The lock, query and transaction alerts show the full queries, with their tags, and the SQL that terminates the offending session.',
+					'**Weekly report** arrives on Monday at 08:00 UTC: the 10 busiest queries of the last week, each linking back here. It is skipped in a week with no query activity.'
 				]
 			}
 		]
