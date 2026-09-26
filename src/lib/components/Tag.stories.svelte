@@ -18,15 +18,6 @@
 	{/snippet}
 </Story>
 
-<Story name="Clickable (filter)">
-	{#snippet template()}
-		<div class="flex flex-wrap items-center gap-2">
-			<Tag text="service=checkout-api" title="Filter by service=checkout-api" onclick={() => {}} />
-			<Tag text="team=payments" title="Filter by team=payments" onclick={() => {}} />
-		</div>
-	{/snippet}
-</Story>
-
 <Story name="Wrapping row">
 	{#snippet template()}
 		<div class="flex max-w-[320px] flex-wrap items-center gap-1.5">

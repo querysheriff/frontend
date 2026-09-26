@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { StatementSortColumn, type StatementStat } from '$lib/gen/querysheriff/v1/statement_pb';
-	import { avgDurationColor, fmtCount, fmtDuration, tagEntries } from '$lib/format';
+	import { avgDurationColor, fmtCount, fmtDuration, kvTags } from '$lib/format';
 	import type { SqlPopoverState } from '$lib/sqlPopover.svelte';
 	import LoadingOverlay from '$lib/components/LoadingOverlay.svelte';
 	import SortHeader, { type Sort } from '$lib/components/SortHeader.svelte';
@@ -11,13 +11,11 @@
 		rows,
 		sort = $bindable(),
 		sql,
-		onFilterTag,
 		loading = false
 	}: {
 		rows: StatementStat[];
 		sort: Sort<StatementSortColumn>;
 		sql: SqlPopoverState;
-		onFilterTag: (key: string, value: string) => void;
 		loading?: boolean;
 	} = $props();
 
@@ -55,7 +53,7 @@
 		</thead>
 		<tbody>
 			{#each rows as q (q.id)}
-				{@const tags = tagEntries(q.tags)}
+				{@const tags = kvTags(q.tags)}
 				<tr class="group relative transition-colors hover:bg-hover">
 					<td class="border-b border-line-soft px-4 py-3 align-top">
 						<div class="min-w-0">
@@ -73,14 +71,9 @@
 								>
 							</a>
 							{#if tags.length > 0}
-								<TagRow class="pointer-events-none relative z-[1] mt-1">
-									{#each tags as [key, value] (key)}
-										<Tag
-											text="{key}={value}"
-											title="Filter by {key}={value}"
-											onclick={() => onFilterTag(key, value)}
-											class="pointer-events-auto"
-										/>
+								<TagRow class="mt-1">
+									{#each tags as t (t)}
+										<Tag text={t} />
 									{/each}
 								</TagRow>
 							{/if}

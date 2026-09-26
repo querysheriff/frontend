@@ -1,8 +1,6 @@
 import type { MessageInitShape } from '@bufbuild/protobuf';
 import { LogFacetField, type LogFilterSchema } from '$lib/gen/querysheriff/v1/log_pb';
 import { FACET_FIELDS, facetValueLabel } from './logs';
-import { decodeList, encodeList } from './urlCodec';
-import type { UrlParams } from './urlState.svelte';
 
 /** One applied filter. Values within a field are ORed, fields are ANDed. */
 type LogFacetFilter = { field: LogFacetField; values: string[] };
@@ -11,43 +9,14 @@ type LogFilterChip = { field: LogFacetField; label: string; values: string };
 
 const ENUM_FIELDS = [LogFacetField.LEVEL, LogFacetField.CATEGORY, LogFacetField.CLASSIFICATION];
 
-function parseValues(field: LogFacetField, raw: string): string[] {
-	const values = decodeList(raw);
-
-	return ENUM_FIELDS.includes(field) ? values.filter((v) => /^\d+$/.test(v)) : values;
-}
-
 const fieldLabel = (field: LogFacetField): string => FACET_FIELDS.find((f) => f.field === field)?.label ?? '';
 
 const describe = (field: LogFacetField, values: string[]): string =>
 	values.map((v) => facetValueLabel(field, v)).join(' or ');
 
-export class LogFilterState implements UrlParams {
+export class LogFilterState {
 	text = $state('');
 	#selected = $state.raw<LogFacetFilter[]>([]);
-
-	applyQuery(params: URLSearchParams): void {
-		this.text = params.get('q') ?? '';
-
-		const selected: LogFacetFilter[] = [];
-		for (const { field, urlKey } of FACET_FIELDS) {
-			const raw = params.get(urlKey);
-			if (raw === null) continue;
-
-			const values = parseValues(field, raw);
-			if (values.length > 0) selected.push({ field, values });
-		}
-		this.#selected = selected;
-	}
-
-	writeQuery(params: URLSearchParams): void {
-		if (this.text) params.set('q', this.text);
-
-		for (const { field, urlKey } of FACET_FIELDS) {
-			const values = this.valuesFor(field);
-			if (values.length > 0) params.set(urlKey, encodeList(values));
-		}
-	}
 
 	/** Categories and event types collapse into one chip: the backend unions them, so two would read as AND. */
 	get chips(): LogFilterChip[] {

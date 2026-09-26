@@ -2,13 +2,11 @@
 	let {
 		text,
 		size = 'sm',
-		onclick,
 		title,
 		class: klass = ''
 	}: {
 		text: string;
 		size?: 'sm' | 'md';
-		onclick?: (e: MouseEvent) => void;
 		title?: string;
 		class?: string;
 	} = $props();
@@ -20,15 +18,4 @@
 	);
 </script>
 
-{#if onclick}
-	<button
-		type="button"
-		{onclick}
-		{title}
-		class="{cls} cursor-pointer hover:border-accent-line hover:text-command {klass}"
-	>
-		{text}
-	</button>
-{:else}
-	<span class="{cls} {klass}" {title}>{text}</span>
-{/if}
+<span class="{cls} {klass}" {title}>{text}</span>

@@ -1,6 +1,12 @@
 import { TagFilterOperator, QueryKind } from '$lib/gen/querysheriff/v1/statement_pb';
-import { decodeTagFilter, encodeTagFilter, isTagKey, type TagFilter, type TagOp } from './urlCodec';
-import type { UrlParams } from './urlState.svelte';
+export type TagOp = 'eq' | 'ne' | 'exists';
+
+export type TagFilter = { key: string; op: TagOp; values: string[] };
+
+export const OP_SYMBOL = { eq: '=', ne: '!=', exists: 'exists' } as const satisfies Record<TagOp, string>;
+
+// The backend rejects a filter on any other key.
+const TAG_KEY_RE = /^[a-z][a-z0-9_]*$/;
 
 export type KindKey = 'reads' | 'writes' | 'others';
 
@@ -20,41 +26,10 @@ const opToProto: Record<TagOp, TagFilterOperator> = {
 
 const sameSlot = (a: TagFilter, b: TagFilter): boolean => a.key === b.key && a.op === b.op;
 
-export class QueryFilterState implements UrlParams {
+export class QueryFilterState {
 	text = $state('');
 	tags = $state<TagFilter[]>([]);
-	// Serialized to ?kind= only when it diverges from all-on (absent = all on, empty = all off).
 	kinds = $state<Record<KindKey, boolean>>({ reads: true, writes: true, others: true });
-
-	applyQuery(params: URLSearchParams): void {
-		this.text = params.get('q') ?? '';
-		const tags: TagFilter[] = [];
-		for (const raw of params.getAll('tag')) {
-			const filter = decodeTagFilter(raw);
-			if (filter && !tags.some((f) => sameSlot(f, filter))) tags.push(filter);
-		}
-		this.tags = tags;
-
-		const kind = params.get('kind');
-		if (kind === null) {
-			this.kinds = { reads: true, writes: true, others: true };
-		} else {
-			const on = kind.split(',');
-			this.kinds = {
-				reads: on.includes('reads'),
-				writes: on.includes('writes'),
-				others: on.includes('others')
-			};
-		}
-	}
-
-	writeQuery(params: URLSearchParams): void {
-		if (this.text) params.set('q', this.text);
-		for (const filter of this.tags) params.append('tag', encodeTagFilter(filter));
-
-		const on = KIND_KEYS.filter((k) => this.kinds[k]);
-		if (on.length !== KIND_KEYS.length) params.set('kind', on.join(','));
-	}
 
 	toRequest() {
 		return {
@@ -70,7 +45,7 @@ export class QueryFilterState implements UrlParams {
 
 	// One filter per key and operator: a second one replaces the first.
 	add(filter: TagFilter): void {
-		if (!isTagKey(filter.key)) return;
+		if (!TAG_KEY_RE.test(filter.key)) return;
 		const at = this.tags.findIndex((f) => sameSlot(f, filter));
 		this.tags = at < 0 ? [...this.tags, filter] : this.tags.map((f, i) => (i === at ? filter : f));
 	}

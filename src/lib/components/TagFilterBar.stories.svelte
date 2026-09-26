@@ -10,8 +10,7 @@
 </script>
 
 <script lang="ts">
-	import { QueryFilterState } from '$lib/queryFilter.svelte';
-	import type { TagFilter } from '$lib/urlCodec';
+	import { QueryFilterState, type TagFilter } from '$lib/queryFilter.svelte';
 
 	const eq = (key: string, ...values: string[]): TagFilter => ({ key, op: 'eq', values });
 

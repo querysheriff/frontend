@@ -4,7 +4,7 @@
 	import { statementClient } from '$lib/connect';
 	import { ctx } from '$lib/state.svelte';
 	import { Loader } from '$lib/loader.svelte';
-	import { OP_SYMBOL, type TagFilter, type TagOp } from '$lib/urlCodec';
+	import { OP_SYMBOL, type TagFilter, type TagOp } from '$lib/queryFilter.svelte';
 
 	let {
 		initial,

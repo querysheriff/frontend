@@ -10,7 +10,6 @@
 	} from '$lib/gen/querysheriff/v1/statement_pb';
 	import { statementClient } from '$lib/connect';
 	import { ctx, serversState } from '$lib/state.svelte';
-	import { urlSync } from '$lib/urlState.svelte';
 	import { Loader, PagedLoader } from '$lib/loader.svelte';
 	import { fmtDuration, fmtBucketSize, kvTags } from '$lib/format';
 	import { toSeriesPoints } from '$lib/metricChart';
@@ -45,8 +44,6 @@
 	const id = $derived(page.params.id ?? '');
 	const validId = $derived(/^\d+$/.test(id));
 	const metaError = $derived(validId ? meta.error : 'Invalid query id');
-
-	const backHref = urlSync.hrefFor('/queries');
 
 	$effect(() => {
 		if (!validId) return meta.reset(false);
@@ -121,7 +118,7 @@
 </script>
 
 <a
-	href={backHref}
+	href="/queries"
 	class="mb-5 inline-flex items-center gap-2 font-mono text-sm font-semibold text-command hover:underline"
 >
 	<ArrowLeftIcon class="size-3.5" /><span>Back</span>

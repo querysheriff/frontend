@@ -127,17 +127,17 @@ export const LEVEL_ROWS: LogEvent_LogLevel[] = [
 	LogEvent_LogLevel.DEBUG
 ];
 
-type FacetMeta = { field: LogFacetField; label: string; urlKey: string; pickable: boolean };
+type FacetMeta = { field: LogFacetField; label: string; pickable: boolean };
 
-/** Every filterable field with its `f`-prefixed URL key; category and event are not pickable. */
+/** Every filterable field; category and event have their own picker. */
 export const FACET_FIELDS: FacetMeta[] = [
-	{ field: LogFacetField.CATEGORY, label: 'Category', urlKey: 'fcat', pickable: false },
-	{ field: LogFacetField.CLASSIFICATION, label: 'Event', urlKey: 'fevent', pickable: false },
-	{ field: LogFacetField.LEVEL, label: 'Severity', urlKey: 'lvl', pickable: true },
-	{ field: LogFacetField.DATABASE, label: 'Database', urlKey: 'fdb', pickable: true },
-	{ field: LogFacetField.USERNAME, label: 'User', urlKey: 'fuser', pickable: true },
-	{ field: LogFacetField.APPLICATION_NAME, label: 'Application', urlKey: 'fapp', pickable: true },
-	{ field: LogFacetField.BACKEND_TYPE, label: 'Backend', urlKey: 'fbackend', pickable: true }
+	{ field: LogFacetField.CATEGORY, label: 'Category', pickable: false },
+	{ field: LogFacetField.CLASSIFICATION, label: 'Event', pickable: false },
+	{ field: LogFacetField.LEVEL, label: 'Severity', pickable: true },
+	{ field: LogFacetField.DATABASE, label: 'Database', pickable: true },
+	{ field: LogFacetField.USERNAME, label: 'User', pickable: true },
+	{ field: LogFacetField.APPLICATION_NAME, label: 'Application', pickable: true },
+	{ field: LogFacetField.BACKEND_TYPE, label: 'Backend', pickable: true }
 ];
 
 export const PICKABLE_FACETS: FacetMeta[] = FACET_FIELDS.filter((f) => f.pickable);

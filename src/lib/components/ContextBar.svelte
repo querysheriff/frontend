@@ -70,7 +70,7 @@
 				<Select.Root type="single" value={ctx.server} onValueChange={selectServer}>
 					<Select.Trigger>
 						{#snippet child({ props })}
-							<button {...props} class={triggerCls} aria-label="Select Postgres server">
+							<button {...props} class={triggerCls} aria-label="Select server">
 								<span class="h-2 w-2 rounded-full {healthDot(ctx.server)}" title={healthTitle(ctx.server)}></span>
 								<span class="font-mono text-sm font-medium text-ink">{ctx.server || '—'}</span>
 								<ChevronDownIcon class="size-3.5 text-ink/55" />
@@ -79,7 +79,7 @@
 					</Select.Trigger>
 					<Select.Portal>
 						<Select.Content sideOffset={6} align="start" class="{panelCls} min-w-[13.125rem]">
-							<div class={labelCls}>Postgres server</div>
+							<div class={labelCls}>Server</div>
 							{#each serversState.names as s (s)}
 								<Select.Item value={s} label={s}>
 									{#snippet child({ props, selected })}

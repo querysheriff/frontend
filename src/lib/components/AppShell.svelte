@@ -7,7 +7,6 @@
 	import DocsDrawer from '$lib/components/DocsDrawer.svelte';
 	import { docs } from '$lib/docs.svelte';
 	import { ctx, serversState } from '$lib/state.svelte';
-	import { urlSync } from '$lib/urlState.svelte';
 	import { session } from '$lib/session.svelte';
 
 	type Props = {
@@ -45,24 +44,24 @@
 		return () => clearInterval(id);
 	});
 
-	// Gated on `allowed`: the children register their filter params only once rendered, and writing
-	// before that would drop them from a deep link.
+	// A navigation within this shell (list → query detail) lands on a bare URL, so it rewrites too.
+	const pathname = $derived(page.url.pathname);
+
 	$effect(() => {
 		if (!contextBar || !allowed) return;
-		const qs = urlSync.queryString();
-		const mode = urlSync.takeMode();
-		urlSync.remember(page.url.pathname, qs);
+		const url = `${pathname}?${ctx.queryString()}`;
+		const mode = ctx.takeHistoryMode();
 		// Not page.url: it misses every shallow pushState/replaceState, also after back/forward.
-		if (qs === location.search.replace(/^\?/, '')) return;
-		if (mode === 'push') pushState(`?${qs}`, page.state);
-		else replaceState(`?${qs}`, page.state);
+		if (url === location.pathname + location.search) return;
+		if (mode === 'push') pushState(url, page.state);
+		else replaceState(url, page.state);
 	});
 
 	$effect(() => {
 		if (!contextBar) return;
 		const onPop = () => {
 			if (location.pathname !== page.url.pathname) return;
-			urlSync.applyQuery(location.search);
+			ctx.applyQuery(new URLSearchParams(location.search));
 		};
 		window.addEventListener('popstate', onPop);
 		return () => window.removeEventListener('popstate', onPop);

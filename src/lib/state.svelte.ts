@@ -3,7 +3,6 @@ import { timestampDate } from '@bufbuild/protobuf/wkt';
 import type { Server } from '$lib/gen/querysheriff/v1/health_pb';
 import { healthClient } from './connect';
 import { errMsg } from './format';
-import { urlSync } from './urlState.svelte';
 
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
@@ -61,6 +60,7 @@ class ContextState {
 	dbScoped = $state(true);
 	// True on a query's detail page: server and db are the query's own and can't be switched.
 	scopeLocked = $state(false);
+	#pushNext = false;
 
 	get isCustom(): boolean {
 		return this.range === 'custom';
@@ -77,7 +77,14 @@ class ContextState {
 
 	zoomTo(from: Date, to: Date): void {
 		this.setCustom(from, to);
-		urlSync.pushNext();
+		this.#pushNext = true;
+	}
+
+	/** A zoom gets its own history entry, so Back undoes it; any other change replaces the current one. */
+	takeHistoryMode(): 'push' | 'replace' {
+		const mode = this.#pushNext ? 'push' : 'replace';
+		this.#pushNext = false;
+		return mode;
 	}
 
 	timeRange(): { from: Date; to: Date } {
@@ -102,21 +109,20 @@ class ContextState {
 		}
 	}
 
-	writeQuery(params: URLSearchParams): void {
-		if (this.server) params.set('server', this.server);
-		if (this.db && this.dbScoped) params.set('db', this.db);
+	queryString(): string {
+		const params: [string, string][] = [];
+		if (this.server) params.push(['server', this.server]);
+		if (this.db && this.dbScoped) params.push(['db', this.db]);
 		if (this.range === 'custom') {
-			params.set('from', String(this.customFrom.getTime()));
-			params.set('to', String(this.customTo.getTime()));
+			params.push(['from', String(this.customFrom.getTime())], ['to', String(this.customTo.getTime())]);
 		} else {
-			params.set('range', this.range);
+			params.push(['range', this.range]);
 		}
+		return new URLSearchParams(params).toString();
 	}
 }
 
 export const ctx = new ContextState();
-
-urlSync.register(ctx);
 
 // Servers whose last health check is older than 24h are already excluded by the backend.
 class ServersState {

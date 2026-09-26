@@ -13,7 +13,7 @@
 
 	const navClass = (active: boolean): string =>
 		clsx(
-			'flex flex-col gap-0.5 border-l-[3px] py-2.5 pr-3 pl-3.5 transition-colors',
+			'flex items-center gap-3 border-l-[3px] py-2.5 pr-3 pl-3.5 transition-colors',
 			active ? 'border-command bg-accent text-ink' : 'border-transparent text-ink/70 hover:bg-hover-soft'
 		);
 
@@ -52,28 +52,16 @@
 	</div>
 
 	<nav class="flex flex-col gap-0.5 px-2 py-2.5">
-		{#each navItems as item (item.href)}
+		{#each session.isSuperAdmin ? [...navItems, ...adminItems] : navItems as item (item.href)}
 			<a href={item.href} title={item.label} class={navClass(isNavActive(item, page.url.pathname))}>
+				<item.icon class="size-4 flex-none -translate-y-px" />
 				<span class="font-sans text-lg font-semibold">{item.label}</span>
 			</a>
 		{/each}
 	</nav>
 
-	{#if session.isSuperAdmin}
-		<div class="mt-auto border-t border-line px-2 pt-2 pb-1">
-			<div class="px-3.5 pt-2 pb-2 font-sans text-2xs font-bold text-ink/70">Admin</div>
-			<div class="flex flex-col gap-0.5">
-				{#each adminItems as item (item.href)}
-					<a href={item.href} title={item.label} class={navClass(isNavActive(item, page.url.pathname))}>
-						<span class="font-sans text-lg font-semibold">{item.label}</span>
-					</a>
-				{/each}
-			</div>
-		</div>
-	{/if}
-
-	<div class="{session.isSuperAdmin ? '' : 'mt-auto'} border-t border-line p-3.5">
-		<div class="flex items-center gap-3 px-2.5 py-2 hover:bg-hover-soft">
+	<div class="mt-auto border-t border-line p-3.5">
+		<div class="flex items-center gap-3 px-2.5 py-2">
 			<span
 				class="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-command font-sans text-xl font-bold text-paper"
 				>{session.displayName.charAt(0).toUpperCase()}</span

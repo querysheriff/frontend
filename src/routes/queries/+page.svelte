@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onDestroy, untrack } from 'svelte';
 	import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 	import {
 		StatementSortColumn,
@@ -9,7 +8,6 @@
 	} from '$lib/gen/querysheriff/v1/statement_pb';
 	import { statementClient } from '$lib/connect';
 	import { ctx, serversState } from '$lib/state.svelte';
-	import { urlSync } from '$lib/urlState.svelte';
 	import { QueryFilterState } from '$lib/queryFilter.svelte';
 	import { Loader, PagedLoader } from '$lib/loader.svelte';
 	import { fmtDuration, fmtBucketSize } from '$lib/format';
@@ -40,12 +38,7 @@
 	const sql = new SqlPopoverState((id) => statementClient.getStatement({ id }).then((r) => r.query));
 	const filters = new QueryFilterState();
 
-	// During init, not in a $effect, or AppShell would rewrite the URL first and drop ?q=/?tag=.
-	// `location`, not page.url: after back/forward page.url misses the shallow URL updates.
-	filters.applyQuery(new URLSearchParams(location.search));
-	onDestroy(urlSync.register(filters));
-
-	let search = $state(filters.text);
+	let search = $state('');
 
 	$effect(() => {
 		const term = search;
@@ -53,14 +46,6 @@
 			filters.text = term.trim();
 		}, 250);
 		return () => clearTimeout(id);
-	});
-
-	// Back/forward rewrites the filters under the input.
-	$effect(() => {
-		const text = filters.text;
-		untrack(() => {
-			if (search.trim() !== text) search = text;
-		});
 	});
 
 	function scope({ from, to } = ctx.timeRange()) {
@@ -155,13 +140,7 @@
 	</header>
 	<TagFilterBar bind:searchText={search} {filters} />
 
-	<StatementTable
-		rows={statements.rows}
-		bind:sort
-		{sql}
-		onFilterTag={(key, value) => filters.add({ key, op: 'eq', values: [value] })}
-		loading={statements.loading && statements.rows.length > 0}
-	/>
+	<StatementTable rows={statements.rows} bind:sort {sql} loading={statements.loading && statements.rows.length > 0} />
 
 	<LoadMoreFooter list={statements} empty="No queries found" />
 </DocCard>

@@ -75,12 +75,10 @@ export function fmtAxisTime(value: Date | number): string {
 
 const isIdTag = (key: string): boolean => key.endsWith('_id');
 
-export function tagEntries(tags: Record<string, string>): [string, string][] {
-	return Object.entries(tags).sort(([a], [b]) => Number(isIdTag(a)) - Number(isIdTag(b)) || a.localeCompare(b));
-}
-
 export function kvTags(tags: Record<string, string>): string[] {
-	return tagEntries(tags).map(([k, v]) => `${k}=${v}`);
+	return Object.entries(tags)
+		.sort(([a], [b]) => Number(isIdTag(a)) - Number(isIdTag(b)) || a.localeCompare(b))
+		.map(([k, v]) => `${k}=${v}`);
 }
 
 export function truncate(text: string, max: number): string {

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onDestroy, untrack } from 'svelte';
 	import { timestampFromDate, timestampDate } from '@bufbuild/protobuf/wkt';
 	import {
 		LogEvent_LogClassification,
@@ -9,7 +8,6 @@
 	} from '$lib/gen/querysheriff/v1/log_pb';
 	import { logClient } from '$lib/connect';
 	import { ctx, serversState } from '$lib/state.svelte';
-	import { urlSync } from '$lib/urlState.svelte';
 	import { LogFilterState } from '$lib/logFilter.svelte';
 	import { Loader, PagedLoader } from '$lib/loader.svelte';
 	import { fmtBucketSize } from '$lib/format';
@@ -35,12 +33,7 @@
 
 	const filters = new LogFilterState();
 
-	// During init, not in a $effect, or AppShell would rewrite the URL first and drop the filter params.
-	// `location`, not page.url: after back/forward page.url misses the shallow URL updates.
-	filters.applyQuery(new URLSearchParams(location.search));
-	onDestroy(urlSync.register(filters));
-
-	let search = $state(filters.text);
+	let search = $state('');
 	let sortDesc = $state(true);
 	let range = $state(ctx.timeRange());
 
@@ -58,14 +51,6 @@
 		}, 250);
 
 		return () => clearTimeout(id);
-	});
-
-	// Back/forward rewrites the filters under the input.
-	$effect(() => {
-		const text = filters.text;
-		untrack(() => {
-			if (search.trim() !== text) search = text;
-		});
 	});
 
 	function scope({ from, to } = ctx.timeRange()) {

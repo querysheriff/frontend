@@ -2,8 +2,7 @@
 	import { SearchIcon } from '@lucide/svelte';
 	import FilterChip from '$lib/components/FilterChip.svelte';
 	import TagFilterPicker from '$lib/components/TagFilterPicker.svelte';
-	import type { KindKey, QueryFilterState } from '$lib/queryFilter.svelte';
-	import { OP_SYMBOL, type TagFilter } from '$lib/urlCodec';
+	import { OP_SYMBOL, type KindKey, type QueryFilterState, type TagFilter } from '$lib/queryFilter.svelte';
 
 	let {
 		searchText = $bindable(),
