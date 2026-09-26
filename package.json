@@ -17,7 +17,8 @@
 		"format": "prettier --write .",
 		"proto:update": "buf generate http://localhost:3000/schema.zip",
 		"storybook": "storybook dev -p 6006",
-		"build-storybook": "storybook build"
+		"build-storybook": "storybook build",
+		"release": "sh scripts/release.sh"
 	},
 	"devDependencies": {
 		"@bufbuild/buf": "1.70.0",
