@@ -12,7 +12,6 @@
 </script>
 
 <script lang="ts">
-	import { clsx } from 'clsx';
 	import { ChevronDownIcon, ChevronRightIcon } from '@lucide/svelte';
 	import { fmtDuration, fmtClockDate, kvTags } from '$lib/format';
 	import {
@@ -26,7 +25,8 @@
 		waitText
 	} from '$lib/activity';
 	import { TransactionSortColumn } from '$lib/gen/querysheriff/v1/activity_pb';
-	import type { SqlPopoverState } from '$lib/sqlPopover.svelte';
+	import { Tooltip } from 'bits-ui';
+	import type { SqlTether } from '$lib/components/SqlPopover.svelte';
 	import LoadingOverlay from '$lib/components/LoadingOverlay.svelte';
 	import SortHeader, { type Sort } from '$lib/components/SortHeader.svelte';
 	import Tag from '$lib/components/Tag.svelte';
@@ -40,12 +40,12 @@
 	}: {
 		rows: TransactionRow[];
 		sort: Sort<TransactionSortColumn>;
-		sql: SqlPopoverState;
+		sql: SqlTether;
 		loading?: boolean;
 	} = $props();
 
 	let headHeight = $state(0);
-	let expanded = $state<Record<string, boolean>>({});
+	const expanded = $state<Record<string, boolean>>({});
 
 	function toggle(r: TransactionRow) {
 		expanded[r.key] = !expanded[r.key];
@@ -96,10 +96,10 @@
 					role="button"
 					tabindex="0"
 					aria-expanded={open}
-					class={clsx(
+					class={[
 						'cursor-pointer transition-colors',
 						open ? 'bg-hover-strong [&>td]:border-b-transparent' : 'hover:bg-hover'
-					)}
+					]}
 				>
 					<td class="{cell} relative pl-9 text-sm leading-[20px]">
 						<span class="absolute top-3 left-3.5 flex h-5 items-center">
@@ -132,14 +132,12 @@
 									<div class="mt-5 first:mt-0">
 										<div class="leading-[18px]">
 											{#if g.query}
-												<button
+												<Tooltip.Trigger
+													tether={sql}
+													payload={{ text: g.query, context: { pid: r.pid, app: r.app } }}
 													type="button"
-													onmouseenter={(e) => sql.show(g.query, e, { pid: r.pid, app: r.app })}
-													onmouseleave={sql.hide}
-													onfocus={(e) => sql.show(g.query, e, { pid: r.pid, app: r.app })}
-													onblur={sql.hide}
 													class="inline-block max-w-full cursor-default truncate border-0 bg-transparent p-0 text-left align-top font-mono text-sm text-ink transition-colors hover:text-command focus-visible:text-command focus-visible:outline-none"
-													>{g.query}</button
+													>{g.query}</Tooltip.Trigger
 												>
 											{:else}
 												<span class="font-mono text-sm text-ink/55">—</span>

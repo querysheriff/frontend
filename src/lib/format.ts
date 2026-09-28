@@ -81,6 +81,12 @@ export function kvTags(tags: Record<string, string>): string[] {
 		.map(([k, v]) => `${k}=${v}`);
 }
 
+/** A bits-ui Command filter: the picker lists match by substring, not bits-ui's default fuzzy score. */
+export function containsFilter(value: string, search: string, keywords: string[] = []): number {
+	const term = search.trim().toLowerCase();
+	return [value, ...keywords].some((v) => v.toLowerCase().includes(term)) ? 1 : 0;
+}
+
 export function truncate(text: string, max: number): string {
 	return text.length > max ? text.slice(0, max) + '...' : text;
 }

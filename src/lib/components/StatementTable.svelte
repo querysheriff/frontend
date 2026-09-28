@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { StatementSortColumn, type StatementStat } from '$lib/gen/querysheriff/v1/statement_pb';
 	import { avgDurationColor, fmtCount, fmtDuration, kvTags } from '$lib/format';
-	import type { SqlPopoverState } from '$lib/sqlPopover.svelte';
+	import { Tooltip } from 'bits-ui';
+	import type { SqlTether } from '$lib/components/SqlPopover.svelte';
 	import LoadingOverlay from '$lib/components/LoadingOverlay.svelte';
 	import SortHeader, { type Sort } from '$lib/components/SortHeader.svelte';
 	import Tag from '$lib/components/Tag.svelte';
@@ -15,7 +16,7 @@
 	}: {
 		rows: StatementStat[];
 		sort: Sort<StatementSortColumn>;
-		sql: SqlPopoverState;
+		sql: SqlTether;
 		loading?: boolean;
 	} = $props();
 
@@ -57,18 +58,22 @@
 				<tr class="group relative transition-colors hover:bg-hover">
 					<td class="border-b border-line-soft px-4 py-3 align-top">
 						<div class="min-w-0">
+							<!-- The link stretches over the row, so hover anchors on the query text instead. -->
 							<a
 								href="/queries/{q.id}"
-								onfocus={(e) => e.currentTarget.matches(':focus-visible') && sql.showLazy(q.id, e)}
-								onblur={sql.hide}
+								onfocus={(e) => e.currentTarget.matches(':focus-visible') && sql.open(`sql-${q.id}`)}
+								onblur={() => sql.close()}
 								class="group/link inline-block max-w-full align-top after:absolute after:inset-0 focus-visible:outline-none"
 							>
-								<code
-									onmouseenter={(e) => sql.showLazy(q.id, e)}
-									onmouseleave={sql.hide}
-									class="relative z-[1] inline-block max-w-full overflow-hidden align-top font-mono text-sm leading-[20px] text-ellipsis whitespace-nowrap text-ink transition-colors hover:text-command group-focus-visible/link:text-command"
-									>{q.preview}</code
-								>
+								<Tooltip.Trigger tether={sql} id="sql-{q.id}" payload={{ id: q.id }} tabindex={-1}>
+									{#snippet child({ props })}
+										<code
+											{...props}
+											class="relative z-[1] inline-block max-w-full overflow-hidden align-top font-mono text-sm leading-[20px] text-ellipsis whitespace-nowrap text-ink transition-colors hover:text-command group-focus-visible/link:text-command"
+											>{q.preview}</code
+										>
+									{/snippet}
+								</Tooltip.Trigger>
 							</a>
 							{#if tags.length > 0}
 								<TagRow class="mt-1">

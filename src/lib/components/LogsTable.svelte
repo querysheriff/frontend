@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { clsx } from 'clsx';
 	import { ChevronDownIcon, ChevronRightIcon, ExternalLinkIcon } from '@lucide/svelte';
 	import { timestampDate } from '@bufbuild/protobuf/wkt';
 	import type { LogRecord } from '$lib/gen/querysheriff/v1/log_pb';
@@ -27,7 +26,7 @@
 		loading?: boolean;
 	} = $props();
 
-	let expanded = $state<Record<string, boolean>>({});
+	const expanded = $state<Record<string, boolean>>({});
 	let headHeight = $state(0);
 
 	const rowKey = (r: LogRecord): string => r.id.toString();
@@ -117,10 +116,10 @@
 					role="button"
 					tabindex="0"
 					aria-expanded={open}
-					class={clsx(
+					class={[
 						'relative cursor-pointer transition-colors',
 						open ? 'bg-hover-strong [&>td]:border-b-transparent' : 'hover:bg-hover'
-					)}
+					]}
 				>
 					<td class="{cell} relative pr-4 pl-9">
 						<span class="absolute top-3 left-3.5 flex h-5 items-center">

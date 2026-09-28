@@ -12,10 +12,11 @@
 <script lang="ts">
 	import { create } from '@bufbuild/protobuf';
 	import { StatementSortColumn, StatementStatSchema } from '$lib/gen/querysheriff/v1/statement_pb';
-	import { SqlPopoverState } from '$lib/sqlPopover.svelte';
+	import { Tooltip } from 'bits-ui';
+	import type { SqlPayload } from './SqlPopover.svelte';
 	import type { Sort } from './SortHeader.svelte';
 
-	const sql = new SqlPopoverState(async () => 'SELECT * FROM orders WHERE id = $1');
+	const sql = Tooltip.createTether<SqlPayload>();
 
 	const rows = [
 		{

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { clsx } from 'clsx';
 	import type { Snippet } from 'svelte';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 
@@ -35,6 +34,6 @@
 	};
 </script>
 
-<button {type} class={clsx(base, variants[variant], sizes[size], klass)} {...rest}>
+<button {type} class={[base, variants[variant], sizes[size], klass]} {...rest}>
 	{@render children()}
 </button>

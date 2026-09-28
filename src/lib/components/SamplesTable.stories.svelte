@@ -13,10 +13,11 @@
 	import { create } from '@bufbuild/protobuf';
 	import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 	import { SampleSortColumn, StatementSampleSchema } from '$lib/gen/querysheriff/v1/statement_pb';
-	import { SqlPopoverState } from '$lib/sqlPopover.svelte';
+	import { Tooltip } from 'bits-ui';
+	import type { SqlPayload } from './SqlPopover.svelte';
 	import type { Sort } from './SortHeader.svelte';
 
-	const sql = new SqlPopoverState(async () => "SELECT u.id FROM users u WHERE u.bio = 'hi there'");
+	const sql = Tooltip.createTether<SqlPayload>();
 
 	const preview = "SELECT u.id, u.name, u.email FROM users u WHERE u.bio = 'hi there' AND u.status = 'active'";
 	const samples = [

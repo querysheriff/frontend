@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { clsx } from 'clsx';
 	import type { Snippet } from 'svelte';
 	import { InfoIcon } from '@lucide/svelte';
 	import { docs } from '$lib/docs.svelte';
@@ -13,12 +12,12 @@
 </script>
 
 <section
-	class={clsx(
+	class={[
 		'relative border border-line-card bg-card transition-[opacity,box-shadow] duration-150',
 		active && 'shadow-chart ring-2 ring-command ring-offset-2 ring-offset-paper',
 		dimmed && 'opacity-50',
 		klass
-	)}
+	]}
 >
 	{#if id}
 		<button
@@ -27,10 +26,10 @@
 			aria-label="About {title}"
 			aria-expanded={active}
 			title="About this card"
-			class={clsx(
+			class={[
 				'absolute top-2 right-2 z-[1] flex size-7 cursor-pointer items-center justify-center rounded-full transition-colors',
 				active ? 'bg-command text-paper' : 'text-ink/45 hover:bg-hover hover:text-command'
-			)}
+			]}
 		>
 			<InfoIcon class="size-4" />
 		</button>

@@ -1,0 +1,45 @@
+{
+    # Disable Caddy's admin API.
+	admin off
+
+	# Don't save config changes to disk.
+	persist_config off
+
+	# Skip storage health checks.
+	storage_check off
+
+	# Disable automatic storage cleanup.
+	storage_clean_interval off
+}
+
+:3000 {
+    # Serve files from /srv.
+	root * /srv
+
+	# Compress responses with zstd/gzip when supported.
+	encode
+
+    # Revalidate normal files instead of caching them long-term.
+	header ?Cache-Control no-cache
+
+	# Match Svelte's hashed build assets.
+	@hashed {
+		path /_app/immutable/*
+		file
+	}
+
+	# Hashed assets never change, so cache them for one year.
+	header @hashed Cache-Control "public, max-age=31536000, immutable"
+
+	# Match unknown SPA routes, but not missing Svelte assets.
+	@route {
+		not path /_app/*
+		not file
+	}
+
+	# Send unknown client routes to the SPA entry point.
+	rewrite @route /index.html
+
+	# Serve the resulting static file.
+	file_server
+}

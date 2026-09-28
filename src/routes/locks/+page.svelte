@@ -18,9 +18,9 @@
 	import DocCard from '$lib/components/DocCard.svelte';
 	import LoadMoreFooter from '$lib/components/LoadMoreFooter.svelte';
 	import SectionHeader from '$lib/components/SectionHeader.svelte';
-	import SqlPopover from '$lib/components/SqlPopover.svelte';
+	import { Tooltip } from 'bits-ui';
+	import SqlPopover, { type SqlPayload } from '$lib/components/SqlPopover.svelte';
 	import type { Sort } from '$lib/components/SortHeader.svelte';
-	import { SqlPopoverState } from '$lib/sqlPopover.svelte';
 	import LockWaitTable, { type LockWaitRow } from '$lib/components/LockWaitTable.svelte';
 
 	const PAGE_SIZE = 10;
@@ -32,7 +32,7 @@
 	const waits = new PagedLoader<LockWaitRow>((r) => r.key);
 
 	// Both sides' full text is already on the wire, so no lazy loader.
-	const sql = new SqlPopoverState();
+	const sql = Tooltip.createTether<SqlPayload>();
 
 	function scope({ from, to } = ctx.timeRange()) {
 		return { serverName: ctx.server, databaseName: ctx.db, from: timestampFromDate(from), to: timestampFromDate(to) };
@@ -117,4 +117,4 @@
 	<LoadMoreFooter list={waits} empty="No lock waits in this range" />
 </DocCard>
 
-<SqlPopover state={sql} />
+<SqlPopover tether={sql} />

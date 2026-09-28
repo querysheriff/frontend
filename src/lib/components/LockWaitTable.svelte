@@ -20,7 +20,8 @@
 	import { fmtDuration, fmtClockDate } from '$lib/format';
 	import { waitColor } from '$lib/activity';
 	import { LockWaitSortColumn } from '$lib/gen/querysheriff/v1/activity_pb';
-	import type { SqlPopoverState } from '$lib/sqlPopover.svelte';
+	import { Tooltip } from 'bits-ui';
+	import type { SqlTether } from '$lib/components/SqlPopover.svelte';
 	import LoadingOverlay from '$lib/components/LoadingOverlay.svelte';
 	import SortHeader, { type Sort } from '$lib/components/SortHeader.svelte';
 	import Tag from '$lib/components/Tag.svelte';
@@ -34,7 +35,7 @@
 	}: {
 		rows: LockWaitRow[];
 		sort: Sort<LockWaitSortColumn>;
-		sql: SqlPopoverState;
+		sql: SqlTether;
 		loading?: boolean;
 	} = $props();
 
@@ -55,14 +56,12 @@
 	<td class={cell}>
 		<div class="min-w-0">
 			{#if party.query}
-				<button
+				<Tooltip.Trigger
+					tether={sql}
+					payload={{ text: party.query, context: { pid: party.pid, app: party.app } }}
 					type="button"
-					onmouseenter={(e) => sql.show(party.query, e, { pid: party.pid, app: party.app })}
-					onmouseleave={sql.hide}
-					onfocus={(e) => sql.show(party.query, e, { pid: party.pid, app: party.app })}
-					onblur={sql.hide}
 					class="block w-full cursor-default truncate border-0 bg-transparent p-0 text-left font-mono text-sm leading-[20px] text-ink transition-colors hover:text-command focus-visible:text-command focus-visible:outline-none"
-					>{party.query}</button
+					>{party.query}</Tooltip.Trigger
 				>
 			{:else}
 				<span

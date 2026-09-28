@@ -3,7 +3,8 @@
 	import { ArrowUpIcon, ExternalLinkIcon } from '@lucide/svelte';
 	import { SampleSortColumn, type StatementSample } from '$lib/gen/querysheriff/v1/statement_pb';
 	import { fmtDuration, fmtTs, kvTags, runDurationColor } from '$lib/format';
-	import type { SqlPopoverState } from '$lib/sqlPopover.svelte';
+	import { Tooltip } from 'bits-ui';
+	import type { SqlTether } from '$lib/components/SqlPopover.svelte';
 	import LoadingOverlay from '$lib/components/LoadingOverlay.svelte';
 	import SortHeader, { type Sort } from '$lib/components/SortHeader.svelte';
 	import Tag from '$lib/components/Tag.svelte';
@@ -19,7 +20,7 @@
 	}: {
 		samples: StatementSample[];
 		sort: Sort<SampleSortColumn>;
-		sql: SqlPopoverState;
+		sql: SqlTether;
 		statementId: string;
 		baseTags: Record<string, string>;
 		loading?: boolean;
@@ -59,14 +60,12 @@
 						>{s.occurredAt ? fmtTs(timestampDate(s.occurredAt)) : '—'}</td
 					>
 					<td class="min-w-0 border-b border-line-soft px-4 py-3 align-top">
-						<button
+						<Tooltip.Trigger
+							tether={sql}
+							payload={{ id: s.id }}
 							type="button"
-							onmouseenter={(e) => sql.showLazy(s.id, e)}
-							onmouseleave={sql.hide}
-							onfocus={(e) => sql.showLazy(s.id, e)}
-							onblur={sql.hide}
 							class="inline-block max-w-full cursor-default overflow-hidden border-0 bg-transparent p-0 text-left align-top font-mono text-sm leading-[20px] text-ellipsis whitespace-nowrap text-ink transition-colors hover:text-command focus-visible:text-command focus-visible:outline-none"
-							>{s.preview}</button
+							>{s.preview}</Tooltip.Trigger
 						>
 						{#if hasBaseTags || extra.length > 0}
 							<TagRow class="mt-1">

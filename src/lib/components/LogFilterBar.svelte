@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Popover } from 'bits-ui';
 	import { LayersIcon, SearchIcon, SlidersHorizontalIcon } from '@lucide/svelte';
 	import { LogFacetField, type LogFacet } from '$lib/gen/querysheriff/v1/log_pb';
 	import FilterChip from '$lib/components/FilterChip.svelte';
@@ -23,13 +24,7 @@
 	let picker = $state<Picker>(null);
 
 	function editChip(field: LogFacetField) {
-		if (field === LogFacetField.CATEGORY) {
-			picker = picker?.kind === 'category' ? null : { kind: 'category' };
-
-			return;
-		}
-
-		picker = picker?.kind === 'facet' && picker.field === field ? null : { kind: 'facet', field };
+		picker = field === LogFacetField.CATEGORY ? { kind: 'category' } : { kind: 'facet', field };
 	}
 
 	function applyCategories(selection: { categories: string[]; events: string[] }) {
@@ -44,19 +39,19 @@
 	}
 
 	const triggerCls =
-		'relative z-[2] flex cursor-pointer items-center gap-1.5 border border-dashed border-line-bold px-2.5 py-1 font-mono text-sm text-ink/70 hover:border-accent-line hover:text-command';
+		'flex cursor-pointer items-center gap-1.5 border border-dashed border-line-bold px-2.5 py-1 font-mono text-sm text-ink/70 hover:border-accent-line hover:text-command';
+	// The picker focuses its own search input or list, so bits-ui must not pick the first button.
+	const contentProps = {
+		side: 'bottom',
+		align: 'start',
+		sideOffset: 6,
+		collisionPadding: 16,
+		onOpenAutoFocus: (e: Event) => e.preventDefault()
+	} as const;
+	const contentCls = 'z-50 border border-line-strong bg-card shadow-popover';
 </script>
 
 <div class="flex flex-wrap items-center gap-2 border-b border-line p-3.5">
-	{#if picker !== null}
-		<button
-			type="button"
-			aria-label="Close filter picker"
-			onclick={() => (picker = null)}
-			class="fixed inset-0 z-[1] cursor-default bg-transparent"
-		></button>
-	{/if}
-
 	{#each filters.chips as chip (chip.field)}
 		<FilterChip
 			label={chip.label}
@@ -72,48 +67,37 @@
 		/>
 	{/each}
 
-	<div class="relative">
-		<button
-			type="button"
-			onclick={() => (picker = picker?.kind === 'category' ? null : { kind: 'category' })}
-			aria-haspopup="listbox"
-			aria-expanded={picker?.kind === 'category'}
-			class={triggerCls}
-		>
+	<Popover.Root bind:open={() => picker?.kind === 'category', (open) => (picker = open ? { kind: 'category' } : null)}>
+		<Popover.Trigger class={triggerCls}>
 			<LayersIcon class="size-3" />
 			Category
-		</button>
+		</Popover.Trigger>
+		<Popover.Portal>
+			<Popover.Content {...contentProps} class="{contentCls} w-[min(23rem,calc(100vw-2rem))]">
+				<LogCategoryPicker {filters} {facets} {loading} onapply={applyCategories} />
+			</Popover.Content>
+		</Popover.Portal>
+	</Popover.Root>
 
-		{#if picker?.kind === 'category'}
-			<LogCategoryPicker {filters} {facets} {loading} onapply={applyCategories} onclose={() => (picker = null)} />
-		{/if}
-	</div>
-
-	<div class="relative">
-		<button
-			type="button"
-			onclick={() => (picker = picker?.kind === 'facet' ? null : { kind: 'facet' })}
-			aria-haspopup="listbox"
-			aria-expanded={picker?.kind === 'facet'}
-			class={triggerCls}
-		>
+	<Popover.Root bind:open={() => picker?.kind === 'facet', (open) => (picker = open ? { kind: 'facet' } : null)}>
+		<Popover.Trigger class={triggerCls}>
 			<SlidersHorizontalIcon class="size-3" />
 			Field
-		</button>
-
-		{#if picker?.kind === 'facet'}
-			{#key picker.field ?? 'any'}
-				<LogFacetPicker
-					{filters}
-					{facets}
-					{loading}
-					initialField={picker.field}
-					onapply={applyFacet}
-					onclose={() => (picker = null)}
-				/>
-			{/key}
-		{/if}
-	</div>
+		</Popover.Trigger>
+		<Popover.Portal>
+			<Popover.Content {...contentProps} class="{contentCls} w-[min(21rem,calc(100vw-2rem))]">
+				{#key picker?.kind === 'facet' ? picker.field : undefined}
+					<LogFacetPicker
+						{filters}
+						{facets}
+						{loading}
+						initialField={picker?.kind === 'facet' ? picker.field : undefined}
+						onapply={applyFacet}
+					/>
+				{/key}
+			</Popover.Content>
+		</Popover.Portal>
+	</Popover.Root>
 
 	{#if filters.chips.length > 0}
 		<button

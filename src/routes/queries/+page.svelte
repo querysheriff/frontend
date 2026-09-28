@@ -19,9 +19,9 @@
 	import LineChart from '$lib/components/LineChart.svelte';
 	import LoadMoreFooter from '$lib/components/LoadMoreFooter.svelte';
 	import SectionHeader from '$lib/components/SectionHeader.svelte';
-	import SqlPopover from '$lib/components/SqlPopover.svelte';
+	import { Tooltip } from 'bits-ui';
+	import SqlPopover, { type SqlPayload } from '$lib/components/SqlPopover.svelte';
 	import type { Sort } from '$lib/components/SortHeader.svelte';
-	import { SqlPopoverState } from '$lib/sqlPopover.svelte';
 	import StatementTable from '$lib/components/StatementTable.svelte';
 	import TagFilterBar from '$lib/components/TagFilterBar.svelte';
 
@@ -35,7 +35,7 @@
 	const latency = new Loader<GetLatencySeriesResponse>();
 	const statements = new PagedLoader<StatementStat>((s) => s.id);
 
-	const sql = new SqlPopoverState((id) => statementClient.getStatement({ id }).then((r) => r.query));
+	const sql = Tooltip.createTether<SqlPayload>();
 	const filters = new QueryFilterState();
 
 	let search = $state('');
@@ -145,4 +145,4 @@
 	<LoadMoreFooter list={statements} empty="No queries found" />
 </DocCard>
 
-<SqlPopover state={sql} />
+<SqlPopover tether={sql} load={(id) => statementClient.getStatement({ id }).then((r) => r.query)} />

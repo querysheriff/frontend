@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { Command } from 'bits-ui';
 	import { CheckIcon, ChevronLeftIcon, ChevronRightIcon, SearchIcon } from '@lucide/svelte';
-	import { LogFacetField, type LogFacet } from '$lib/gen/querysheriff/v1/log_pb';
-	import { fmtCount } from '$lib/format';
+	import type { LogFacet, LogFacetField } from '$lib/gen/querysheriff/v1/log_pb';
+	import { containsFilter, fmtCount } from '$lib/format';
 	import { PICKABLE_FACETS, facetTruncated, facetValueLabel, facetValues } from '$lib/logs';
 	import type { LogFilterState } from '$lib/logFilter.svelte';
 
@@ -11,15 +12,13 @@
 		facets,
 		loading,
 		initialField,
-		onapply,
-		onclose
+		onapply
 	}: {
 		filters: LogFilterState;
 		facets: LogFacet[] | undefined;
 		loading: boolean;
 		initialField?: LogFacetField;
 		onapply: (field: LogFacetField, values: string[]) => void;
-		onclose: () => void;
 	} = $props();
 
 	// Seeded once so a facet refresh mid-edit cannot discard a pending selection.
@@ -31,11 +30,11 @@
 	let field = $state<LogFacetField | null>(seed.field);
 	let picked = $state<string[]>(seed.picked);
 	let search = $state('');
-	let highlight = $state(0);
-	let searchInput = $state<HTMLInputElement | null>(null);
+	let fieldList = $state<HTMLElement | null>(null);
 
+	// The field list has no search input to take focus, so the list itself does.
 	$effect(() => {
-		searchInput?.focus();
+		fieldList?.focus();
 	});
 
 	const fields = $derived(
@@ -56,22 +55,17 @@
 		}));
 	});
 
-	const term = $derived(search.trim().toLowerCase());
-	const visible = $derived(values.filter((v) => v.label.toLowerCase().includes(term)));
 	const truncated = $derived(field !== null && facetTruncated(facets, field));
 
 	function selectField(next: LogFacetField) {
 		field = next;
 		picked = filters.valuesFor(next);
 		search = '';
-		highlight = 0;
 	}
 
 	function back() {
 		field = null;
 		picked = [];
-		search = '';
-		highlight = 0;
 	}
 
 	function toggle(value: string) {
@@ -82,82 +76,45 @@
 		if (field !== null) onapply(field, picked);
 	}
 
-	function activate() {
-		if (field === null) {
-			const next = fields[highlight];
-			if (next && next.present > 0) selectField(next.field);
-
-			return;
-		}
-
-		const value = visible[highlight];
-		if (value) toggle(value.value);
-	}
-
 	function onkeydown(e: KeyboardEvent) {
-		const max = (field === null ? fields.length : visible.length) - 1;
-
-		if (e.key === 'Escape') {
-			e.stopPropagation();
-			onclose();
-		} else if (e.key === 'ArrowDown') {
-			e.preventDefault();
-			highlight = Math.min(highlight + 1, Math.max(max, 0));
-		} else if (e.key === 'ArrowUp') {
-			e.preventDefault();
-			highlight = Math.max(highlight - 1, 0);
-		} else if (e.key === 'ArrowLeft' && field !== null && search === '') {
+		if (e.key === 'ArrowLeft' && search === '') {
 			e.preventDefault();
 			back();
-		} else if (e.key === 'Enter') {
+		} else if (e.key === 'Enter' && e.metaKey) {
 			e.preventDefault();
-			if (e.metaKey && field !== null) apply();
-			else activate();
+			apply();
 		}
 	}
 
-	const rowCls = 'flex w-full cursor-pointer items-center gap-2.5 px-2.5 py-2 text-left font-sans text-sm text-ink';
+	const rowCls =
+		'flex w-full cursor-pointer items-center gap-2.5 px-2.5 py-2 text-left font-sans text-sm text-ink data-[selected]:bg-hover';
 	const boxCls = 'flex size-3.5 flex-none items-center justify-center border border-line-bold';
 	const countCls = 'font-mono text-xs text-ink/70';
+	const emptyCls = 'px-2.5 py-2.5 font-sans text-sm text-ink/70';
 </script>
 
-<svelte:document
-	onkeydown={(e) => {
-		if (e.key === 'Escape') onclose();
-	}}
-/>
-
-<div
-	role="presentation"
-	{onkeydown}
-	class="absolute top-[calc(100%+6px)] left-0 z-[3] w-[min(21rem,calc(100vw-2rem))] border border-line-strong bg-card shadow-popover"
->
-	{#if field === null}
+{#if field === null}
+	<Command.Root bind:ref={fieldList} class="outline-none">
 		<div class="border-b border-line px-3.5 py-2 font-sans text-2xs font-semibold text-ink/70">Filter by</div>
-		<div class="max-h-[18rem] overflow-y-auto p-1.5" role="listbox" aria-label="Filter fields" tabindex="-1">
-			{#each fields as meta, i (meta.field)}
-				<button
-					type="button"
-					role="option"
-					aria-selected={i === highlight}
-					disabled={meta.present === 0}
-					onclick={() => selectField(meta.field)}
-					onmouseenter={() => (highlight = i)}
-					class="{rowCls} {i === highlight ? 'bg-hover' : ''} {meta.present === 0
-						? 'cursor-not-allowed opacity-45'
-						: ''}"
-				>
-					<span class="flex-1">{meta.label}</span>
-					<span class={countCls}>{meta.present}</span>
-					<ChevronRightIcon class="size-3.5 flex-none text-ink/40" />
-				</button>
-			{:else}
-				<div class="px-2.5 py-2.5 font-sans text-sm text-ink/70">
-					{loading ? 'Loading…' : 'No values in this window'}
-				</div>
-			{/each}
-		</div>
-	{:else}
+		<Command.List aria-label="Filter fields" class="max-h-[18rem] overflow-y-auto p-1.5">
+			<Command.Viewport>
+				{#each fields as meta (meta.field)}
+					<Command.Item
+						value={meta.label}
+						disabled={meta.present === 0}
+						onSelect={() => selectField(meta.field)}
+						class="{rowCls} data-[disabled]:cursor-not-allowed data-[disabled]:opacity-45"
+					>
+						<span class="flex-1">{meta.label}</span>
+						<span class={countCls}>{meta.present}</span>
+						<ChevronRightIcon class="size-3.5 flex-none text-ink/40" />
+					</Command.Item>
+				{/each}
+			</Command.Viewport>
+		</Command.List>
+	</Command.Root>
+{:else}
+	<Command.Root filter={containsFilter} {onkeydown}>
 		<div class="flex items-center gap-2 border-b border-line px-2 py-2">
 			<button
 				type="button"
@@ -174,40 +131,34 @@
 
 		<div class="flex items-center gap-2 border-b border-line px-2.5 py-2">
 			<SearchIcon class="size-3.5 flex-none text-ink/55" />
-			<input
-				bind:this={searchInput}
+			<Command.Input
+				autofocus
 				bind:value={search}
-				oninput={() => (highlight = 0)}
-				type="text"
 				placeholder="Find a value…"
-				spellcheck="false"
 				aria-label="Find a value"
 				class="w-full border-none bg-transparent font-sans text-sm text-ink outline-none"
 			/>
 		</div>
 
-		<div class="max-h-[15rem] overflow-y-auto p-1.5" role="listbox" aria-label="Filter values" tabindex="-1">
-			{#each visible as value, i (value.value)}
-				<button
-					type="button"
-					role="option"
-					aria-selected={picked.includes(value.value)}
-					onclick={() => toggle(value.value)}
-					onmouseenter={() => (highlight = i)}
-					class="{rowCls} {i === highlight ? 'bg-hover' : ''}"
-				>
-					<span class={boxCls}>
-						{#if picked.includes(value.value)}<CheckIcon class="size-3 text-command" />{/if}
-					</span>
-					<span class="min-w-0 flex-1 truncate {value.value === '' ? 'text-ink/70 italic' : ''}">{value.label}</span>
-					<span class={countCls}>{fmtCount(value.count)}</span>
-				</button>
-			{:else}
-				<div class="px-2.5 py-2.5 font-sans text-sm text-ink/70">
-					{loading ? 'Loading…' : 'No matching values'}
-				</div>
-			{/each}
-		</div>
+		<Command.List aria-label="Filter values" class="max-h-[15rem] overflow-y-auto p-1.5">
+			<Command.Viewport>
+				{#each values as value (value.value)}
+					<Command.Item
+						value={value.label}
+						onSelect={() => toggle(value.value)}
+						aria-checked={picked.includes(value.value)}
+						class={rowCls}
+					>
+						<span class={boxCls}>
+							{#if picked.includes(value.value)}<CheckIcon class="size-3 text-command" />{/if}
+						</span>
+						<span class="min-w-0 flex-1 truncate {value.value === '' ? 'text-ink/70 italic' : ''}">{value.label}</span>
+						<span class={countCls}>{fmtCount(value.count)}</span>
+					</Command.Item>
+				{/each}
+				<Command.Empty class={emptyCls}>{loading ? 'Loading…' : 'No matching values'}</Command.Empty>
+			</Command.Viewport>
+		</Command.List>
 
 		{#if truncated}
 			<div class="border-t border-line px-3 py-1.5 font-sans text-xs text-ink/70">
@@ -224,5 +175,5 @@
 				{picked.length > 0 ? `Apply ${picked.length} value${picked.length === 1 ? '' : 's'}` : 'Clear this filter'}
 			</button>
 		</div>
-	{/if}
-</div>
+	</Command.Root>
+{/if}

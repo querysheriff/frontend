@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { Command } from 'bits-ui';
 	import { CheckIcon, ChevronLeftIcon, ChevronRightIcon, SearchIcon } from '@lucide/svelte';
 	import { LogCategory, LogFacetField, type LogFacet } from '$lib/gen/querysheriff/v1/log_pb';
-	import { fmtCount } from '$lib/format';
+	import { containsFilter, fmtCount } from '$lib/format';
 	import {
 		CATEGORY_ORDER,
 		categoryColor,
@@ -17,14 +18,12 @@
 		filters,
 		facets,
 		loading,
-		onapply,
-		onclose
+		onapply
 	}: {
 		filters: LogFilterState;
 		facets: LogFacet[] | undefined;
 		loading: boolean;
 		onapply: (selection: { categories: string[]; events: string[] }) => void;
-		onclose: () => void;
 	} = $props();
 
 	// Seeded once: the picker stays open across facet refreshes, which must not clobber a selection.
@@ -37,11 +36,11 @@
 	let pickedEvents = $state<string[]>(seed.events);
 	let openCategory = $state<LogCategory | null>(null);
 	let search = $state('');
-	let highlight = $state(0);
-	let searchInput = $state<HTMLInputElement | null>(null);
+	let eventList = $state<HTMLElement | null>(null);
 
+	// A drilled-in category has no search input to take focus, so the list itself does.
 	$effect(() => {
-		searchInput?.focus();
+		eventList?.focus();
 	});
 
 	const categoryCounts = $derived(
@@ -51,23 +50,20 @@
 	type EventRow = { value: string; label: string; code: string; count: number; category: LogCategory };
 
 	const events = $derived(
-		facetValues(facets, LogFacetField.CLASSIFICATION).map((v) => ({
-			value: v.value,
-			label: classificationLabel(Number(v.value)),
-			code: classificationCode(Number(v.value)),
-			count: Number(v.count),
-			category: v.category
-		}))
+		facetValues(facets, LogFacetField.CLASSIFICATION)
+			.map((v) => ({
+				value: v.value,
+				label: classificationLabel(Number(v.value)),
+				code: classificationCode(Number(v.value)),
+				count: Number(v.count),
+				category: v.category
+			}))
+			.sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
 	);
 
 	const eventsByCategory = $derived(
 		new Map<LogCategory, EventRow[]>(
-			CATEGORY_ORDER.map((category) => [
-				category,
-				events
-					.filter((e) => e.category === category)
-					.sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
-			])
+			CATEGORY_ORDER.map((category) => [category, events.filter((e) => e.category === category)])
 		)
 	);
 
@@ -83,29 +79,7 @@
 			.sort((a, b) => (a.count > 0 ? 0 : 1) - (b.count > 0 ? 0 : 1))
 	);
 
-	const term = $derived(search.trim().toLowerCase());
-
-	const matches = $derived(
-		term === ''
-			? []
-			: events
-					.filter((e) => e.label.toLowerCase().includes(term) || e.code.toLowerCase().includes(term))
-					.sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
-	);
-
 	const openEvents = $derived(openCategory === null ? [] : (eventsByCategory.get(openCategory) ?? []));
-
-	type Row =
-		{ kind: 'category'; category: LogCategory } | { kind: 'event'; value: string } | { kind: 'whole-category' };
-
-	const rows = $derived.by((): Row[] => {
-		if (term !== '') return matches.map((e) => ({ kind: 'event', value: e.value }) as Row);
-		if (openCategory !== null) {
-			return [{ kind: 'whole-category' }, ...openEvents.map((e) => ({ kind: 'event', value: e.value }) as Row)];
-		}
-
-		return categories.map((c) => ({ kind: 'category', category: c.category }) as Row);
-	});
 
 	const wholeCategorySelected = $derived(openCategory !== null && pickedCategories.includes(String(openCategory)));
 
@@ -130,23 +104,7 @@
 
 	function drillInto(category: LogCategory) {
 		openCategory = category;
-		highlight = 0;
 		search = '';
-	}
-
-	function back() {
-		openCategory = null;
-		highlight = 0;
-		search = '';
-	}
-
-	function activate() {
-		const row = rows[highlight];
-		if (!row) return;
-
-		if (row.kind === 'category') drillInto(row.category);
-		else if (row.kind === 'event') toggleEvent(row.value);
-		else if (openCategory !== null) toggleCategory(openCategory);
 	}
 
 	function apply() {
@@ -159,188 +117,171 @@
 	}
 
 	function onkeydown(e: KeyboardEvent) {
-		if (e.key === 'Escape') {
-			e.stopPropagation();
-			onclose();
-		} else if (e.key === 'ArrowDown') {
+		if (e.key === 'ArrowLeft' && openCategory !== null) {
 			e.preventDefault();
-			highlight = Math.min(highlight + 1, Math.max(rows.length - 1, 0));
-		} else if (e.key === 'ArrowUp') {
+			openCategory = null;
+		} else if (e.key === 'Enter' && e.metaKey) {
 			e.preventDefault();
-			highlight = Math.max(highlight - 1, 0);
-		} else if (e.key === 'ArrowLeft' && openCategory !== null && search === '') {
-			e.preventDefault();
-			back();
-		} else if (e.key === 'Enter') {
-			e.preventDefault();
-			if (e.metaKey) apply();
-			else activate();
+			apply();
 		}
 	}
 
-	const rowCls = 'flex w-full cursor-pointer items-center gap-2.5 px-2.5 py-2 text-left font-sans text-sm text-ink';
+	const listCls = 'max-h-[18rem] overflow-y-auto p-1.5';
+	const rowCls =
+		'flex w-full cursor-pointer items-center gap-2.5 px-2.5 py-2 text-left font-sans text-sm text-ink data-[selected]:bg-hover';
 	const boxCls = 'flex size-3.5 flex-none items-center justify-center border border-line-bold';
 	const countCls = 'font-mono text-xs text-ink/70';
+	const emptyCls = 'px-2.5 py-2.5 font-sans text-sm text-ink/70';
 	const selectedCount = $derived(pickedCategories.length + pickedEvents.length);
 </script>
 
-<svelte:document
-	onkeydown={(e) => {
-		if (e.key === 'Escape') onclose();
-	}}
-/>
+{#snippet check(on: boolean)}
+	<span class={boxCls}>
+		{#if on}<CheckIcon class="size-3 text-command" />{/if}
+	</span>
+{/snippet}
 
-<div
-	role="presentation"
-	{onkeydown}
-	class="absolute top-[calc(100%+6px)] left-0 z-[3] w-[min(23rem,calc(100vw-2rem))] border border-line-strong bg-card shadow-popover"
->
-	<div class="flex items-center gap-2 border-b border-line px-2 py-2">
-		{#if openCategory !== null}
+{#if openCategory === null}
+	<Command.Root filter={containsFilter} {onkeydown}>
+		<div class="flex items-center gap-2 border-b border-line px-2 py-2">
+			<SearchIcon class="ml-1 size-3.5 flex-none text-ink/55" />
+			<Command.Input
+				autofocus
+				bind:value={search}
+				placeholder="Search all event types, e.g. deadlock"
+				aria-label="Search log event types"
+				class="w-full border-none bg-transparent font-sans text-sm text-ink outline-none"
+			/>
+		</div>
+
+		<Command.List aria-label="Log categories" class={listCls}>
+			<Command.Viewport>
+				{#if search.trim() === ''}
+					{#each categories as category (category.category)}
+						<!-- Enter and the chevron drill in; the row's main button toggles the whole category. -->
+						<Command.Item
+							value={category.label}
+							onSelect={() => drillInto(category.category)}
+							aria-checked={pickedCategories.includes(String(category.category))}
+							class="flex items-center data-[selected]:bg-hover {category.count === 0 ? 'opacity-45' : ''}"
+						>
+							<button
+								type="button"
+								onclick={(e) => {
+									e.stopPropagation();
+									toggleCategory(category.category);
+								}}
+								aria-label="Filter by all {category.label}"
+								class="{rowCls} min-w-0 flex-1"
+							>
+								{@render check(pickedCategories.includes(String(category.category)))}
+								<span class="h-2.5 w-2.5 flex-none" style:background={category.color}></span>
+								<span class="min-w-0 flex-1 truncate">{category.label}</span>
+								<span class={countCls}>{fmtCount(category.count)}</span>
+							</button>
+							<button
+								type="button"
+								disabled={category.present === 0}
+								title={category.present === 0
+									? 'No events of this category in this window'
+									: `Pick individual event types (${category.present})`}
+								aria-label="Open {category.label}"
+								class="flex-none px-2 py-2 {category.present === 0
+									? 'cursor-not-allowed text-ink/25'
+									: 'cursor-pointer text-ink/55 hover:text-command'}"
+							>
+								<ChevronRightIcon class="size-3.5" />
+							</button>
+						</Command.Item>
+					{/each}
+				{:else}
+					{#each events as event (event.value)}
+						<Command.Item
+							value={event.label}
+							keywords={[event.code]}
+							onSelect={() => toggleEvent(event.value)}
+							aria-checked={pickedEvents.includes(event.value)}
+							class={rowCls}
+						>
+							{@render check(pickedEvents.includes(event.value))}
+							<span class="flex min-w-0 flex-1 flex-col">
+								<span class="truncate">{event.label}</span>
+								<span class="truncate font-sans text-2xs text-ink/55">{categoryLabel(event.category)}</span>
+							</span>
+							<span class={countCls}>{fmtCount(event.count)}</span>
+						</Command.Item>
+					{/each}
+				{/if}
+				<Command.Empty class={emptyCls}>
+					{loading
+						? 'Loading…'
+						: search.trim() === ''
+							? 'No log events in this window'
+							: `No event type in this window matches “${search.trim()}”`}
+				</Command.Empty>
+			</Command.Viewport>
+		</Command.List>
+	</Command.Root>
+{:else}
+	{@const open = openCategory}
+	<Command.Root bind:ref={eventList} {onkeydown} class="outline-none">
+		<div class="flex items-center gap-2 border-b border-line px-2 py-2">
 			<button
 				type="button"
-				onclick={back}
+				onclick={() => (openCategory = null)}
 				aria-label="Back to categories"
 				class="cursor-pointer p-1 text-ink/55 hover:text-ink"
 			>
 				<ChevronLeftIcon class="size-3.5" />
 			</button>
-			<span class="flex-1 font-sans text-sm font-semibold text-ink">{categoryLabel(openCategory)}</span>
-		{:else}
-			<SearchIcon class="ml-1 size-3.5 flex-none text-ink/55" />
-			<input
-				bind:this={searchInput}
-				bind:value={search}
-				oninput={() => (highlight = 0)}
-				type="text"
-				placeholder="Search all event types, e.g. deadlock"
-				spellcheck="false"
-				aria-label="Search log event types"
-				class="w-full border-none bg-transparent font-sans text-sm text-ink outline-none"
-			/>
-		{/if}
-	</div>
+			<span class="flex-1 font-sans text-sm font-semibold text-ink">{categoryLabel(open)}</span>
+		</div>
 
-	<div class="max-h-[18rem] overflow-y-auto p-1.5" role="listbox" aria-label="Log categories" tabindex="-1">
-		{#if term !== ''}
-			{#each matches as event, i (event.value)}
-				<button
-					type="button"
-					role="option"
-					aria-selected={pickedEvents.includes(event.value)}
-					onclick={() => toggleEvent(event.value)}
-					onmouseenter={() => (highlight = i)}
-					class="{rowCls} {i === highlight ? 'bg-hover' : ''}"
+		<Command.List aria-label="{categoryLabel(open)} events" class={listCls}>
+			<Command.Viewport>
+				<Command.Item
+					forceMount
+					value="Everything in this category"
+					onSelect={() => toggleCategory(open)}
+					aria-checked={wholeCategorySelected}
+					class={rowCls}
 				>
-					<span class={boxCls}>
-						{#if pickedEvents.includes(event.value)}<CheckIcon class="size-3 text-command" />{/if}
-					</span>
-					<span class="flex min-w-0 flex-1 flex-col">
-						<span class="truncate">{event.label}</span>
-						<span class="truncate font-sans text-2xs text-ink/55">{categoryLabel(event.category)}</span>
-					</span>
-					<span class={countCls}>{fmtCount(event.count)}</span>
-				</button>
-			{:else}
-				<div class="px-2.5 py-2.5 font-sans text-sm text-ink/70">
-					{loading ? 'Loading…' : `No event type in this window matches “${search.trim()}”`}
-				</div>
-			{/each}
-		{:else if openCategory !== null}
-			{@const open = openCategory}
-			<button
-				type="button"
-				role="option"
-				aria-selected={wholeCategorySelected}
-				onclick={() => toggleCategory(open)}
-				onmouseenter={() => (highlight = 0)}
-				class="{rowCls} {highlight === 0 ? 'bg-hover' : ''}"
-			>
-				<span class={boxCls}>
-					{#if wholeCategorySelected}<CheckIcon class="size-3 text-command" />{/if}
-				</span>
-				<span class="flex-1 text-ink/70 italic">Everything in this category</span>
-				<span class={countCls}>{fmtCount(categoryCounts.get(openCategory) ?? 0)}</span>
-			</button>
+					{@render check(wholeCategorySelected)}
+					<span class="flex-1 text-ink/70 italic">Everything in this category</span>
+					<span class={countCls}>{fmtCount(categoryCounts.get(open) ?? 0)}</span>
+				</Command.Item>
 
-			{#each openEvents as event, i (event.value)}
-				<button
-					type="button"
-					role="option"
-					aria-selected={pickedEvents.includes(event.value)}
-					onclick={() => toggleEvent(event.value)}
-					onmouseenter={() => (highlight = i + 1)}
-					class="{rowCls} {highlight === i + 1 ? 'bg-hover' : ''} {wholeCategorySelected ? 'opacity-40' : ''}"
-				>
-					<span class={boxCls}>
-						{#if pickedEvents.includes(event.value)}<CheckIcon class="size-3 text-command" />{/if}
-					</span>
-					<span class="min-w-0 flex-1 truncate" title={event.code}>{event.label}</span>
-					<span class={countCls}>{fmtCount(event.count)}</span>
-				</button>
-			{:else}
-				<div class="px-2.5 py-2.5 font-sans text-sm text-ink/70">No events of this category in this window</div>
-			{/each}
-		{:else}
-			{#each categories as category, i (category.category)}
-				{@const selected = pickedCategories.includes(String(category.category))}
-				<div
-					class="flex items-center {i === highlight ? 'bg-hover' : ''} {category.count === 0 ? 'opacity-45' : ''}"
-					role="option"
-					aria-selected={selected}
-					tabindex="-1"
-					onmouseenter={() => (highlight = i)}
-				>
-					<button
-						type="button"
-						onclick={() => toggleCategory(category.category)}
-						aria-label="Filter by all {category.label}"
-						class="{rowCls} min-w-0 flex-1"
+				{#each openEvents as event (event.value)}
+					<Command.Item
+						value={event.label}
+						onSelect={() => toggleEvent(event.value)}
+						aria-checked={pickedEvents.includes(event.value)}
+						class="{rowCls} {wholeCategorySelected ? 'opacity-40' : ''}"
 					>
-						<span class={boxCls}>
-							{#if selected}<CheckIcon class="size-3 text-command" />{/if}
-						</span>
-						<span class="h-2.5 w-2.5 flex-none" style:background={category.color}></span>
-						<span class="min-w-0 flex-1 truncate">{category.label}</span>
-						<span class={countCls}>{fmtCount(category.count)}</span>
-					</button>
-					<button
-						type="button"
-						onclick={() => drillInto(category.category)}
-						disabled={category.present === 0}
-						title={category.present === 0
-							? 'No events of this category in this window'
-							: `Pick individual event types (${category.present})`}
-						aria-label="Open {category.label}"
-						class="flex-none px-2 py-2 {category.present === 0
-							? 'cursor-not-allowed text-ink/25'
-							: 'cursor-pointer text-ink/55 hover:text-command'}"
-					>
-						<ChevronRightIcon class="size-3.5" />
-					</button>
-				</div>
-			{:else}
-				<div class="px-2.5 py-2.5 font-sans text-sm text-ink/70">
-					{loading ? 'Loading…' : 'No log events in this window'}
-				</div>
-			{/each}
-		{/if}
-	</div>
+						{@render check(pickedEvents.includes(event.value))}
+						<span class="min-w-0 flex-1 truncate" title={event.code}>{event.label}</span>
+						<span class={countCls}>{fmtCount(event.count)}</span>
+					</Command.Item>
+				{/each}
+				<Command.Empty class={emptyCls}>No events of this category in this window</Command.Empty>
+			</Command.Viewport>
+		</Command.List>
+	</Command.Root>
+{/if}
 
-	<div class="flex items-center gap-2 border-t border-line p-2">
-		{#if selectedCount > 0}
-			<button
-				type="button"
-				onclick={reset}
-				class="cursor-pointer px-2 py-2 font-mono text-xs text-ink/70 hover:text-danger">Reset</button
-			>
-		{/if}
+<div class="flex items-center gap-2 border-t border-line p-2">
+	{#if selectedCount > 0}
 		<button
 			type="button"
-			onclick={apply}
-			class="flex-1 cursor-pointer bg-command py-2 text-center font-sans text-md font-semibold text-paper hover:bg-danger"
+			onclick={reset}
+			class="cursor-pointer px-2 py-2 font-mono text-xs text-ink/70 hover:text-danger">Reset</button
 		>
-			{selectedCount > 0 ? `Apply ${selectedCount} filter${selectedCount === 1 ? '' : 's'}` : 'Show all categories'}
-		</button>
-	</div>
+	{/if}
+	<button
+		type="button"
+		onclick={apply}
+		class="flex-1 cursor-pointer bg-command py-2 text-center font-sans text-md font-semibold text-paper hover:bg-danger"
+	>
+		{selectedCount > 0 ? `Apply ${selectedCount} filter${selectedCount === 1 ? '' : 's'}` : 'Show all categories'}
+	</button>
 </div>

@@ -6,22 +6,16 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run build && npm prune --omit=dev
+RUN npm run build
 
-FROM node:24-alpine
+FROM caddy:2-alpine
 
-WORKDIR /app
+# Caddy doesn't need low-port capability, container runs on :3000.
+RUN setcap -r /usr/bin/caddy
 
-ENV NODE_ENV=production \
-    HOST=0.0.0.0 \
-    PORT=3000
+COPY Caddyfile /etc/caddy/Caddyfile
+COPY --from=build /app/build /srv
 
-COPY --from=build /app/build ./build
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/package.json ./
-
-USER node
+USER 1000:1000
 
 EXPOSE 3000
-
-CMD ["node", "build"]

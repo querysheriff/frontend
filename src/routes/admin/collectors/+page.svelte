@@ -62,7 +62,7 @@
 	async function create() {
 		const name = serverName.trim();
 		if (!name) {
-			formError = 'Enter a Postgres server name.';
+			formError = 'Enter a server name.';
 			return;
 		}
 		if (creating) return;
@@ -119,7 +119,7 @@
 			<table class="w-full min-w-[35rem] border-collapse font-sans">
 				<thead>
 					<tr class="bg-hover-soft">
-						<th scope="col" class="{th} text-left">Postgres Server</th>
+						<th scope="col" class="{th} text-left">Server</th>
 						<th scope="col" class="{th} text-left">Created</th>
 						<th scope="col" class="{th} w-[7.5rem] text-right">Actions</th>
 					</tr>
@@ -159,7 +159,7 @@
 	<Modal title={modal === 'reveal' ? 'Token Created' : 'Create Collector Token'} onclose={close}>
 		{#if modal === 'form'}
 			<div class="p-5">
-				<FormLabel for="token-server">Postgres Server</FormLabel>
+				<FormLabel for="token-server">Server</FormLabel>
 				<TextInput
 					id="token-server"
 					type="text"

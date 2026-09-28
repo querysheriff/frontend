@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { Command } from 'bits-ui';
 	import { CheckIcon, ChevronLeftIcon, SearchIcon } from '@lucide/svelte';
 	import { statementClient } from '$lib/connect';
 	import { ctx } from '$lib/state.svelte';
+	import { containsFilter } from '$lib/format';
 	import { Loader } from '$lib/loader.svelte';
 	import { OP_SYMBOL, type TagFilter, type TagOp } from '$lib/queryFilter.svelte';
 
 	let {
 		initial,
-		onapply,
-		onclose
+		onapply
 	}: {
 		initial?: TagFilter;
 		onapply: (filter: TagFilter) => void;
-		onclose: () => void;
 	} = $props();
 
 	type KeyRow = { key: string; valueCount: number };
@@ -34,22 +34,12 @@
 	let picked = $state<string[]>(seed.picked);
 	let anyValue = $state(seed.anyValue);
 
-	let keySearch = $state('');
-	let valueSearch = $state('');
-
-	let highlight = $state(0);
-	let searchInput = $state<HTMLInputElement | null>(null);
-
 	const keys = new Loader<KeyRow[]>();
 	const values = new Loader<ValueRow[]>();
 	const keyRows = $derived(keys.data ?? []);
 	const valueRows = $derived(values.data ?? []);
 
 	const scope = () => ({ serverName: ctx.server, databaseName: ctx.db });
-
-	$effect(() => {
-		searchInput?.focus();
-	});
 
 	$effect(() => {
 		if (step !== 'key') return;
@@ -73,13 +63,6 @@
 		);
 	});
 
-	const visibleKeys = $derived(keyRows.filter((k) => k.key.toLowerCase().includes(keySearch.trim().toLowerCase())));
-
-	const visibleValues = $derived(
-		valueRows.filter((v) => v.value.toLowerCase().includes(valueSearch.trim().toLowerCase()))
-	);
-
-	const valueRowCount = $derived(1 + visibleValues.length);
 	const canApply = $derived(anyValue || picked.length > 0);
 
 	function selectKey(k: string) {
@@ -87,14 +70,11 @@
 		step = 'value';
 		picked = [];
 		anyValue = false;
-		valueSearch = '';
-		highlight = 0;
 	}
 
-	function back() {
-		step = 'key';
-		highlight = 0;
-		keySearch = '';
+	function toggleAny() {
+		anyValue = !anyValue;
+		if (anyValue) picked = [];
 	}
 
 	function toggleValue(v: string) {
@@ -107,94 +87,47 @@
 		onapply(anyValue ? { key, op: 'exists', values: [] } : { key, op, values: picked });
 	}
 
-	function activate() {
-		if (step === 'key') {
-			const k = visibleKeys[highlight];
-			if (k) selectKey(k.key);
-			return;
-		}
-
-		if (highlight === 0) {
-			anyValue = !anyValue;
-			if (anyValue) picked = [];
-			return;
-		}
-
-		const v = visibleValues[highlight - 1];
-		if (v) toggleValue(v.value);
-	}
-
 	function onkeydown(e: KeyboardEvent) {
-		const max = (step === 'key' ? visibleKeys.length : valueRowCount) - 1;
-
-		if (e.key === 'Escape') {
-			e.stopPropagation();
-			onclose();
-		} else if (e.key === 'ArrowDown') {
+		if (e.key === 'Enter' && e.metaKey) {
 			e.preventDefault();
-			highlight = Math.min(highlight + 1, Math.max(max, 0));
-		} else if (e.key === 'ArrowUp') {
-			e.preventDefault();
-			highlight = Math.max(highlight - 1, 0);
-		} else if (e.key === 'Enter') {
-			e.preventDefault();
-			if (step === 'value' && e.metaKey) apply();
-			else activate();
+			apply();
 		}
 	}
 
-	const rowCls = 'flex w-full cursor-pointer items-center gap-2.5 px-2.5 py-2 font-mono text-sm text-ink';
+	const searchCls = 'flex items-center gap-2 border-b border-line px-2.5 py-2';
+	const inputCls = 'w-full border-none bg-transparent font-mono text-sm text-ink outline-none';
+	const rowCls =
+		'flex w-full cursor-pointer items-center gap-2.5 px-2.5 py-2 font-mono text-sm text-ink data-[selected]:bg-hover';
+	const boxCls = 'flex size-3.5 flex-none items-center justify-center border border-line-bold';
+	const emptyCls = 'px-2.5 py-2.5 font-mono text-sm text-ink/70';
 </script>
 
-<svelte:document
-	onkeydown={(e) => {
-		if (e.key === 'Escape') onclose();
-	}}
-/>
-
-<div
-	role="presentation"
-	{onkeydown}
-	class="absolute top-[calc(100%+6px)] left-0 z-[2] w-[min(320px,calc(100vw-32px))] border border-line-strong bg-card shadow-popover"
->
-	{#if step === 'key'}
-		<div class="flex items-center gap-2 border-b border-line px-2.5 py-2">
+{#if step === 'key'}
+	<Command.Root filter={containsFilter}>
+		<div class={searchCls}>
 			<SearchIcon class="size-3.5 flex-none text-ink/55" />
-			<input
-				bind:this={searchInput}
-				bind:value={keySearch}
-				oninput={() => (highlight = 0)}
-				type="text"
-				placeholder="Find a tag key…"
-				spellcheck="false"
-				aria-label="Find a tag key"
-				class="w-full border-none bg-transparent font-mono text-sm text-ink outline-none"
-			/>
+			<Command.Input autofocus placeholder="Find a tag key…" aria-label="Find a tag key" class={inputCls} />
 		</div>
-		<div class="max-h-[17.5rem] overflow-y-auto p-1.5" role="listbox" aria-label="Tag keys" tabindex="-1">
-			{#each visibleKeys as k, i (k.key)}
-				<button
-					type="button"
-					role="option"
-					aria-selected={i === highlight}
-					onclick={() => selectKey(k.key)}
-					onmouseenter={() => (highlight = i)}
-					class="{rowCls} {i === highlight ? 'bg-hover' : ''}"
-				>
-					<span class="flex-1 text-left">{k.key}</span>
-					<span class="text-xs text-ink/70">{k.valueCount}</span>
-				</button>
-			{:else}
-				<div class="px-2.5 py-2.5 font-mono text-sm text-ink/70">
+		<Command.List aria-label="Tag keys" class="max-h-[17.5rem] overflow-y-auto p-1.5">
+			<Command.Viewport>
+				{#each keyRows as k (k.key)}
+					<Command.Item value={k.key} onSelect={() => selectKey(k.key)} class={rowCls}>
+						<span class="flex-1 text-left">{k.key}</span>
+						<span class="text-xs text-ink/70">{k.valueCount}</span>
+					</Command.Item>
+				{/each}
+				<Command.Empty class={emptyCls}>
 					{keys.loading ? 'Loading…' : (keys.error ?? (keyRows.length > 0 ? 'No matching tag keys' : 'No tags found'))}
-				</div>
-			{/each}
-		</div>
-	{:else}
+				</Command.Empty>
+			</Command.Viewport>
+		</Command.List>
+	</Command.Root>
+{:else}
+	<Command.Root filter={containsFilter} {onkeydown}>
 		<div class="flex items-center gap-2 border-b border-line px-2 py-2">
 			<button
 				type="button"
-				onclick={back}
+				onclick={() => (step = 'key')}
 				aria-label="Back to tag keys"
 				class="cursor-pointer p-1 text-ink/55 hover:text-ink"
 			>
@@ -220,59 +153,39 @@
 			</div>
 		</div>
 
-		<div class="flex items-center gap-2 border-b border-line px-2.5 py-2">
+		<div class={searchCls}>
 			<SearchIcon class="size-3.5 flex-none text-ink/55" />
-			<input
-				bind:this={searchInput}
-				bind:value={valueSearch}
-				oninput={() => (highlight = 0)}
-				type="text"
-				placeholder="Find a value…"
-				spellcheck="false"
-				aria-label="Find a tag value"
-				class="w-full border-none bg-transparent font-mono text-sm text-ink outline-none"
-			/>
+			<Command.Input autofocus placeholder="Find a value…" aria-label="Find a tag value" class={inputCls} />
 		</div>
 
-		<div class="max-h-[15rem] overflow-y-auto p-1.5" role="listbox" aria-label="Tag values" tabindex="-1">
-			<button
-				type="button"
-				role="option"
-				aria-selected={anyValue}
-				onclick={() => {
-					anyValue = !anyValue;
-					if (anyValue) picked = [];
-				}}
-				onmouseenter={() => (highlight = 0)}
-				class="{rowCls} {highlight === 0 ? 'bg-hover' : ''}"
-			>
-				<span class="flex size-3.5 flex-none items-center justify-center border border-line-bold">
-					{#if anyValue}<CheckIcon class="size-3 text-command" />{/if}
-				</span>
-				<span class="flex-1 text-left text-ink/70 italic">Any value</span>
-			</button>
-
-			{#each visibleValues as v, i (v.value)}
-				<button
-					type="button"
-					role="option"
-					aria-selected={picked.includes(v.value)}
-					onclick={() => toggleValue(v.value)}
-					onmouseenter={() => (highlight = i + 1)}
-					class="{rowCls} {highlight === i + 1 ? 'bg-hover' : ''} {anyValue ? 'opacity-40' : ''}"
-				>
-					<span class="flex size-3.5 flex-none items-center justify-center border border-line-bold">
-						{#if picked.includes(v.value)}<CheckIcon class="size-3 text-command" />{/if}
+		<Command.List aria-label="Tag values" class="max-h-[15rem] overflow-y-auto p-1.5">
+			<Command.Viewport>
+				<Command.Item forceMount value="Any value" onSelect={toggleAny} aria-checked={anyValue} class={rowCls}>
+					<span class={boxCls}>
+						{#if anyValue}<CheckIcon class="size-3 text-command" />{/if}
 					</span>
-					<span class="flex-1 truncate text-left">{v.value}</span>
-					<span class="text-xs text-ink/70">{v.statementCount}</span>
-				</button>
-			{:else}
-				<div class="px-2.5 py-2.5 font-mono text-sm text-ink/70">
+					<span class="flex-1 text-left text-ink/70 italic">Any value</span>
+				</Command.Item>
+
+				{#each valueRows as v (v.value)}
+					<Command.Item
+						value={v.value}
+						onSelect={() => toggleValue(v.value)}
+						aria-checked={picked.includes(v.value)}
+						class="{rowCls} {anyValue ? 'opacity-40' : ''}"
+					>
+						<span class={boxCls}>
+							{#if picked.includes(v.value)}<CheckIcon class="size-3 text-command" />{/if}
+						</span>
+						<span class="flex-1 truncate text-left">{v.value}</span>
+						<span class="text-xs text-ink/70">{v.statementCount}</span>
+					</Command.Item>
+				{/each}
+				<Command.Empty class={emptyCls}>
 					{values.loading ? 'Loading…' : (values.error ?? (valueRows.length > 0 ? 'No matching values' : 'No values'))}
-				</div>
-			{/each}
-		</div>
+				</Command.Empty>
+			</Command.Viewport>
+		</Command.List>
 
 		<div class="border-t border-line p-2">
 			<button
@@ -286,5 +199,5 @@
 				Apply filter
 			</button>
 		</div>
-	{/if}
-</div>
+	</Command.Root>
+{/if}

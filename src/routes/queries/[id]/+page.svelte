@@ -21,9 +21,9 @@
 	import LoadMoreFooter from '$lib/components/LoadMoreFooter.svelte';
 	import QueryTextBlock from '$lib/components/QueryTextBlock.svelte';
 	import SectionHeader from '$lib/components/SectionHeader.svelte';
-	import SqlPopover from '$lib/components/SqlPopover.svelte';
+	import { Tooltip } from 'bits-ui';
+	import SqlPopover, { type SqlPayload } from '$lib/components/SqlPopover.svelte';
 	import type { Sort } from '$lib/components/SortHeader.svelte';
-	import { SqlPopoverState } from '$lib/sqlPopover.svelte';
 	import SamplesTable from '$lib/components/SamplesTable.svelte';
 	import Tag from '$lib/components/Tag.svelte';
 	import TagRow from '$lib/components/TagRow.svelte';
@@ -37,9 +37,7 @@
 	const series = new Loader<GetStatementSeriesResponse>();
 	const samples = new PagedLoader<StatementSample>((s) => s.id);
 
-	const sql = new SqlPopoverState((sampleId) =>
-		statementClient.getStatementSample({ id: sampleId }).then((r) => r.query)
-	);
+	const sql = Tooltip.createTether<SqlPayload>();
 
 	const id = $derived(page.params.id ?? '');
 	const validId = $derived(/^\d+$/.test(id));
@@ -192,4 +190,4 @@
 	<LoadMoreFooter list={samples} empty="No samples captured in this range" />
 </DocCard>
 
-<SqlPopover state={sql} />
+<SqlPopover tether={sql} load={(id) => statementClient.getStatementSample({ id }).then((r) => r.query)} />

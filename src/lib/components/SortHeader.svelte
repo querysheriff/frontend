@@ -3,7 +3,6 @@
 </script>
 
 <script lang="ts" generics="C">
-	import { clsx } from 'clsx';
 	import { ArrowUpIcon, ArrowDownIcon, ArrowUpDownIcon } from '@lucide/svelte';
 
 	let {
@@ -24,7 +23,7 @@
 
 	const sortable = $derived(column !== undefined && sort !== undefined);
 	const dir = $derived(sort && sort.column === column ? (sort.desc ? 'desc' : 'asc') : null);
-	const box = $derived(clsx('block py-2.5', pad, align === 'right' ? 'text-right' : 'text-left'));
+	const box = $derived(`block py-2.5 ${pad} ${align === 'right' ? 'text-right' : 'text-left'}`);
 
 	function toggle() {
 		if (column === undefined || !sort) return;
@@ -38,10 +37,10 @@
 		<span>{label}</span>
 		{#if sortable}
 			<span
-				class={clsx(
+				class={[
 					'pointer-events-none absolute inset-y-0 flex items-center',
 					align === 'right' ? 'right-full pr-1' : 'left-full pl-1'
-				)}
+				]}
 			>
 				{#if dir === 'asc'}
 					<ArrowUpIcon class="size-3 flex-none text-command" />
@@ -60,7 +59,7 @@
 <th
 	scope="col"
 	aria-sort={sortable ? (dir === 'asc' ? 'ascending' : dir === 'desc' ? 'descending' : 'none') : undefined}
-	class={clsx('border-b border-line font-sans text-xs font-semibold whitespace-nowrap text-ink/70', klass)}
+	class={['border-b border-line font-sans text-xs font-semibold whitespace-nowrap text-ink/70', klass]}
 >
 	{#if sortable}
 		<button

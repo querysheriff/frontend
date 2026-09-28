@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { clsx } from 'clsx';
-	import { onMount } from 'svelte';
+	import { MediaQuery } from 'svelte/reactivity';
 	import { LogOutIcon, XIcon } from '@lucide/svelte';
 	import { Dialog } from 'bits-ui';
 	import { page } from '$app/state';
@@ -12,19 +11,16 @@
 	import QuerySheriffMark from '$lib/icons/QuerySheriffMark.svelte';
 
 	const navClass = (active: boolean): string =>
-		clsx(
-			'flex items-center gap-3 border-l-[3px] py-2.5 pr-3 pl-3.5 transition-colors',
+		`flex items-center gap-3 border-l-[3px] py-2.5 pr-3 pl-3.5 transition-colors ${
 			active ? 'border-command bg-accent text-ink' : 'border-transparent text-ink/70 hover:bg-hover-soft'
-		);
+		}`;
 
 	afterNavigate(() => sidebar.closeDrawer());
 
 	// Close the mobile drawer when the viewport grows, or bits-ui keeps the now-hidden scroll lock.
-	onMount(() => {
-		const mq = window.matchMedia('(min-width: 768px)');
-		const onChange = () => mq.matches && sidebar.closeDrawer();
-		mq.addEventListener('change', onChange);
-		return () => mq.removeEventListener('change', onChange);
+	const desktop = new MediaQuery('min-width: 768px');
+	$effect(() => {
+		if (desktop.current) sidebar.closeDrawer();
 	});
 
 	async function handleLogout() {

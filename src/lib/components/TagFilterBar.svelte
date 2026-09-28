@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Popover } from 'bits-ui';
 	import { SearchIcon } from '@lucide/svelte';
 	import FilterChip from '$lib/components/FilterChip.svelte';
 	import TagFilterPicker from '$lib/components/TagFilterPicker.svelte';
@@ -38,7 +39,7 @@
 			op={OP_SYMBOL[filter.op]}
 			values={filter.values.join(' or ')}
 			active={picker?.mode === 'edit' && picker.index === i}
-			onedit={() => (picker = picker?.mode === 'edit' && picker.index === i ? null : { mode: 'edit', index: i })}
+			onedit={() => (picker = { mode: 'edit', index: i })}
 			onremove={() => {
 				if (picker?.mode === 'edit' && picker.index === i) picker = null;
 				filters.remove(i);
@@ -46,33 +47,28 @@
 		/>
 	{/each}
 
-	<div class="relative">
-		{#if picker !== null}
-			<button
-				type="button"
-				aria-label="Close tag filter picker"
-				onclick={() => (picker = null)}
-				class="fixed inset-0 z-[1] cursor-default bg-transparent"
-			></button>
-		{/if}
-
-		<button
-			type="button"
-			onclick={() => (picker = picker?.mode === 'add' ? null : { mode: 'add' })}
-			aria-haspopup="listbox"
-			aria-expanded={picker !== null}
-			class="relative z-[2] flex cursor-pointer items-center gap-1.5 border border-dashed border-line-bold px-2.5 py-1 font-mono text-sm text-ink/70 hover:border-accent-line hover:text-command"
+	<Popover.Root bind:open={() => picker !== null, (open) => (picker = open ? { mode: 'add' } : null)}>
+		<Popover.Trigger
+			class="flex cursor-pointer items-center gap-1.5 border border-dashed border-line-bold px-2.5 py-1 font-mono text-sm text-ink/70 hover:border-accent-line hover:text-command"
 		>
 			<SearchIcon class="size-3" />
 			Tag
-		</button>
-
-		{#if picker !== null}
-			{#key picker.mode === 'edit' ? picker.index : 'add'}
-				<TagFilterPicker initial={editing} onapply={commit} onclose={() => (picker = null)} />
-			{/key}
-		{/if}
-	</div>
+		</Popover.Trigger>
+		<Popover.Portal>
+			<Popover.Content
+				side="bottom"
+				align="start"
+				sideOffset={6}
+				collisionPadding={16}
+				onOpenAutoFocus={(e) => e.preventDefault()}
+				class="z-50 w-[min(320px,calc(100vw-32px))] border border-line-strong bg-card shadow-popover"
+			>
+				{#key picker?.mode === 'edit' ? picker.index : 'add'}
+					<TagFilterPicker initial={editing} onapply={commit} />
+				{/key}
+			</Popover.Content>
+		</Popover.Portal>
+	</Popover.Root>
 
 	{#if filters.tags.length > 0}
 		<button
