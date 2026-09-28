@@ -137,7 +137,7 @@
 							: 'Set as default server and database'}
 						class="flex cursor-pointer items-center border-l border-line px-2.5 hover:bg-hover-soft disabled:cursor-default disabled:opacity-40"
 					>
-						<StarIcon class="size-3.5 {defaultScope.isCurrent ? 'fill-warn text-warn' : 'text-ink/55'}" />
+						<StarIcon class="size-3.5 {defaultScope.isCurrent ? 'fill-warn text-warn' : 'text-ink-muted'}" />
 					</button>
 				{/if}
 			{/if}

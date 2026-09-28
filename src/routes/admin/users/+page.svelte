@@ -133,7 +133,7 @@
 	const allChip =
 		'inline-block border border-accent-line bg-accent px-2 py-0.5 font-sans text-2xs font-bold whitespace-nowrap text-command';
 	const serverChip =
-		'inline-block border border-steel/28 bg-steel/10 px-2 py-0.5 font-mono text-xs whitespace-nowrap text-steel';
+		'inline-block border border-steel/28 bg-steel-wash px-2 py-0.5 font-mono text-xs whitespace-nowrap text-steel-text';
 </script>
 
 <PageBar>

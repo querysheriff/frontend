@@ -50,13 +50,13 @@
 			class="group flex cursor-pointer items-start gap-1.5 text-left text-paper {clear}"
 		>
 			{#if shown > 0}
-				<ChevronDownIcon class="mt-1 size-3.5 flex-none text-paper/45 group-hover:text-paper" />
+				<ChevronDownIcon class="mt-1 size-3.5 flex-none text-paper/60 group-hover:text-paper" />
 			{:else}
-				<ChevronRightIcon class="mt-1 size-3.5 flex-none text-paper/45 group-hover:text-paper" />
+				<ChevronRightIcon class="mt-1 size-3.5 flex-none text-paper/60 group-hover:text-paper" />
 			{/if}
 			<span class="break-words">{node.text}</span>
 			{#if shown === 0}
-				<span class="flex-none text-paper/45 group-hover:text-paper/70">… {plural(node.lines)}</span>
+				<span class="flex-none text-paper/60 group-hover:text-paper">… {plural(node.lines)}</span>
 			{/if}
 		</button>
 
@@ -69,7 +69,7 @@
 					type="button"
 					onclick={() => (unfolded[path] = true)}
 					style:margin-left={`${(depth + 1) * INDENT_REM}rem`}
-					class="cursor-pointer pl-5 text-left text-paper/45 hover:text-paper"
+					class="cursor-pointer pl-5 text-left text-paper/60 hover:text-paper"
 				>
 					{more(hiddenLines(node, shown))}
 				</button>
@@ -80,7 +80,7 @@
 
 <div class="relative border border-line-card bg-ink px-4 py-3.5 font-mono text-sm leading-[1.7]">
 	{#if !text}
-		<div class={error ? 'text-danger-on-ink' : 'text-paper/50'}>{placeholder}</div>
+		<div class={error ? 'text-danger-on-ink' : 'text-paper/60'}>{placeholder}</div>
 	{:else if roots.length === 0}
 		<div class="break-words whitespace-pre-wrap text-paper">{text}</div>
 	{:else}
@@ -88,7 +88,7 @@
 			<button
 				type="button"
 				onclick={toggleAll}
-				class="absolute top-3.5 right-4 z-[1] flex cursor-pointer items-center gap-1.5 font-sans text-2xs font-semibold text-paper/45 hover:text-paper"
+				class="absolute top-3.5 right-4 z-[1] flex cursor-pointer items-center gap-1.5 font-sans text-2xs font-semibold text-paper/60 hover:text-paper"
 			>
 				{#if allExpanded}
 					<ChevronsDownUpIcon class="size-3.5" /><span>Collapse all</span>

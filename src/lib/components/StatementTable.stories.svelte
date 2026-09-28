@@ -13,7 +13,7 @@
 	import { create } from '@bufbuild/protobuf';
 	import { StatementSortColumn, StatementStatSchema } from '$lib/gen/querysheriff/v1/statement_pb';
 	import { Tooltip } from 'bits-ui';
-	import type { SqlPayload } from './SqlPopover.svelte';
+	import SqlPopover, { type SqlPayload } from './SqlPopover.svelte';
 	import type { Sort } from './SortHeader.svelte';
 
 	const sql = Tooltip.createTether<SqlPayload>();
@@ -54,6 +54,9 @@
 	].map((init) => create(StatementStatSchema, init));
 
 	let sort = $state<Sort<StatementSortColumn>>({ column: StatementSortColumn.PCT_TIME, desc: true });
+
+	const fullQuery = async (id: bigint) =>
+		rows.find((r) => r.id === id)?.preview.replace(/ (FROM|JOIN|WHERE|ORDER BY|GROUP BY)/g, '\n$1') ?? '';
 </script>
 
 <Story name="Default">
@@ -61,6 +64,7 @@
 		<div class="border border-line-card bg-card">
 			<StatementTable {rows} bind:sort {sql} />
 		</div>
+		<SqlPopover tether={sql} load={fullQuery} />
 	{/snippet}
 </Story>
 

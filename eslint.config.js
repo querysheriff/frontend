@@ -5,7 +5,7 @@ import svelte from 'eslint-plugin-svelte';
 import ts from 'typescript-eslint';
 
 export default defineConfig(
-	{ ignores: ['.svelte-kit/', 'build/', 'storybook-static/', 'src/lib/gen/'] },
+	{ ignores: ['.svelte-kit/', 'build/', 'src/lib/gen/'] },
 	js.configs.recommended,
 	ts.configs.recommended,
 	svelte.configs.recommended,

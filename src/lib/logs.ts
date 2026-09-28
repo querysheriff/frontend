@@ -32,7 +32,7 @@ export function levelLabel(level: LogEvent_LogLevel): string {
 }
 
 function tint(color: string, pct: number): string {
-	return `color-mix(in oklab, ${color} ${pct}%, transparent)`;
+	return `color-mix(in oklab, ${color} ${pct}%, var(--color-card))`;
 }
 
 const TEXT_VARIANT: Record<string, string> = {

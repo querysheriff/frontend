@@ -107,7 +107,7 @@
 					>
 						<span class="flex-1">{meta.label}</span>
 						<span class={countCls}>{meta.present}</span>
-						<ChevronRightIcon class="size-3.5 flex-none text-ink/40" />
+						<ChevronRightIcon class="size-3.5 flex-none text-ink/55" />
 					</Command.Item>
 				{/each}
 			</Command.Viewport>
@@ -120,7 +120,7 @@
 				type="button"
 				onclick={back}
 				aria-label="Back to filter fields"
-				class="cursor-pointer p-1 text-ink/55 hover:text-ink"
+				class="cursor-pointer p-1 text-ink-muted hover:text-ink"
 			>
 				<ChevronLeftIcon class="size-3.5" />
 			</button>

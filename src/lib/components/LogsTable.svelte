@@ -83,7 +83,7 @@
 	{#if value}
 		<span title={value} class="inline-block max-w-full truncate align-top text-sm text-ink/75">{value}</span>
 	{:else}
-		<span class="text-sm text-ink/45">—</span>
+		<span class="text-sm text-ink-muted">—</span>
 	{/if}
 {/snippet}
 
@@ -249,7 +249,7 @@
 									{#each [{ label: 'PID', value: r.pid ? String(r.pid) : '' }, { label: 'Application', value: r.applicationName }, { label: 'Backend', value: r.backendType }] as field (field.label)}
 										<span class="text-ink-muted"
 											>{field.label}
-											<span class={field.value ? 'text-ink' : 'text-ink/45'}>{field.value || '—'}</span></span
+											<span class={field.value ? 'text-ink' : 'text-ink-muted'}>{field.value || '—'}</span></span
 										>
 									{/each}
 								</div>

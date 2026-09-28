@@ -66,7 +66,7 @@
 			{:else}
 				<span
 					title="This session was never sampled — autovacuum and other non-client backends are not collected"
-					class="font-mono text-sm leading-[20px] text-ink/55">not captured</span
+					class="font-mono text-sm leading-[20px] text-ink-muted">not captured</span
 				>
 			{/if}
 			{#if party.tags.length > 0}

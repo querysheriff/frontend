@@ -41,7 +41,7 @@
 		type="button"
 		onclick={onremove}
 		aria-label="Remove {description} filter"
-		class="cursor-pointer border-l border-line px-1.5 py-1.5 text-ink/55 hover:bg-hover hover:text-danger-text"
+		class="cursor-pointer border-l border-line px-1.5 py-1.5 text-ink-muted hover:bg-hover hover:text-danger-text"
 	>
 		<XIcon class="size-3" />
 	</button>

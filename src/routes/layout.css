@@ -1,43 +1,43 @@
 @import 'tailwindcss';
 
 @theme {
-	/* Tailwind's default breakpoints, pinned in px. */
+	/* Default Tailwind breakpoints, fixed in px. */
 	--breakpoint-sm: 640px;
 	--breakpoint-md: 768px;
 	--breakpoint-lg: 1024px;
 
-	/* Surfaces */
+	/* Main surfaces. */
 	--color-paper: #f4efe6;
 	--color-card: #fbf8f1;
 	--color-shell: #efe8db;
 
-	/* Text; also the base of the line-* and hover-* scale below. */
+	/* Main and muted text; ink also drives neutral tints below. */
 	--color-ink: #3a2a1f;
 	--color-ink-muted: #6f6258;
 
-	/* Accent */
+	/* Primary action / brand accent. */
 	--color-command: #a83d2b;
 
+	/* Status colors; *-text variants are dark enough for small text. */
 	--color-danger: #c23a24;
 	--color-danger-text: #b93622;
 	--color-danger-on-ink: color-mix(in oklab, var(--color-danger) 60%, var(--color-paper));
-	/* -text variants are darkened to clear WCAG AA as text; the vivid bases stay for dots and fills. */
 	--color-warn: #c86d14;
 	--color-warn-text: #92530d;
 	--color-ok: #578f32;
 	--color-ok-text: #40701d;
 	--color-panic: #5e1414;
 
-	/* Data / chart series */
+	/* Chart and data colors. */
 	--color-steel: #6c8392;
-	--color-steel-text: #546774; /* darker steel that clears AA as text (e.g. tag labels) */
+	--color-steel-text: #546774;
+	--color-steel-wash: color-mix(in oklab, var(--color-steel) 10%, var(--color-card));
 	--color-teal: #4e7a86;
 	--color-teal-text: #456f7a;
 	--color-taupe: #827666;
 	--color-taupe-text: #6f6354;
 
-	/* Semantic neutral scale — ink at fixed alphas, named by role: line-* for borders, hover-* for
-	   background tints, weak to strong. */
+	/* Neutral borders, hovers and overlays, all derived from ink. */
 	--color-line-soft: color-mix(in oklab, var(--color-ink) 8%, transparent);
 	--color-line: color-mix(in oklab, var(--color-ink) 14%, transparent);
 	--color-line-card: color-mix(in oklab, var(--color-ink) 16%, transparent);
@@ -49,11 +49,11 @@
 	--color-hover-strong: color-mix(in oklab, var(--color-ink) 10%, transparent);
 	--color-scrim: color-mix(in oklab, var(--color-ink) 40%, transparent);
 
-	/* Accent (command) tints — a background and a border weight. */
+	/* Soft accent background and border. */
 	--color-accent: color-mix(in oklab, var(--color-command) 10%, transparent);
 	--color-accent-line: color-mix(in oklab, var(--color-command) 50%, transparent);
 
-	/* Elevation — floating surfaces reference ink so shadows track the palette. */
+	/* Shadows derived from ink so they stay in the palette. */
 	--shadow-popover: 0 10px 28px color-mix(in oklab, var(--color-ink) 20%, transparent);
 	--shadow-modal: 0 24px 60px color-mix(in oklab, var(--color-ink) 32%, transparent);
 	--shadow-dropdown: 0 8px 24px color-mix(in oklab, var(--color-ink) 18%, transparent);
@@ -62,7 +62,7 @@
 	--shadow-chart: 0 4px 16px color-mix(in oklab, var(--color-ink) 10%, transparent);
 	--shadow-knob: 0 1px 2px color-mix(in oklab, var(--color-ink) 30%, transparent);
 
-	/* Text scale (rem). xs–2xl keep Tailwind's default line-heights; set leading-* where it matters. */
+	/* App text sizes; line heights stay on Tailwind defaults. */
 	--text-2xs: 0.75rem; /* 12px */
 	--text-xs: 0.8125rem; /* 13px */
 	--text-md: 0.9375rem; /* 15px */
@@ -81,10 +81,13 @@
 		-webkit-font-smoothing: antialiased;
 		text-rendering: optimizeLegibility;
 	}
+	::placeholder {
+		color: var(--color-ink-muted);
+	}
 	::selection {
 		background: color-mix(in oklab, var(--color-ink) 16%, transparent);
 	}
-	/* That ink tint is invisible on the dark code surfaces; tint with paper there. */
+	/* Light selection on dark ink surfaces. */
 	.bg-ink::selection,
 	.bg-ink ::selection {
 		background: color-mix(in oklab, var(--color-paper) 22%, transparent);

@@ -129,7 +129,7 @@
 				type="button"
 				onclick={() => (step = 'key')}
 				aria-label="Back to tag keys"
-				class="cursor-pointer p-1 text-ink/55 hover:text-ink"
+				class="cursor-pointer p-1 text-ink-muted hover:text-ink"
 			>
 				<ChevronLeftIcon class="size-3.5" />
 			</button>

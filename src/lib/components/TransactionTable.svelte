@@ -140,7 +140,7 @@
 													>{g.query}</Tooltip.Trigger
 												>
 											{:else}
-												<span class="font-mono text-sm text-ink/55">—</span>
+												<span class="font-mono text-sm text-ink-muted">—</span>
 											{/if}
 											{#if Object.keys(g.queryTags).length > 0}
 												<TagRow class="mt-1.5">

@@ -188,7 +188,7 @@
 								aria-label="Open {category.label}"
 								class="flex-none px-2 py-2 {category.present === 0
 									? 'cursor-not-allowed text-ink/25'
-									: 'cursor-pointer text-ink/55 hover:text-command'}"
+									: 'cursor-pointer text-ink-muted hover:text-command'}"
 							>
 								<ChevronRightIcon class="size-3.5" />
 							</button>
@@ -206,7 +206,7 @@
 							{@render check(pickedEvents.includes(event.value))}
 							<span class="flex min-w-0 flex-1 flex-col">
 								<span class="truncate">{event.label}</span>
-								<span class="truncate font-sans text-2xs text-ink/55">{categoryLabel(event.category)}</span>
+								<span class="truncate font-sans text-2xs text-ink-muted">{categoryLabel(event.category)}</span>
 							</span>
 							<span class={countCls}>{fmtCount(event.count)}</span>
 						</Command.Item>
@@ -230,7 +230,7 @@
 				type="button"
 				onclick={() => (openCategory = null)}
 				aria-label="Back to categories"
-				class="cursor-pointer p-1 text-ink/55 hover:text-ink"
+				class="cursor-pointer p-1 text-ink-muted hover:text-ink"
 			>
 				<ChevronLeftIcon class="size-3.5" />
 			</button>

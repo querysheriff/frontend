@@ -24,8 +24,8 @@
 	const sev: Record<AlertLevel, { label: string; chip: string }> = {
 		[AlertLevel.CRITICAL]: { label: 'Critical', chip: 'border-danger bg-danger text-paper' },
 		[AlertLevel.WARNING]: { label: 'Warning', chip: 'border-warn/34 bg-warn/10 text-warn-text' },
-		[AlertLevel.INFO]: { label: 'Info', chip: 'border-steel/34 bg-steel/10 text-steel-text' },
-		[AlertLevel.UNSPECIFIED]: { label: 'Info', chip: 'border-steel/34 bg-steel/10 text-steel-text' }
+		[AlertLevel.INFO]: { label: 'Info', chip: 'border-steel/34 bg-steel-wash text-steel-text' },
+		[AlertLevel.UNSPECIFIED]: { label: 'Info', chip: 'border-steel/34 bg-steel-wash text-steel-text' }
 	};
 </script>
 

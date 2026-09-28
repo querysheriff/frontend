@@ -50,7 +50,7 @@
 				type="button"
 				onclick={() => docs.close()}
 				aria-label="Close documentation"
-				class="-mr-1 flex size-8 flex-none cursor-pointer items-center justify-center rounded-full text-ink/55 hover:bg-hover hover:text-command"
+				class="-mr-1 flex size-8 flex-none cursor-pointer items-center justify-center rounded-full text-ink-muted hover:bg-hover hover:text-command"
 			>
 				<XIcon class="size-5" />
 			</button>

@@ -92,7 +92,7 @@
 				rule
 				ticks={timeAxisTicks}
 				format={fmtAxisTime}
-				tickLabelProps={{ class: 'fill-ink/45 font-mono text-2xs' }}
+				tickLabelProps={{ class: 'fill-ink-muted font-mono text-2xs' }}
 			/>
 			<HeatmapCells {rows} {buckets} step={model.step} rowHeight={ROW_HEIGHT} />
 			{#if !brush.brushing && !message}
@@ -125,13 +125,13 @@
 							{#if detail}
 								{@const lines = detail(entry.row.key, entry.index)}
 								{#each lines.slice(0, DETAIL_LINES) as line (line.label)}
-									<div class="flex items-center gap-2.5 pl-3.5 text-ink/55">
+									<div class="flex items-center gap-2.5 pl-3.5 text-ink-muted">
 										<span class="flex-1">{line.label}</span>
 										<span>{fmtCountFull(line.count)}</span>
 									</div>
 								{/each}
 								{#if lines.length > DETAIL_LINES}
-									<div class="pl-3.5 text-ink/45">+{lines.length - DETAIL_LINES} more</div>
+									<div class="pl-3.5 text-ink-muted">+{lines.length - DETAIL_LINES} more</div>
 								{/if}
 							{/if}
 						{/each}
@@ -159,8 +159,8 @@
 		{#each rows as row, r (row.key)}
 			<div
 				class="absolute flex items-center gap-1.5 pr-2 font-sans text-2xs font-semibold {row.total > 0
-					? 'text-ink-muted'
-					: 'text-ink/35'}"
+					? 'text-ink'
+					: 'text-ink-muted'}"
 				style:top="{r * ROW_HEIGHT}px"
 				style:height="{ROW_HEIGHT}px"
 				style:width="{labelWidth}px"

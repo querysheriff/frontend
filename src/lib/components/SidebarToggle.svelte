@@ -3,7 +3,7 @@
 	import { sidebar } from '$lib/sidebar.svelte';
 
 	const btn =
-		'flex size-8 flex-none cursor-pointer items-center justify-center text-ink/55 transition-colors hover:bg-hover hover:text-command';
+		'flex size-8 flex-none cursor-pointer items-center justify-center text-ink-muted transition-colors hover:bg-hover hover:text-command';
 </script>
 
 <button type="button" onclick={() => sidebar.openDrawer()} aria-label="Open navigation" class="{btn} -ml-1.5 md:hidden">

@@ -28,3 +28,9 @@ LIMIT $3`;
 		<QueryTextBlock placeholder="Loading…" />
 	{/snippet}
 </Story>
+
+<Story name="Error">
+	{#snippet template()}
+		<QueryTextBlock placeholder="Invalid query id" error />
+	{/snippet}
+</Story>

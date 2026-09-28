@@ -70,13 +70,13 @@
 	>
 		<Svg>
 			<Grid y={{ class: 'stroke-ink/10' }} />
-			<Axis placement="left" rule ticks={4} {format} tickLabelProps={{ class: 'fill-ink/45 font-mono text-2xs' }} />
+			<Axis placement="left" rule ticks={4} {format} tickLabelProps={{ class: 'fill-ink-muted font-mono text-2xs' }} />
 			<Axis
 				placement="bottom"
 				rule
 				ticks={timeAxisTicks}
 				format={fmtAxisTime}
-				tickLabelProps={{ class: 'fill-ink/45 font-mono text-2xs' }}
+				tickLabelProps={{ class: 'fill-ink-muted font-mono text-2xs' }}
 			/>
 			<LinearGradient vertical>
 				{#snippet stopsContent()}

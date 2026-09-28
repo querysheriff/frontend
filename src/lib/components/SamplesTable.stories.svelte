@@ -14,7 +14,7 @@
 	import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 	import { SampleSortColumn, StatementSampleSchema } from '$lib/gen/querysheriff/v1/statement_pb';
 	import { Tooltip } from 'bits-ui';
-	import type { SqlPayload } from './SqlPopover.svelte';
+	import SqlPopover, { type SqlPayload } from './SqlPopover.svelte';
 	import type { Sort } from './SortHeader.svelte';
 
 	const sql = Tooltip.createTether<SqlPayload>();
@@ -34,6 +34,8 @@
 
 	const baseTags = { app: 'web' };
 
+	const fullQuery = async () => preview.replace(/ (FROM|WHERE)/g, '\n$1');
+
 	let sort = $state<Sort<SampleSortColumn>>({ column: SampleSortColumn.AT, desc: true });
 </script>
 
@@ -42,6 +44,7 @@
 		<div class="border border-line-card bg-card">
 			<SamplesTable {samples} bind:sort {sql} statementId="1" {baseTags} />
 		</div>
+		<SqlPopover tether={sql} load={fullQuery} />
 	{/snippet}
 </Story>
 

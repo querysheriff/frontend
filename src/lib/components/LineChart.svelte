@@ -66,13 +66,13 @@
 	>
 		<Svg>
 			<Grid y={{ class: 'stroke-ink/10' }} />
-			<Axis placement="left" rule ticks={4} {format} tickLabelProps={{ class: 'fill-ink/45 font-mono text-2xs' }} />
+			<Axis placement="left" rule ticks={4} {format} tickLabelProps={{ class: 'fill-ink-muted font-mono text-2xs' }} />
 			<Axis
 				placement="bottom"
 				rule
 				ticks={timeAxisTicks}
 				format={fmtAxisTime}
-				tickLabelProps={{ class: 'fill-ink/45 font-mono text-2xs' }}
+				tickLabelProps={{ class: 'fill-ink-muted font-mono text-2xs' }}
 			/>
 			{#each series as s, i (s.label)}
 				<Spline y={(d: MetricSeriesRow) => d.values[i]} style="stroke: {s.color}; stroke-width: 1.5" />

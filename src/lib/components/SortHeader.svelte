@@ -48,7 +48,7 @@
 					<ArrowDownIcon class="size-3 flex-none text-command" />
 				{:else}
 					<ArrowUpDownIcon
-						class="size-3 flex-none text-ink/35 opacity-0 transition-opacity group-hover/sort:opacity-100 group-focus-visible/sort:opacity-100"
+						class="size-3 flex-none text-ink/55 opacity-0 transition-opacity group-hover/sort:opacity-100 group-focus-visible/sort:opacity-100"
 					/>
 				{/if}
 			</span>

@@ -10,7 +10,39 @@
 </script>
 
 <script lang="ts">
+	import { create } from '@bufbuild/protobuf';
+	import { statementClient } from '$lib/connect';
+	import { ListTagKeysResponseSchema, ListTagValuesResponseSchema } from '$lib/gen/querysheriff/v1/statement_pb';
 	import { QueryFilterState, type TagFilter } from '$lib/queryFilter.svelte';
+
+	const TAGS: Record<string, [string, number][]> = {
+		service: [
+			['checkout-api', 42],
+			['billing-worker', 17],
+			['search', 9]
+		],
+		env: [
+			['production', 61],
+			['staging', 7]
+		],
+		region: [
+			['eu-central-1', 38],
+			['us-east-1', 30]
+		],
+		team: [
+			['payments', 25],
+			['growth', 12]
+		]
+	};
+
+	statementClient.listTagKeys = async () =>
+		create(ListTagKeysResponseSchema, {
+			keys: Object.entries(TAGS).map(([key, values]) => ({ key, valueCount: BigInt(values.length) }))
+		});
+	statementClient.listTagValues = async ({ key }) =>
+		create(ListTagValuesResponseSchema, {
+			values: (TAGS[key ?? ''] ?? []).map(([value, n]) => ({ value, statementCount: BigInt(n) }))
+		});
 
 	const eq = (key: string, ...values: string[]): TagFilter => ({ key, op: 'eq', values });
 

@@ -12,7 +12,9 @@
 
 	const navClass = (active: boolean): string =>
 		`flex items-center gap-3 border-l-[3px] py-2.5 pr-3 pl-3.5 transition-colors ${
-			active ? 'border-command bg-accent text-ink' : 'border-transparent text-ink-muted hover:bg-hover-soft'
+			active
+				? 'border-command bg-accent text-ink'
+				: 'border-transparent text-ink-muted hover:bg-hover-soft hover:text-ink'
 		}`;
 
 	afterNavigate(() => sidebar.closeDrawer());
@@ -41,7 +43,7 @@
 			type="button"
 			aria-label="Close navigation"
 			onclick={() => sidebar.closeDrawer()}
-			class="ml-auto flex size-8 flex-none cursor-pointer items-center justify-center text-ink/50 hover:text-command md:hidden"
+			class="ml-auto flex size-8 flex-none cursor-pointer items-center justify-center text-ink-muted hover:text-command md:hidden"
 		>
 			<XIcon class="size-5" />
 		</button>
@@ -68,7 +70,7 @@
 				type="button"
 				title="Sign out"
 				onclick={handleLogout}
-				class="flex h-7 w-7 flex-none cursor-pointer items-center justify-center text-ink/50 hover:text-danger-text"
+				class="flex h-7 w-7 flex-none cursor-pointer items-center justify-center text-ink-muted hover:text-danger-text"
 			>
 				<LogOutIcon class="size-4" />
 			</button>

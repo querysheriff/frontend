@@ -109,7 +109,7 @@
 										aria-label="Remove webhook"
 										title="Remove webhook"
 										onclick={() => clearWebhook(s)}
-										class="shrink-0 cursor-pointer text-ink/55 hover:text-danger-text"
+										class="shrink-0 cursor-pointer text-ink-muted hover:text-danger-text"
 									>
 										<XIcon class="size-3.5" />
 									</button>
