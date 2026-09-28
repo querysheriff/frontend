@@ -9,11 +9,11 @@ const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
 export const presets: { key: string; label: string; ms: number }[] = [
-	{ key: '15m', label: 'Last 15 minutes', ms: 15 * MINUTE },
 	{ key: '1h', label: 'Last 1 hour', ms: HOUR },
 	{ key: '6h', label: 'Last 6 hours', ms: 6 * HOUR },
 	{ key: '24h', label: 'Last 24 hours', ms: 24 * HOUR },
-	{ key: '7d', label: 'Last 7 days', ms: 7 * DAY }
+	{ key: '7d', label: 'Last 7 days', ms: 7 * DAY },
+	{ key: '30d', label: 'Last 30 days', ms: 30 * DAY }
 ];
 
 const DEFAULT_RANGE = '24h';

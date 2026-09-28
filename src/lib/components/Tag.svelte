@@ -2,13 +2,11 @@
 	let {
 		text,
 		size = 'sm',
-		title,
-		class: klass = ''
+		title
 	}: {
 		text: string;
 		size?: 'sm' | 'md';
 		title?: string;
-		class?: string;
 	} = $props();
 
 	const cls = $derived(
@@ -18,4 +16,4 @@
 	);
 </script>
 
-<span class="{cls} {klass}" {title}>{text}</span>
+<span class={cls} {title}>{text}</span>

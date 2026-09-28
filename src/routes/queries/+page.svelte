@@ -88,9 +88,7 @@
 	const bucketMs = $derived(Number(calls.data?.bucketMs ?? latency.data?.bucketMs ?? 0n));
 	const callsPoints = $derived(toSeriesPoints(calls.data?.calls));
 	const volumeDescription = $derived(
-		callsPoints.length > 0
-			? `How many times queries ran · ${fmtBucketSize(bucketMs)} buckets`
-			: 'How many times queries ran'
+		callsPoints.length > 0 ? `How many queries ran · ${fmtBucketSize(bucketMs)} buckets` : 'How many queries ran'
 	);
 	const latencySeries = $derived([
 		{ label: 'p90', color: 'var(--color-steel)', points: toSeriesPoints(latency.data?.p90Ms) },
@@ -117,26 +115,22 @@
 				unit="calls"
 			/>
 		{:else}
-			<ChartEmpty message={calls.loading ? 'Loading…' : (calls.error ?? 'No data')} />
+			<ChartEmpty message={calls.loading ? 'Loading…' : (calls.error ?? 'No data')} error={!!calls.error} />
 		{/if}
 	</ChartPanel>
 
-	<ChartPanel
-		docId="q-speed"
-		title="Query speed over time"
-		description="How long queries of 10 ms or more took — p90 means roughly 9 in 10 finished faster"
-	>
+	<ChartPanel docId="q-speed" title="Query speed over time" description="How long queries of 10 ms or more took">
 		{#if latencySeries.some((s) => s.points.length > 0)}
 			<LineChart series={latencySeries} from={chartRange.from} to={chartRange.to} {bucketMs} format={fmtDuration} />
 		{:else}
-			<ChartEmpty message={latencyMessage} />
+			<ChartEmpty message={latencyMessage} error={!!latency.error && !calls.loading} />
 		{/if}
 	</ChartPanel>
 </div>
 
 <DocCard id="q-table">
 	<header class="pt-3.5 pr-11 pb-0 pl-4">
-		<SectionHeader title="Queries" description="Grouped by shape, with the most time-consuming first" />
+		<SectionHeader title="Queries" description="Grouped by shape, with the biggest total time first" />
 	</header>
 	<TagFilterBar bind:searchText={search} {filters} />
 

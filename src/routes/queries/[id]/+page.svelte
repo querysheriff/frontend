@@ -128,7 +128,11 @@
 	</header>
 
 	<div class="mt-3.5">
-		<QueryTextBlock text={meta.data?.query} placeholder={meta.loading ? 'Loading…' : (metaError ?? '')} />
+		<QueryTextBlock
+			text={meta.data?.query}
+			placeholder={meta.loading ? 'Loading…' : (metaError ?? '')}
+			error={!meta.loading && !!metaError}
+		/>
 	</div>
 
 	{#if tags.length > 0}
@@ -153,7 +157,7 @@
 				unit="calls"
 			/>
 		{:else}
-			<ChartEmpty message={chartMessage} />
+			<ChartEmpty message={chartMessage} error={!!series.error} />
 		{/if}
 	</ChartPanel>
 
@@ -165,7 +169,7 @@
 		{#if timing.some((s) => s.points.length > 0)}
 			<LineChart series={timing} from={chartRange.from} to={chartRange.to} {bucketMs} format={fmtDuration} />
 		{:else}
-			<ChartEmpty message={chartMessage} />
+			<ChartEmpty message={chartMessage} error={!!series.error} />
 		{/if}
 	</ChartPanel>
 </div>

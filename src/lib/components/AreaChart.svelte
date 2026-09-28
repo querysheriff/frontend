@@ -1,11 +1,16 @@
 <script lang="ts">
 	import { Axis, Chart, Grid, Highlight, LinearGradient, Svg, Tooltip } from 'layerchart';
-	import { scaleTime } from 'd3-scale';
 	import { fmtAxisTime, fmtBucketRange, fmtCount, fmtCountFull } from '$lib/format';
 	import ChartFrame from '$lib/components/ChartFrame.svelte';
 	import MetricArea from '$lib/components/MetricArea.svelte';
 	import SeriesPoints from '$lib/components/SeriesPoints.svelte';
-	import { buildMetricChartModel, type MetricSeriesPoint, type MetricSeriesRow } from '$lib/metricChart';
+	import {
+		buildMetricChartModel,
+		timeAxisTicks,
+		Y_AXIS_WIDTH,
+		type MetricSeriesPoint,
+		type MetricSeriesRow
+	} from '$lib/metricChart';
 	import { createTimeBrush } from '$lib/chartBrush.svelte';
 
 	let {
@@ -48,9 +53,6 @@
 		return m;
 	});
 
-	// Sized from the widest label the formatter can produce: a fixed gutter overruns on "8.33min".
-	const padLeft = $derived(Math.max(36, Math.ceil(format(yMax || 1).length * 7.2) + 12));
-
 	const brush = createTimeBrush(() => model.step);
 </script>
 
@@ -58,12 +60,11 @@
 	<Chart
 		data={model.rows}
 		x={bucketCenter}
-		xScale={scaleTime()}
 		xDomain={[model.xFrom, model.xTo]}
 		y={() => 0}
 		yDomain={[0, Math.max(yMax, minYMax)]}
 		yNice
-		padding={{ left: padLeft, right: 16, bottom: 24 }}
+		padding={{ left: Y_AXIS_WIDTH, right: 16, bottom: 24 }}
 		tooltipContext={{ mode: 'bisect-x' }}
 		brush={brush.props}
 	>
@@ -73,7 +74,7 @@
 			<Axis
 				placement="bottom"
 				rule
-				ticks={6}
+				ticks={timeAxisTicks}
 				format={fmtAxisTime}
 				tickLabelProps={{ class: 'fill-ink/45 font-mono text-2xs' }}
 			/>

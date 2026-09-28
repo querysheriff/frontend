@@ -2,7 +2,7 @@
 	import { ChevronDownIcon, ChevronRightIcon, ChevronsDownUpIcon, ChevronsUpDownIcon } from '@lucide/svelte';
 	import { buildSqlTree, foldablePaths, formatSql, hiddenLines, previewLimits, type SqlNode } from '$lib/sqlOutline';
 
-	let { text, placeholder = '' }: { text?: string; placeholder?: string } = $props();
+	let { text, placeholder = '', error = false }: { text?: string; placeholder?: string; error?: boolean } = $props();
 
 	const roots = $derived(text ? buildSqlTree(formatSql(text)) : []);
 	const limits = $derived(previewLimits(roots));
@@ -80,7 +80,7 @@
 
 <div class="relative border border-line-card bg-ink px-4 py-3.5 font-mono text-sm leading-[1.7]">
 	{#if !text}
-		<div class="text-paper/50">{placeholder}</div>
+		<div class={error ? 'text-danger-on-ink' : 'text-paper/50'}>{placeholder}</div>
 	{:else if roots.length === 0}
 		<div class="break-words whitespace-pre-wrap text-paper">{text}</div>
 	{:else}

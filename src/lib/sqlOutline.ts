@@ -11,7 +11,7 @@ const PREVIEW_LINES = 20;
 
 const PROJECTIONS = new Set(['SELECT', 'SELECT DISTINCT', 'SELECT ALL', 'RETURNING']);
 
-export function isProjection(node: SqlNode): boolean {
+function isProjection(node: SqlNode): boolean {
 	return PROJECTIONS.has(node.text.trim().toUpperCase());
 }
 

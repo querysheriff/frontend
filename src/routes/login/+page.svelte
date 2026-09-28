@@ -79,7 +79,8 @@
 				disabled={submitting}
 				class="flex h-[2.75rem] w-full cursor-pointer items-center justify-center gap-2.5 bg-command font-sans text-lg font-bold text-paper hover:bg-danger disabled:cursor-default disabled:opacity-70"
 			>
-				<span>{submitting ? 'Signing in…' : 'Sign in'}</span>
+				<!-- 1px down: centred, the label reads high next to the arrow. -->
+				<span class="translate-y-px">{submitting ? 'Signing in…' : 'Sign in'}</span>
 				<ArrowRightIcon class="size-4 stroke-[2.2]" />
 			</button>
 		</form>

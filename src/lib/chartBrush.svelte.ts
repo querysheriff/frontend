@@ -16,6 +16,14 @@ function toDate(value: unknown): Date | null {
 // Drag-to-zoom shared by every time chart; a drag narrower than one bucket is a stray click.
 export function createTimeBrush(step: () => number) {
 	let brushing = $state(false);
+	let cancelled = false;
+
+	function cancelOnEscape(e: KeyboardEvent) {
+		if (e.key !== 'Escape') return;
+		e.preventDefault();
+		cancelled = true;
+		window.dispatchEvent(new PointerEvent('pointerup'));
+	}
 
 	return {
 		get brushing() {
@@ -29,9 +37,18 @@ export function createTimeBrush(step: () => number) {
 			},
 			onBrushStart: () => {
 				brushing = true;
+				cancelled = false;
+				window.addEventListener('keydown', cancelOnEscape, { capture: true });
 			},
 			onBrushEnd: ({ brush }: { brush: BrushLike }) => {
 				brushing = false;
+				window.removeEventListener('keydown', cancelOnEscape, { capture: true });
+
+				if (cancelled) {
+					brush.reset();
+
+					return;
+				}
 
 				// A click with no drag is BrushContext's reset gesture, not a selection.
 				if (!brush.active) return;

@@ -1,9 +1,20 @@
 import { timestampDate } from '@bufbuild/protobuf/wkt';
 import type { MetricPoint } from '$lib/gen/querysheriff/v1/common_pb';
+import type { AnyScale } from 'layerchart';
 
 export type MetricSeriesPoint = { at: Date; value: number };
 
 export type MetricSeriesRow = { at: Date; values: number[] };
+
+export const Y_AXIS_WIDTH = 64;
+
+const TIME_TICKS = 8.25;
+const MIN_TICK_SPACING = 80;
+
+export function timeAxisTicks(scale: AnyScale): Date[] | undefined {
+	const [start, end] = scale.range();
+	return scale.ticks?.(Math.min(TIME_TICKS, Math.abs(end - start) / MIN_TICK_SPACING));
+}
 
 type MetricChartModel = {
 	rows: MetricSeriesRow[];

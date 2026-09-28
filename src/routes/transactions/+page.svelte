@@ -94,7 +94,10 @@
 				minYMax={1000}
 			/>
 		{:else}
-			<ChartEmpty message={series.loading ? 'Loading…' : (series.error ?? 'No open transactions')} />
+			<ChartEmpty
+				message={series.loading ? 'Loading…' : (series.error ?? 'No open transactions')}
+				error={!!series.error}
+			/>
 		{/if}
 	</ChartPanel>
 </div>
@@ -103,7 +106,7 @@
 	<div class="border-b border-line py-3.5 pr-11 pl-4">
 		<SectionHeader
 			title="Long transactions"
-			description="Transactions open for {fmtDuration(MIN_TRANSACTION_MS)} or more — open one to see what it was doing"
+			description="Transactions open for {fmtDuration(MIN_TRANSACTION_MS)} or more"
 		/>
 	</div>
 

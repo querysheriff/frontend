@@ -11,7 +11,7 @@
 
 <Story name="With content">
 	{#snippet template()}
-		<ChartPanel title="Query volume over time" description="How many times queries ran">
+		<ChartPanel title="Query volume over time" description="How many queries ran">
 			<div
 				class="flex h-[15rem] items-center justify-center border border-dashed border-line-strong font-mono text-2xs text-ink/70"
 			>

@@ -18,6 +18,7 @@
 	--color-command: #a83d2b;
 
 	--color-danger: #c23a24;
+	--color-danger-on-ink: color-mix(in oklab, var(--color-danger) 60%, var(--color-paper));
 	/* -text variants are darkened to clear WCAG AA as text; the vivid bases stay for dots and fills. */
 	--color-warn-text: #9a5b12;
 	--color-warn: #d97b1c;
@@ -60,7 +61,6 @@
 	/* Text scale (rem). xs–2xl keep Tailwind's default line-heights; set leading-* where it matters. */
 	--text-2xs: 0.75rem; /* 12px */
 	--text-xs: 0.8125rem; /* 13px */
-	--text-sm: 0.875rem; /* 14px */
 	--text-md: 0.9375rem; /* 15px */
 	--text-lg: 1rem; /* 16px */
 	--text-xl: 1.125rem; /* 18px */
@@ -71,15 +71,9 @@
 }
 
 @layer base {
-	html,
-	body {
-		margin: 0;
-		padding: 0;
-	}
 	body {
 		background: var(--color-paper);
 		color: var(--color-ink);
-		font-family: var(--font-sans);
 		-webkit-font-smoothing: antialiased;
 		text-rendering: optimizeLegibility;
 	}
@@ -104,8 +98,7 @@
 	}
 }
 
-/* layerchart strokes its tick labels; the app's charts want plain text. */
-.lc-axis-tick-label,
-.lc-axis-tick-label tspan {
+/* hide layerchart's faint white outline around axis labels */
+.lc-axis-tick-label {
 	stroke: none;
 }

@@ -1,9 +1,10 @@
 <script lang="ts">
 	import ChartFrame from '$lib/components/ChartFrame.svelte';
+	import StateBlock from '$lib/components/StateBlock.svelte';
 
-	let { message }: { message: string } = $props();
+	let { message, error = false }: { message: string; error?: boolean } = $props();
 </script>
 
 <ChartFrame>
-	<div class="flex h-full items-center justify-center font-mono text-sm text-ink/70">{message}</div>
+	<StateBlock kind={error ? 'error' : 'muted'} class="flex h-full items-center justify-center" {message} />
 </ChartFrame>

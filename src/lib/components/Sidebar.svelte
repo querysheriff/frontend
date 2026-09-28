@@ -50,8 +50,9 @@
 	<nav class="flex flex-col gap-0.5 px-2 py-2.5">
 		{#each session.isSuperAdmin ? [...navItems, ...adminItems] : navItems as item (item.href)}
 			<a href={item.href} title={item.label} class={navClass(isNavActive(item, page.url.pathname))}>
+				<!-- 1px up: geometrically centred, the icons read low next to the labels. -->
 				<item.icon class="size-4 flex-none -translate-y-px" />
-				<span class="font-sans text-lg font-semibold">{item.label}</span>
+				<span class="font-sans text-lg leading-6 font-semibold">{item.label}</span>
 			</a>
 		{/each}
 	</nav>

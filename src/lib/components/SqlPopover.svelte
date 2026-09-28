@@ -93,7 +93,7 @@
 							>
 						{:catch}
 							{@render header()}
-							<div class="flex-1 px-3.5 py-3.5 font-mono text-sm text-paper/55">Failed to load query.</div>
+							<div class="flex-1 px-3.5 py-3.5 font-mono text-sm text-danger-on-ink">Failed to load query.</div>
 						{/await}
 					</Tooltip.Content>
 				</Tooltip.Portal>

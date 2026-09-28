@@ -14,10 +14,9 @@
 
 <script lang="ts">
 	import { Axis, Chart, Highlight, Svg, Tooltip } from 'layerchart';
-	import { scaleTime } from 'd3-scale';
 	import { fmtAxisTime, fmtBucketRange, fmtCount, fmtCountFull } from '$lib/format';
 	import HeatmapCells, { type HeatmapRow } from '$lib/components/HeatmapCells.svelte';
-	import { buildMetricChartModel, type MetricSeriesRow } from '$lib/metricChart';
+	import { buildMetricChartModel, timeAxisTicks, type MetricSeriesRow } from '$lib/metricChart';
 	import { createTimeBrush } from '$lib/chartBrush.svelte';
 
 	let {
@@ -28,6 +27,7 @@
 		bucketMs,
 		labelWidth,
 		message = null,
+		error = false,
 		detail
 	}: {
 		rows: HeatmapRow[];
@@ -38,6 +38,7 @@
 		bucketMs: number;
 		labelWidth: number;
 		message?: string | null;
+		error?: boolean;
 		detail?: (rowKey: string, bucketIndex: number) => HeatmapDetail[];
 	} = $props();
 
@@ -74,12 +75,10 @@
 	}
 </script>
 
-<!-- Sizes to its rows rather than a fixed height, so it carries select-none itself (see ChartFrame). -->
-<div class="relative select-none" style:height="{height}px" ondblclickcapture={(e) => e.stopPropagation()}>
+<div class="relative" style:height="{height}px" ondblclickcapture={(e) => e.stopPropagation()}>
 	<Chart
 		data={model.rows}
 		x={bucketCenter}
-		xScale={scaleTime()}
 		xDomain={[model.xFrom, model.xTo]}
 		y={() => 0}
 		yDomain={[0, 1]}
@@ -91,7 +90,7 @@
 			<Axis
 				placement="bottom"
 				rule
-				ticks={6}
+				ticks={timeAxisTicks}
 				format={fmtAxisTime}
 				tickLabelProps={{ class: 'fill-ink/45 font-mono text-2xs' }}
 			/>
@@ -144,7 +143,9 @@
 
 	{#if message}
 		<div
-			class="pointer-events-none absolute flex items-center justify-center font-mono text-sm text-ink/70"
+			class="pointer-events-none absolute flex items-center justify-center font-mono text-sm {error
+				? 'text-danger'
+				: 'text-ink/70'}"
 			style:left="{labelWidth}px"
 			style:right="16px"
 			style:top="0px"

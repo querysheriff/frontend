@@ -16,31 +16,31 @@ export const navItems: NavItem[] = [
 		label: 'Queries',
 		href: '/queries',
 		icon: DatabaseZapIcon,
-		description: 'How often queries ran, how long they took, and how each one compares'
+		description: 'How often queries ran, how long they took, and which ones used the most time'
 	},
 	{
 		label: 'Locks',
 		href: '/locks',
 		icon: LockIcon,
-		description: 'How much time queries spent stuck waiting, and what was holding them up'
+		description: 'How long queries waited on locks, and what blocked them'
 	},
 	{
 		label: 'Transactions',
 		href: '/transactions',
 		icon: ArrowLeftRightIcon,
-		description: 'How long transactions stayed open, and what they were doing all that time'
+		description: 'How long transactions stayed open, and what they were doing'
 	},
 	{
 		label: 'Logs',
 		href: '/logs',
 		icon: ScrollTextIcon,
-		description: 'What PostgreSQL logged on this server, by severity and category'
+		description: 'What PostgreSQL logged on this server, grouped by severity and category'
 	},
 	{
 		label: 'Alerts',
 		href: '/alerts',
 		icon: BellIcon,
-		description: 'Slack notifications and per-alert toggles for each monitored server'
+		description: 'Slack alerts and per-alert settings for each monitored server'
 	}
 ];
 
@@ -49,13 +49,13 @@ export const adminItems: NavItem[] = [
 		label: 'Collectors',
 		href: '/admin/collectors',
 		icon: KeyRoundIcon,
-		description: 'Access tokens that let collectors report into querysheriff'
+		description: 'Access tokens collectors use to send data to QuerySheriff'
 	},
 	{
 		label: 'Users',
 		href: '/admin/users',
 		icon: UsersIcon,
-		description: 'User accounts and which servers each one can see'
+		description: 'User accounts and which monitored servers they can access'
 	}
 ];
 

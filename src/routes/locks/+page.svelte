@@ -82,8 +82,8 @@
 	const bucketMs = $derived(Number(series.data?.bucketMs ?? 0n));
 	const chartDescription = $derived(
 		bucketMs > 0
-			? `Time queries spent waiting instead of running · ${fmtBucketSize(bucketMs)} buckets`
-			: 'Time queries spent waiting instead of running'
+			? `How much time queries spent waiting instead of running · ${fmtBucketSize(bucketMs)} buckets`
+			: 'How much time queries spent waiting instead of running'
 	);
 </script>
 
@@ -102,14 +102,14 @@
 				minYMax={1000}
 			/>
 		{:else}
-			<ChartEmpty message={series.loading ? 'Loading…' : (series.error ?? 'No lock waits')} />
+			<ChartEmpty message={series.loading ? 'Loading…' : (series.error ?? 'No lock waits')} error={!!series.error} />
 		{/if}
 	</ChartPanel>
 </div>
 
 <DocCard id="l-waits">
 	<div class="border-b border-line py-3.5 pr-11 pl-4">
-		<SectionHeader title="Lock waits" description="Each query that got stuck, and the query that blocked it" />
+		<SectionHeader title="Lock waits" description="Blocked queries and the sessions blocking them" />
 	</div>
 
 	<LockWaitTable rows={waits.rows} bind:sort {sql} loading={waits.loading && waits.rows.length > 0} />

@@ -7,7 +7,7 @@ import {
 	type LogFacetValue
 } from '$lib/gen/querysheriff/v1/log_pb';
 
-export type LevelTier = 'info' | 'warn' | 'severe';
+type LevelTier = 'info' | 'warn' | 'severe';
 
 type LevelMeta = { tier: LevelTier; color: string };
 

@@ -38,6 +38,7 @@
 	} = $props();
 
 	const GAP = 1;
+	const MIN_SEAMED_WIDTH = 6;
 
 	const c = getChartContext();
 
@@ -58,7 +59,7 @@
 				// A cell covers its whole bucket, from at-step to at, cut off at the edges of the plot.
 				const left = Math.max(0, Math.min(c.width, Number(c.xScale(new Date(at.getTime() - step)))));
 				const right = Math.max(0, Math.min(c.width, Number(c.xScale(at))));
-				const w = right - left - GAP;
+				const w = right - left - (right - left >= MIN_SEAMED_WIDTH ? GAP : 0);
 				if (w <= 0) return;
 
 				out.push({

@@ -157,13 +157,14 @@
 			{bucketMs}
 			{labelWidth}
 			message={chartMessage}
+			error={!!series.error}
 		/>
 	</ChartPanel>
 
 	<ChartPanel
 		docId="lg-categories"
 		title="Log categories over time"
-		description={`When each category of event was logged${bucketNote}`}
+		description={`When each type of event was logged${bucketNote}`}
 	>
 		<LogTimelineHeatmap
 			rows={categoryRows}
@@ -173,6 +174,7 @@
 			{bucketMs}
 			{labelWidth}
 			message={chartMessage}
+			error={!!series.error}
 			detail={categoryDetail}
 		/>
 	</ChartPanel>
@@ -180,10 +182,7 @@
 
 <DocCard id="lg-table">
 	<header class="pt-3.5 pr-11 pb-0 pl-4">
-		<SectionHeader
-			title="Log events"
-			description="Every message PostgreSQL wrote, newest first — expand one for the full text"
-		/>
+		<SectionHeader title="Log events" description="PostgreSQL log messages, newest first" />
 	</header>
 
 	<LogFilterBar {filters} facets={facets.data} loading={facets.loading} bind:searchText={search} />

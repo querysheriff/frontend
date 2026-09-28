@@ -99,7 +99,7 @@
 	const rowCls =
 		'flex w-full cursor-pointer items-center gap-2.5 px-2.5 py-2 font-mono text-sm text-ink data-[selected]:bg-hover';
 	const boxCls = 'flex size-3.5 flex-none items-center justify-center border border-line-bold';
-	const emptyCls = 'px-2.5 py-2.5 font-mono text-sm text-ink/70';
+	const emptyCls = 'px-2.5 py-2.5 font-mono text-sm';
 </script>
 
 {#if step === 'key'}
@@ -116,7 +116,7 @@
 						<span class="text-xs text-ink/70">{k.valueCount}</span>
 					</Command.Item>
 				{/each}
-				<Command.Empty class={emptyCls}>
+				<Command.Empty class="{emptyCls} {keys.error ? 'text-danger' : 'text-ink/70'}">
 					{keys.loading ? 'Loading…' : (keys.error ?? (keyRows.length > 0 ? 'No matching tag keys' : 'No tags found'))}
 				</Command.Empty>
 			</Command.Viewport>
@@ -181,7 +181,7 @@
 						<span class="text-xs text-ink/70">{v.statementCount}</span>
 					</Command.Item>
 				{/each}
-				<Command.Empty class={emptyCls}>
+				<Command.Empty class="{emptyCls} {values.error ? 'text-danger' : 'text-ink/70'}">
 					{values.loading ? 'Loading…' : (values.error ?? (valueRows.length > 0 ? 'No matching values' : 'No values'))}
 				</Command.Empty>
 			</Command.Viewport>

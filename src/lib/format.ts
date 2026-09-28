@@ -63,6 +63,7 @@ export function fmtBucketSize(bucketMs: number): string {
 	const minutes = Math.round(bucketMs / 60_000);
 	if (minutes < 60) return `${minutes}-minute`;
 	const hours = minutes / 60;
+	if (hours % 24 === 0) return `${hours / 24}-day`;
 	if (Number.isInteger(hours)) return `${hours}-hour`;
 	return `${minutes}-minute`;
 }
