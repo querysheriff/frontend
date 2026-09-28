@@ -109,7 +109,7 @@
 										aria-label="Remove webhook"
 										title="Remove webhook"
 										onclick={() => clearWebhook(s)}
-										class="shrink-0 cursor-pointer text-ink/55 hover:text-danger"
+										class="shrink-0 cursor-pointer text-ink/55 hover:text-danger-text"
 									>
 										<XIcon class="size-3.5" />
 									</button>
@@ -118,7 +118,7 @@
 							<Button class="shrink-0 px-5" disabled={!isDirty(s)} onclick={() => saveWebhook(s)}>Save</Button>
 						</div>
 						{#if s.slackWebhookUrl.trim() === ''}
-							<div class="mt-3 flex items-center gap-2 font-sans text-sm text-ink/70">
+							<div class="mt-3 flex items-center gap-2 font-sans text-sm text-ink-muted">
 								<InfoIcon class="size-3.5 shrink-0" />
 								<span>Add a webhook URL to configure alerts for this server.</span>
 							</div>

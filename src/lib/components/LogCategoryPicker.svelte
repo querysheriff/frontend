@@ -130,8 +130,8 @@
 	const rowCls =
 		'flex w-full cursor-pointer items-center gap-2.5 px-2.5 py-2 text-left font-sans text-sm text-ink data-[selected]:bg-hover';
 	const boxCls = 'flex size-3.5 flex-none items-center justify-center border border-line-bold';
-	const countCls = 'font-mono text-xs text-ink/70';
-	const emptyCls = 'px-2.5 py-2.5 font-sans text-sm text-ink/70';
+	const countCls = 'font-mono text-xs text-ink-muted';
+	const emptyCls = 'px-2.5 py-2.5 font-sans text-sm text-ink-muted';
 	const selectedCount = $derived(pickedCategories.length + pickedEvents.length);
 </script>
 
@@ -247,7 +247,7 @@
 					class={rowCls}
 				>
 					{@render check(wholeCategorySelected)}
-					<span class="flex-1 text-ink/70 italic">Everything in this category</span>
+					<span class="flex-1 text-ink-muted italic">Everything in this category</span>
 					<span class={countCls}>{fmtCount(categoryCounts.get(open) ?? 0)}</span>
 				</Command.Item>
 
@@ -274,7 +274,7 @@
 		<button
 			type="button"
 			onclick={reset}
-			class="cursor-pointer px-2 py-2 font-mono text-xs text-ink/70 hover:text-danger">Reset</button
+			class="cursor-pointer px-2 py-2 font-mono text-xs text-ink-muted hover:text-danger-text">Reset</button
 		>
 	{/if}
 	<button

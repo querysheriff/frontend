@@ -39,7 +39,7 @@
 	}
 
 	const triggerCls =
-		'flex cursor-pointer items-center gap-1.5 border border-dashed border-line-bold px-2.5 py-1 font-mono text-sm text-ink/70 hover:border-accent-line hover:text-command';
+		'flex cursor-pointer items-center gap-1.5 border border-dashed border-line-bold px-2.5 py-1 font-mono text-sm text-ink-muted hover:border-accent-line hover:text-command';
 	// The picker focuses its own search input or list, so bits-ui must not pick the first button.
 	const contentProps = {
 		side: 'bottom',
@@ -106,7 +106,7 @@
 				filters.clear();
 				picker = null;
 			}}
-			class="translate-y-[1px] cursor-pointer px-1.5 py-1 font-mono text-xs text-ink/70 hover:text-danger"
+			class="translate-y-[1px] cursor-pointer px-1.5 py-1 font-mono text-xs text-ink-muted hover:text-danger-text"
 		>
 			Clear all
 		</button>

@@ -101,7 +101,7 @@
 		}
 	}
 
-	const th = 'border-b border-line px-5 py-3 font-sans text-xs font-semibold whitespace-nowrap text-ink/70';
+	const th = 'border-b border-line px-5 py-3 font-sans text-xs font-semibold whitespace-nowrap text-ink-muted';
 </script>
 
 <PageBar>
@@ -130,11 +130,15 @@
 							<td class="border-b border-line-soft px-5 py-3.5">
 								<span class="font-mono text-md font-medium text-ink">{token.serverName}</span>
 							</td>
-							<td class="border-b border-line-soft px-5 py-3.5 font-mono text-sm whitespace-nowrap text-ink/70">
+							<td class="border-b border-line-soft px-5 py-3.5 font-mono text-sm whitespace-nowrap text-ink-muted">
 								{created(token)}
 							</td>
 							<td class="border-b border-line-soft px-5 py-3.5 text-right">
-								<button type="button" onclick={() => remove(token)} class="{rowAction} text-ink/70 hover:text-danger">
+								<button
+									type="button"
+									onclick={() => remove(token)}
+									class="{rowAction} text-ink-muted hover:text-danger-text"
+								>
 									<Trash2Icon class="size-3.5 shrink-0" />
 									<span>Delete</span>
 								</button>
@@ -181,10 +185,12 @@
 		{:else}
 			<div class="p-5">
 				<div role="alert" class="mb-4 flex items-center gap-2.5 border border-danger/30 bg-danger/8 px-3.5 py-3">
-					<TriangleAlertIcon class="size-4 flex-none text-danger" />
-					<div class="font-sans text-sm font-bold text-danger">Copy this token now. It will not be shown again.</div>
+					<TriangleAlertIcon class="size-4 flex-none text-danger-text" />
+					<div class="font-sans text-sm font-bold text-danger-text">
+						Copy this token now. It will not be shown again.
+					</div>
 				</div>
-				<span class="mb-1.5 block font-sans text-2xs font-semibold text-ink/70">Token</span>
+				<span class="mb-1.5 block font-sans text-2xs font-semibold text-ink-muted">Token</span>
 				<div class="flex items-center gap-3 border border-line-boldest bg-ink px-3.5 py-3.5">
 					<code class="min-w-0 flex-1 font-mono text-md leading-[1.5] break-all text-paper">{newToken}</code>
 					<button
@@ -196,7 +202,7 @@
 						<span>{copied ? 'Copied' : 'Copy'}</span>
 					</button>
 				</div>
-				<div class="mt-3 font-sans text-sm text-ink/70">
+				<div class="mt-3 font-sans text-sm text-ink-muted">
 					Server <span class="font-mono text-ink">{newTokenServer}</span>
 				</div>
 			</div>

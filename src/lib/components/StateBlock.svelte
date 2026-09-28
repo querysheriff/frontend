@@ -3,6 +3,6 @@
 	let { kind = 'muted', message, class: klass = '' }: Props = $props();
 </script>
 
-<div class="text-center font-mono text-sm {kind === 'error' ? 'text-danger' : 'text-ink/70'} {klass}">
+<div class="text-center font-mono text-sm {kind === 'error' ? 'text-danger-text' : 'text-ink-muted'} {klass}">
 	{message}
 </div>

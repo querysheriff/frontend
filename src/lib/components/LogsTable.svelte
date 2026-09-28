@@ -73,7 +73,7 @@
 
 	const cell = 'border-b border-line-soft px-4 py-3 align-top leading-[20px]';
 	const badgeCls = 'inline-flex h-5 max-w-full translate-y-px items-center align-top leading-none';
-	const panelLabel = 'mb-1 font-sans text-2xs font-semibold text-ink/70';
+	const panelLabel = 'mb-1 font-sans text-2xs font-semibold text-ink-muted';
 
 	const hasDetail = (r: LogRecord): boolean =>
 		!!(messageOf(r) || r.statementSample || r.stateCode || r.detail || r.hint || r.context || r.statement);
@@ -148,7 +148,7 @@
 							>{classificationLabel(r.classification)}</span
 						>
 						{#if summary}
-							<span class="mt-0.5 block truncate font-mono text-xs leading-[18px] text-ink/70">{summary}</span>
+							<span class="mt-0.5 block truncate font-mono text-xs leading-[18px] text-ink-muted">{summary}</span>
 						{/if}
 					</td>
 
@@ -205,7 +205,7 @@
 													>
 												{/if}
 											{:else}
-												<span class="font-sans text-xs text-ink/70">
+												<span class="font-sans text-xs text-ink-muted">
 													Not matched to a known query — enable
 													<code class="font-mono">compute_query_id</code> to link these
 												</span>
@@ -217,7 +217,7 @@
 								{#if r.stateCode}
 									<div class="mb-3.5">
 										<span
-											class="border border-danger/30 bg-danger/10 px-2.5 py-1 font-mono text-xs font-semibold text-danger"
+											class="border border-danger/30 bg-danger/10 px-2.5 py-1 font-mono text-xs font-semibold text-danger-text"
 											>SQLSTATE {r.stateCode}</span
 										>
 									</div>
@@ -247,7 +247,7 @@
 
 								<div class="flex flex-wrap gap-x-6 gap-y-1.5 border-t border-line-soft pt-3 font-mono text-xs">
 									{#each [{ label: 'PID', value: r.pid ? String(r.pid) : '' }, { label: 'Application', value: r.applicationName }, { label: 'Backend', value: r.backendType }] as field (field.label)}
-										<span class="text-ink/70"
+										<span class="text-ink-muted"
 											>{field.label}
 											<span class={field.value ? 'text-ink' : 'text-ink/45'}>{field.value || '—'}</span></span
 										>
@@ -255,7 +255,7 @@
 								</div>
 
 								{#if !hasDetail(r)}
-									<div class="mt-3 font-mono text-sm text-ink/70">No additional fields recorded for this event</div>
+									<div class="mt-3 font-mono text-sm text-ink-muted">No additional fields recorded for this event</div>
 								{/if}
 							</div>
 						</td>

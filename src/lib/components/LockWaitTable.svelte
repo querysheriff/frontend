@@ -92,7 +92,7 @@
 		<tbody>
 			{#each rows as r (r.key)}
 				<tr class="transition-colors hover:bg-hover">
-					<td class="{cell} hidden font-mono text-sm leading-[20px] whitespace-nowrap text-ink/70 sm:table-cell"
+					<td class="{cell} hidden font-mono text-sm leading-[20px] whitespace-nowrap text-ink-muted sm:table-cell"
 						>{r.startedWaiting ? fmtClockDate(r.startedWaiting) : '—'}</td
 					>
 					<td

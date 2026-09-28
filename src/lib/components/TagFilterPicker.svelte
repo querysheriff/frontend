@@ -113,10 +113,10 @@
 				{#each keyRows as k (k.key)}
 					<Command.Item value={k.key} onSelect={() => selectKey(k.key)} class={rowCls}>
 						<span class="flex-1 text-left">{k.key}</span>
-						<span class="text-xs text-ink/70">{k.valueCount}</span>
+						<span class="text-xs text-ink-muted">{k.valueCount}</span>
 					</Command.Item>
 				{/each}
-				<Command.Empty class="{emptyCls} {keys.error ? 'text-danger' : 'text-ink/70'}">
+				<Command.Empty class="{emptyCls} {keys.error ? 'text-danger-text' : 'text-ink-muted'}">
 					{keys.loading ? 'Loading…' : (keys.error ?? (keyRows.length > 0 ? 'No matching tag keys' : 'No tags found'))}
 				</Command.Empty>
 			</Command.Viewport>
@@ -145,7 +145,7 @@
 							? 'cursor-not-allowed text-ink/25'
 							: op === o
 								? 'cursor-pointer bg-command text-paper'
-								: 'cursor-pointer text-ink/70 hover:bg-hover'}"
+								: 'cursor-pointer text-ink-muted hover:bg-hover'}"
 					>
 						{OP_SYMBOL[o]}
 					</button>
@@ -164,7 +164,7 @@
 					<span class={boxCls}>
 						{#if anyValue}<CheckIcon class="size-3 text-command" />{/if}
 					</span>
-					<span class="flex-1 text-left text-ink/70 italic">Any value</span>
+					<span class="flex-1 text-left text-ink-muted italic">Any value</span>
 				</Command.Item>
 
 				{#each valueRows as v (v.value)}
@@ -178,10 +178,10 @@
 							{#if picked.includes(v.value)}<CheckIcon class="size-3 text-command" />{/if}
 						</span>
 						<span class="flex-1 truncate text-left">{v.value}</span>
-						<span class="text-xs text-ink/70">{v.statementCount}</span>
+						<span class="text-xs text-ink-muted">{v.statementCount}</span>
 					</Command.Item>
 				{/each}
-				<Command.Empty class="{emptyCls} {values.error ? 'text-danger' : 'text-ink/70'}">
+				<Command.Empty class="{emptyCls} {values.error ? 'text-danger-text' : 'text-ink-muted'}">
 					{values.loading ? 'Loading…' : (values.error ?? (valueRows.length > 0 ? 'No matching values' : 'No values'))}
 				</Command.Empty>
 			</Command.Viewport>

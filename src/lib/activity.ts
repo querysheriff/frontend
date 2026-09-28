@@ -20,7 +20,7 @@ export function statusColor(s: TransactionEventStatus): string {
 		case TransactionEventStatus.ACTIVE:
 			return 'var(--color-ok-text)';
 		case TransactionEventStatus.ABORTED:
-			return 'var(--color-danger)';
+			return 'var(--color-danger-text)';
 		default:
 			return 'var(--color-steel-text)';
 	}

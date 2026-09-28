@@ -59,7 +59,7 @@
 <th
 	scope="col"
 	aria-sort={sortable ? (dir === 'asc' ? 'ascending' : dir === 'desc' ? 'descending' : 'none') : undefined}
-	class={['border-b border-line font-sans text-xs font-semibold whitespace-nowrap text-ink/70', klass]}
+	class={['border-b border-line font-sans text-xs font-semibold whitespace-nowrap text-ink-muted', klass]}
 >
 	{#if sortable}
 		<button

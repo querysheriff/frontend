@@ -59,7 +59,9 @@
 					</td>
 					<td class={cell}>
 						<div
-							class="{line} justify-end font-mono text-md whitespace-nowrap {fires === 0 ? 'text-ink/70' : 'text-ink'}"
+							class="{line} justify-end font-mono text-md whitespace-nowrap {fires === 0
+								? 'text-ink-muted'
+								: 'text-ink'}"
 						>
 							{#if fires === 0}
 								<!-- The dash is the visual form of zero; a screen reader gets the number. -->

@@ -72,7 +72,7 @@
 								{#if hasBaseTags}
 									<span
 										title="Also carries the base tags shown at the top"
-										class="inline-flex items-center gap-1 border border-line px-1.5 py-px font-mono text-xs whitespace-nowrap text-ink/70"
+										class="inline-flex items-center gap-1 border border-line px-1.5 py-px font-mono text-xs whitespace-nowrap text-ink-muted"
 									>
 										<ArrowUpIcon class="size-2.5" />base tags
 									</span>
@@ -95,7 +95,7 @@
 								<ExternalLinkIcon class="size-3 stroke-[2.2]" />
 							</a>
 						{:else}
-							<span class="font-mono text-sm leading-[20px] text-ink/70">—</span>
+							<span class="font-mono text-sm leading-[20px] text-ink-muted">—</span>
 						{/if}
 					</td>
 					<td

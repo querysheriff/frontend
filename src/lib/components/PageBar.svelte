@@ -24,7 +24,7 @@
 				{screen.title}
 			</h1>
 		</div>
-		<p class="truncate text-xs leading-[1.2] text-ink/70">{screen.description}</p>
+		<p class="truncate text-xs leading-[1.2] text-ink-muted">{screen.description}</p>
 	</div>
 	{#if actions}
 		<div class="flex flex-wrap items-center gap-2.5">

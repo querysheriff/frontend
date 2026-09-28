@@ -20,7 +20,11 @@
 	{#if plan.data?.planJson}
 		<PlanViewer planJson={plan.data.planJson} query={plan.data.query} />
 	{:else}
-		<div class="flex h-full items-center justify-center font-mono text-sm {plan.error ? 'text-danger' : 'text-ink/70'}">
+		<div
+			class="flex h-full items-center justify-center font-mono text-sm {plan.error
+				? 'text-danger-text'
+				: 'text-ink-muted'}"
+		>
 			{plan.loading ? 'Loading plan…' : (plan.error ?? 'No plan was captured for this sample')}
 		</div>
 	{/if}

@@ -109,7 +109,7 @@
 			>
 				{#snippet children({ data: point }: { data: MetricSeriesRow })}
 					<div class="flex flex-col gap-1 font-mono text-xs leading-[1.4] whitespace-nowrap">
-						<div class="text-ink/70">{fmtBucketRange(point.at, model.step)}</div>
+						<div class="text-ink-muted">{fmtBucketRange(point.at, model.step)}</div>
 						<div class="font-semibold text-ink">{formatFull(point.values[0])}{unit ? ` ${unit}` : ''}</div>
 					</div>
 				{/snippet}

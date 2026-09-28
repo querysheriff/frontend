@@ -128,7 +128,8 @@
 		}
 	}
 
-	const th = 'border-b border-line px-5 py-3 text-left font-sans text-xs font-semibold whitespace-nowrap text-ink/70';
+	const th =
+		'border-b border-line px-5 py-3 text-left font-sans text-xs font-semibold whitespace-nowrap text-ink-muted';
 	const allChip =
 		'inline-block border border-accent-line bg-accent px-2 py-0.5 font-sans text-2xs font-bold whitespace-nowrap text-command';
 	const serverChip =
@@ -164,7 +165,7 @@
 							</td>
 							<td class="border-b border-line-soft px-5 py-3.5 align-top font-sans text-sm text-ink/78">{u.email}</td>
 							<td
-								class="border-b border-line-soft px-5 py-3.5 align-top font-mono text-sm whitespace-nowrap text-ink/70"
+								class="border-b border-line-soft px-5 py-3.5 align-top font-mono text-sm whitespace-nowrap text-ink-muted"
 							>
 								{created(u)}
 							</td>
@@ -173,7 +174,7 @@
 									{#if u.isSuperAdmin}
 										<span class={allChip}>All servers</span>
 									{:else if u.allowedServers.length === 0}
-										<span class="font-mono text-sm text-ink/70">—</span>
+										<span class="font-mono text-sm text-ink-muted">—</span>
 									{:else}
 										{#each u.allowedServers as s (s)}
 											<span class={serverChip}>{s}</span>
@@ -183,12 +184,20 @@
 							</td>
 							<td class="border-b border-line-soft px-5 py-3.5 text-right align-top">
 								<div class="inline-flex items-center justify-end gap-4">
-									<button type="button" onclick={() => openEdit(u)} class="{rowAction} text-command hover:text-danger">
+									<button
+										type="button"
+										onclick={() => openEdit(u)}
+										class="{rowAction} text-command hover:text-danger-text"
+									>
 										<SquarePenIcon class="size-3.5 shrink-0" />
 										<span>Edit</span>
 									</button>
 									{#if !u.isSuperAdmin}
-										<button type="button" onclick={() => remove(u)} class="{rowAction} text-ink/70 hover:text-danger">
+										<button
+											type="button"
+											onclick={() => remove(u)}
+											class="{rowAction} text-ink-muted hover:text-danger-text"
+										>
 											<Trash2Icon class="size-3.5 shrink-0" />
 											<span>Delete</span>
 										</button>
@@ -238,13 +247,13 @@
 			/>
 
 			{#if editingSuperAdmin}
-				<div class="border border-line-card bg-hover-soft px-3.5 py-3 font-sans text-sm text-ink/70">
+				<div class="border border-line-card bg-hover-soft px-3.5 py-3 font-sans text-sm text-ink-muted">
 					The super admin can view every server.
 				</div>
 			{:else}
-				<span class="mb-2 block font-sans text-2xs font-semibold text-ink/70"> Allowed Servers </span>
+				<span class="mb-2 block font-sans text-2xs font-semibold text-ink-muted"> Allowed Servers </span>
 				{#if serverChoices.length === 0}
-					<div class="font-mono text-sm text-ink/70">No servers yet — create a collector token first</div>
+					<div class="font-mono text-sm text-ink-muted">No servers yet — create a collector token first</div>
 				{:else}
 					<div class="flex flex-wrap gap-2">
 						{#each serverChoices as name (name)}
@@ -254,7 +263,7 @@
 								onclick={() => toggleServer(name)}
 								class="inline-flex cursor-pointer items-center gap-2 border px-3 py-2 font-mono text-sm select-none {on
 									? 'border-command bg-accent font-semibold text-command'
-									: 'border-line-strong text-ink/70'}"
+									: 'border-line-strong text-ink-muted'}"
 							>
 								{#if on}<CheckIcon class="size-3.5" />{:else}<PlusIcon class="size-3.5" />{/if}{name}
 							</button>

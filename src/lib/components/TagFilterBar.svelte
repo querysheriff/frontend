@@ -49,7 +49,7 @@
 
 	<Popover.Root bind:open={() => picker !== null, (open) => (picker = open ? { mode: 'add' } : null)}>
 		<Popover.Trigger
-			class="flex cursor-pointer items-center gap-1.5 border border-dashed border-line-bold px-2.5 py-1 font-mono text-sm text-ink/70 hover:border-accent-line hover:text-command"
+			class="flex cursor-pointer items-center gap-1.5 border border-dashed border-line-bold px-2.5 py-1 font-mono text-sm text-ink-muted hover:border-accent-line hover:text-command"
 		>
 			<SearchIcon class="size-3" />
 			Tag
@@ -77,7 +77,7 @@
 				filters.clear();
 				picker = null;
 			}}
-			class="translate-y-[1px] cursor-pointer px-1.5 py-1 font-mono text-xs text-ink/70 hover:text-danger"
+			class="translate-y-[1px] cursor-pointer px-1.5 py-1 font-mono text-xs text-ink-muted hover:text-danger-text"
 		>
 			Clear all
 		</button>
@@ -89,7 +89,7 @@
 		<div class="flex items-center gap-3.5">
 			{#each kindOptions as opt (opt.key)}
 				<label
-					class="flex cursor-pointer items-center gap-2 font-sans text-xs leading-none font-semibold text-ink/70 select-none hover:text-ink"
+					class="flex cursor-pointer items-center gap-2 font-sans text-xs leading-none font-semibold text-ink-muted select-none hover:text-ink"
 				>
 					<input
 						type="checkbox"

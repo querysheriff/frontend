@@ -35,6 +35,18 @@ function tint(color: string, pct: number): string {
 	return `color-mix(in oklab, ${color} ${pct}%, transparent)`;
 }
 
+const TEXT_VARIANT: Record<string, string> = {
+	'var(--color-steel)': 'var(--color-steel-text)',
+	'var(--color-teal)': 'var(--color-teal-text)',
+	'var(--color-taupe)': 'var(--color-taupe-text)',
+	'var(--color-ok)': 'var(--color-ok-text)',
+	'var(--color-warn)': 'var(--color-warn-text)',
+	'var(--color-danger)': 'var(--color-danger-text)',
+	'var(--color-line-boldest)': 'var(--color-ink-muted)'
+};
+
+const textColor = (color: string): string => TEXT_VARIANT[color] ?? color;
+
 type PillStyle = { color: string; background: string; border: string };
 
 export function levelBadge(level: LogEvent_LogLevel): PillStyle {
@@ -46,13 +58,13 @@ export function levelBadge(level: LogEvent_LogLevel): PillStyle {
 
 	if (m.tier === 'warn') {
 		return {
-			color: 'var(--color-warn-text)',
+			color: textColor(m.color),
 			background: tint(m.color, 16),
 			border: `1px solid ${tint(m.color, 50)}`
 		};
 	}
 
-	return { color: m.color, background: tint(m.color, 10), border: `1px solid ${tint(m.color, 45)}` };
+	return { color: textColor(m.color), background: tint(m.color, 10), border: `1px solid ${tint(m.color, 45)}` };
 }
 
 export function classificationLabel(c: LogEvent_LogClassification): string {
@@ -112,7 +124,7 @@ export function categoryColor(category: LogCategory): string {
 export function categoryBadge(category: LogCategory): PillStyle {
 	const color = categoryColor(category);
 
-	return { color, background: tint(color, 10), border: `1px solid ${tint(color, 40)}` };
+	return { color: textColor(color), background: tint(color, 10), border: `1px solid ${tint(color, 40)}` };
 }
 
 /** Most serious first, not `log_min_messages` order, which ranks LOG above ERROR. */

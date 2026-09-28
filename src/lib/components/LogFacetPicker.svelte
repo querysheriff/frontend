@@ -89,13 +89,13 @@
 	const rowCls =
 		'flex w-full cursor-pointer items-center gap-2.5 px-2.5 py-2 text-left font-sans text-sm text-ink data-[selected]:bg-hover';
 	const boxCls = 'flex size-3.5 flex-none items-center justify-center border border-line-bold';
-	const countCls = 'font-mono text-xs text-ink/70';
-	const emptyCls = 'px-2.5 py-2.5 font-sans text-sm text-ink/70';
+	const countCls = 'font-mono text-xs text-ink-muted';
+	const emptyCls = 'px-2.5 py-2.5 font-sans text-sm text-ink-muted';
 </script>
 
 {#if field === null}
 	<Command.Root bind:ref={fieldList} class="outline-none">
-		<div class="border-b border-line px-3.5 py-2 font-sans text-2xs font-semibold text-ink/70">Filter by</div>
+		<div class="border-b border-line px-3.5 py-2 font-sans text-2xs font-semibold text-ink-muted">Filter by</div>
 		<Command.List aria-label="Filter fields" class="max-h-[18rem] overflow-y-auto p-1.5">
 			<Command.Viewport>
 				{#each fields as meta (meta.field)}
@@ -152,7 +152,9 @@
 						<span class={boxCls}>
 							{#if picked.includes(value.value)}<CheckIcon class="size-3 text-command" />{/if}
 						</span>
-						<span class="min-w-0 flex-1 truncate {value.value === '' ? 'text-ink/70 italic' : ''}">{value.label}</span>
+						<span class="min-w-0 flex-1 truncate {value.value === '' ? 'text-ink-muted italic' : ''}"
+							>{value.label}</span
+						>
 						<span class={countCls}>{fmtCount(value.count)}</span>
 					</Command.Item>
 				{/each}
@@ -161,7 +163,7 @@
 		</Command.List>
 
 		{#if truncated}
-			<div class="border-t border-line px-3 py-1.5 font-sans text-xs text-ink/70">
+			<div class="border-t border-line px-3 py-1.5 font-sans text-xs text-ink-muted">
 				Showing the most frequent values only
 			</div>
 		{/if}

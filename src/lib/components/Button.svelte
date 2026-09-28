@@ -24,8 +24,8 @@
 
 	const variants: Record<ButtonVariant, string> = {
 		primary: 'bg-command font-bold text-paper enabled:hover:bg-danger',
-		secondary: 'border border-line-strong font-bold text-ink/70 enabled:hover:bg-hover',
-		ghost: 'border border-line-card font-semibold text-ink/70 enabled:hover:bg-hover enabled:hover:text-command'
+		secondary: 'border border-line-strong font-bold text-ink-muted enabled:hover:bg-hover',
+		ghost: 'border border-line-card font-semibold text-ink-muted enabled:hover:bg-hover enabled:hover:text-command'
 	};
 
 	const sizes: Record<ButtonSize, string> = {

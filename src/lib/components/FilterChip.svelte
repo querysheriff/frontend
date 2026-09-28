@@ -31,8 +31,8 @@
 		title={description}
 		class="flex cursor-pointer items-center gap-1.5 py-1 pr-1.5 pl-2 font-mono text-sm whitespace-nowrap"
 	>
-		<span class="text-ink/70">{label}</span>
-		<span class="font-semibold {op === '!=' ? 'text-danger' : 'text-command'}">{op}</span>
+		<span class="text-ink-muted">{label}</span>
+		<span class="font-semibold {op === '!=' ? 'text-danger-text' : 'text-command'}">{op}</span>
 		{#if op !== 'exists'}
 			<span class="max-w-[13.75rem] truncate text-ink">{values}</span>
 		{/if}
@@ -41,7 +41,7 @@
 		type="button"
 		onclick={onremove}
 		aria-label="Remove {description} filter"
-		class="cursor-pointer border-l border-line px-1.5 py-1.5 text-ink/55 hover:bg-hover hover:text-danger"
+		class="cursor-pointer border-l border-line px-1.5 py-1.5 text-ink/55 hover:bg-hover hover:text-danger-text"
 	>
 		<XIcon class="size-3" />
 	</button>

@@ -99,7 +99,7 @@ export function errMsg(e: unknown): string {
 
 // The vivid warn/ok fills fail text contrast, so text uses their darker variants.
 export function durationColor(ms: number, warnMs: number, dangerMs: number): string {
-	if (ms >= dangerMs) return 'var(--color-danger)';
+	if (ms >= dangerMs) return 'var(--color-danger-text)';
 	if (ms >= warnMs) return 'var(--color-warn-text)';
 	return 'var(--color-ok-text)';
 }

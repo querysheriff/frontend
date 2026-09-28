@@ -107,7 +107,7 @@
 									class="size-3.5 text-command"
 								/>{/if}
 						</span>
-						<span class="font-mono text-sm leading-[20px] whitespace-nowrap text-ink/70"
+						<span class="font-mono text-sm leading-[20px] whitespace-nowrap text-ink-muted"
 							>{r.start ? fmtClockDate(r.start) : '—'}</span
 						>
 					</td>
@@ -154,17 +154,17 @@
 										<div class="mt-2 border-l border-line-strong pl-3.5">
 											{#each g.events as e (tsKey(e.from))}
 												<div class={timelineGrid}>
-													<span class="font-mono text-sm leading-[18px] whitespace-nowrap text-ink/70">
+													<span class="font-mono text-sm leading-[18px] whitespace-nowrap text-ink-muted">
 														{#if r.start && e.from && e.to}{relFrom(r.start, e.from)}–{relFrom(r.start, e.to)}{/if}
 													</span>
-													<span class="text-right font-mono text-sm leading-[18px] whitespace-nowrap text-ink/70">
+													<span class="text-right font-mono text-sm leading-[18px] whitespace-nowrap text-ink-muted">
 														{fmtDuration(durationMs(e.from, e.to))}
 													</span>
 													<span
 														class="font-sans text-xs leading-[18px] font-bold whitespace-nowrap"
 														style:color={statusColor(e.status)}>{statusLabel(e.status)}</span
 													>
-													<span class="truncate font-mono text-sm leading-[18px] text-ink/70">{waitText(e)}</span>
+													<span class="truncate font-mono text-sm leading-[18px] text-ink-muted">{waitText(e)}</span>
 												</div>
 											{/each}
 										</div>

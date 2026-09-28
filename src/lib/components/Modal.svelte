@@ -27,7 +27,7 @@
 		>
 			<div class="flex items-center justify-between gap-3 border-b border-line px-5 py-4">
 				<Dialog.Title class="font-sans text-xl font-bold text-ink">{title}</Dialog.Title>
-				<Dialog.Close aria-label="Close" class="cursor-pointer leading-none text-ink/55 hover:text-danger">
+				<Dialog.Close aria-label="Close" class="cursor-pointer leading-none text-ink/55 hover:text-danger-text">
 					<XIcon class="size-4" />
 				</Dialog.Close>
 			</div>

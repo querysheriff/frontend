@@ -13,24 +13,28 @@
 
 	/* Text; also the base of the line-* and hover-* scale below. */
 	--color-ink: #3a2a1f;
+	--color-ink-muted: #6f6258;
 
 	/* Accent */
 	--color-command: #a83d2b;
 
 	--color-danger: #c23a24;
+	--color-danger-text: #b93622;
 	--color-danger-on-ink: color-mix(in oklab, var(--color-danger) 60%, var(--color-paper));
 	/* -text variants are darkened to clear WCAG AA as text; the vivid bases stay for dots and fills. */
-	--color-warn-text: #9a5b12;
-	--color-warn: #d97b1c;
-	--color-ok: #5c9e34;
-	--color-ok-text: #46781f;
+	--color-warn: #c86d14;
+	--color-warn-text: #92530d;
+	--color-ok: #578f32;
+	--color-ok-text: #40701d;
 	--color-panic: #5e1414;
 
 	/* Data / chart series */
 	--color-steel: #6c8392;
 	--color-steel-text: #546774; /* darker steel that clears AA as text (e.g. tag labels) */
 	--color-teal: #4e7a86;
-	--color-taupe: #9a8f7e;
+	--color-teal-text: #456f7a;
+	--color-taupe: #827666;
+	--color-taupe-text: #6f6354;
 
 	/* Semantic neutral scale — ink at fixed alphas, named by role: line-* for borders, hover-* for
 	   background tints, weak to strong. */

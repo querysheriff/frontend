@@ -112,14 +112,14 @@
 			{#snippet children({ data: point }: { data: MetricSeriesRow })}
 				{@const entries = hovered(point.at)}
 				<div class="flex flex-col gap-1 font-mono text-xs leading-[1.4] whitespace-nowrap">
-					<div class="text-ink/70">{fmtBucketRange(point.at, model.step)}</div>
+					<div class="text-ink-muted">{fmtBucketRange(point.at, model.step)}</div>
 					{#if entries.length === 0}
-						<div class="text-ink/70">No events</div>
+						<div class="text-ink-muted">No events</div>
 					{:else}
 						{#each entries as entry (entry.row.key)}
 							<div class="flex items-center gap-1.5">
 								<span class="size-2 flex-none" style:background={entry.row.color}></span>
-								<span class="flex-1 text-ink/70">{entry.row.label}</span>
+								<span class="flex-1 text-ink-muted">{entry.row.label}</span>
 								<span class="font-semibold text-ink">{fmtCountFull(entry.count)}</span>
 							</div>
 							{#if detail}
@@ -144,8 +144,8 @@
 	{#if message}
 		<div
 			class="pointer-events-none absolute flex items-center justify-center font-mono text-sm {error
-				? 'text-danger'
-				: 'text-ink/70'}"
+				? 'text-danger-text'
+				: 'text-ink-muted'}"
 			style:left="{labelWidth}px"
 			style:right="16px"
 			style:top="0px"
@@ -159,7 +159,7 @@
 		{#each rows as row, r (row.key)}
 			<div
 				class="absolute flex items-center gap-1.5 pr-2 font-sans text-2xs font-semibold {row.total > 0
-					? 'text-ink/70'
+					? 'text-ink-muted'
 					: 'text-ink/35'}"
 				style:top="{r * ROW_HEIGHT}px"
 				style:height="{ROW_HEIGHT}px"
