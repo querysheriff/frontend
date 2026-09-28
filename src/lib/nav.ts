@@ -62,7 +62,7 @@ export const adminItems: NavItem[] = [
 // A sub-view of Queries, reached by clicking a row, so it has no sidebar entry.
 const queryDetail = {
 	title: 'Query detail',
-	description: 'How often this query ran, how long it took, and real samples'
+	description: 'How often this query ran, how long it took, and real captured runs'
 };
 
 export function screenFor(pathname: string): { title: string; description: string } {

@@ -1,5 +1,5 @@
 {
-    # Disable Caddy's admin API.
+	# Disable Caddy's admin API.
 	admin off
 
 	# Don't save config changes to disk.
@@ -13,13 +13,13 @@
 }
 
 :3000 {
-    # Serve files from /srv.
+	# Serve files from /srv.
 	root * /srv
 
 	# Compress responses with zstd/gzip when supported.
 	encode
 
-    # Revalidate normal files instead of caching them long-term.
+	# Revalidate normal files instead of caching them long-term.
 	header ?Cache-Control no-cache
 
 	# Match Svelte's hashed build assets.

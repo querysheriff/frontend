@@ -124,7 +124,7 @@
 
 <DocCard id="qd-query" class="px-4 pt-3.5 pb-4">
 	<header class="pr-9">
-		<SectionHeader title="Query" description="The normalized query — each captured run below fills in real values" />
+		<SectionHeader title="Query" description="The normalized query, with changing values replaced by placeholders" />
 	</header>
 
 	<div class="mt-3.5">
@@ -164,7 +164,7 @@
 	<ChartPanel
 		docId="qd-speed"
 		title="Query speed over time"
-		description="How long this query took per run on average, and how much of that was disk I/O"
+		description="Average time per run, including time spent on disk IO"
 	>
 		{#if timing.some((s) => s.points.length > 0)}
 			<LineChart series={timing} from={chartRange.from} to={chartRange.to} {bucketMs} format={fmtDuration} />
@@ -178,7 +178,7 @@
 	<div class="border-b border-line py-3.5 pr-11 pl-4">
 		<SectionHeader
 			title="Captured samples"
-			description="Individual runs of this query — the real values each one used, and a plan when captured"
+			description="Real runs with their values, duration, and execution plan when captured"
 		/>
 	</div>
 
