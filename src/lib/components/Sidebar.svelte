@@ -2,13 +2,13 @@
 	import { MediaQuery } from 'svelte/reactivity';
 	import { LogOutIcon, XIcon } from '@lucide/svelte';
 	import { Dialog } from 'bits-ui';
+	import { asset } from '$app/paths';
 	import { page } from '$app/state';
 	import { afterNavigate } from '$app/navigation';
 	import { errMsg } from '$lib/format';
 	import { navItems, adminItems, isNavActive } from '$lib/nav';
 	import { session } from '$lib/session.svelte';
 	import { sidebar } from '$lib/sidebar.svelte';
-	import QuerySheriffMark from '$lib/icons/QuerySheriffMark.svelte';
 
 	const navClass = (active: boolean): string =>
 		`flex items-center gap-3 border-l-[3px] py-2.5 pr-3 pl-3.5 transition-colors ${
@@ -37,7 +37,7 @@
 {#snippet body()}
 	<!-- Height matches the PageBar (min-h-[4.25rem]) so this border lines up with the section header's. -->
 	<div class="flex h-[4.25rem] items-center gap-3 border-b border-line px-5">
-		<QuerySheriffMark class="size-8 flex-none text-ink" />
+		<img src={asset('/logo.svg')} alt="" class="size-11 flex-none" />
 		<span class="font-sans text-2xl font-bold text-ink">QuerySheriff</span>
 		<button
 			type="button"
