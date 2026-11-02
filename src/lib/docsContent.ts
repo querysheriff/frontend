@@ -65,9 +65,9 @@ const docContent: Record<string, DocEntry> = {
 			{
 				heading: 'How it works',
 				body: [
-					'`pg_stat_statements` does not keep every individual query duration, so these percentiles are estimated from each query’s average time and call count.',
+					'`pg_stat_statements` does not keep every individual query duration, so these percentiles are estimated from the average time and call count of each query.',
 					'Utility commands and queries averaging under 10 ms are excluded so very fast work does not hide slower queries.',
-					'Use this chart mainly for trends, not exact per-request latency.'
+					'The estimates are good for spotting trends but too rough for exact per-request latency.'
 				]
 			}
 		]
@@ -81,7 +81,7 @@ const docContent: Record<string, DocEntry> = {
 				body: [
 					'One row per normalized query that ran during the selected time range.',
 					'Normalized means values are replaced with placeholders. For example, `id = 10` and `id = 25` become `id = $1`, so PostgreSQL can group them together.',
-					'Tags come from the samples captured in the selected time range. A key shows every value it had, and `*_id` tags stay on the samples only.',
+					'Tags come from the samples captured in the selected time range. If a tag had several values, each one is shown. `*_id` tags appear only on individual samples.',
 					{
 						list: [
 							'**Query**: normalized SQL',
@@ -98,7 +98,7 @@ const docContent: Record<string, DocEntry> = {
 			{
 				heading: 'Why it matters',
 				body: [
-					'This is the fastest way to find queries worth improving. Sorting by **% Time** is usually a good start.',
+					'Start here to find queries worth improving. Sorting by **% Time** is usually the best first step.',
 					'A 50 ms query running a million times can matter more than a 5 second query running twice.',
 					{
 						list: [
@@ -115,7 +115,7 @@ const docContent: Record<string, DocEntry> = {
 				heading: 'How it works',
 				body: [
 					'QuerySheriff reads `pg_stat_statements` every minute and stores the changes in its counters.',
-					'The selected time range is then combined into the totals, averages, and percentages shown here.',
+					'The totals, averages, and percentages here add up those changes over the selected time range.',
 					'Open a query to investigate it in more detail.'
 				]
 			}
@@ -155,7 +155,7 @@ const docContent: Record<string, DocEntry> = {
 				heading: 'Why it matters',
 				body: [
 					'It shows whether this query is getting slower and whether disk IO is a large part of that time.',
-					'High IO can mean the query reads a lot of data and may be worth checking for better indexes or a better query plan.'
+					'High IO often means the query reads a lot of data. A better index or query plan may help.'
 				]
 			},
 			{
@@ -181,7 +181,7 @@ const docContent: Record<string, DocEntry> = {
 			{
 				heading: 'Why it matters',
 				body: [
-					'Grouping similar runs lets the charts and totals describe the query as a whole instead of one execution.'
+					'Grouping similar runs lets the charts and totals describe the query as a whole, across all its executions.'
 				]
 			}
 		]
@@ -342,7 +342,7 @@ const docContent: Record<string, DocEntry> = {
 				heading: 'How it works',
 				body: [
 					'Samples come from PostgreSQL logs. `log_min_duration_statement` can log slow queries, and `auto_explain` can add their plans.',
-					'Only queries that PostgreSQL logs can appear here, so this is not necessarily every execution.'
+					'Only runs that PostgreSQL logged appear here, so the list usually does not include every execution.'
 				]
 			}
 		]
@@ -362,7 +362,7 @@ const docContent: Record<string, DocEntry> = {
 			{
 				heading: 'Why it matters',
 				body: [
-					'It quickly shows when important database problems happened.',
+					'It shows at a glance when the database had problems.',
 					'`ERROR` usually means an operation failed, `FATAL` means a connection was terminated, and `PANIC` is a serious PostgreSQL failure.',
 					'Check serious spikes, then open the logs below for details.'
 				]
@@ -455,7 +455,7 @@ const docContent: Record<string, DocEntry> = {
 							'**Transaction open too long**: open for 10 minutes'
 						]
 					},
-					'Query, lock, and transaction alerts include useful query details and SQL for terminating the session.',
+					'Query, lock, and transaction alerts include the query details and the SQL to terminate the session.',
 					'**Weekly report** arrives Monday at 08:00 UTC with the 10 busiest queries from the previous week.'
 				]
 			}
