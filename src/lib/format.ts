@@ -76,10 +76,35 @@ export function fmtAxisTime(value: Date | number): string {
 
 const isIdTag = (key: string): boolean => key.endsWith('_id');
 
-export function kvTags(tags: Record<string, string>): string[] {
-	return Object.entries(tags)
-		.sort(([a], [b]) => Number(isIdTag(a)) - Number(isIdTag(b)) || a.localeCompare(b))
-		.map(([k, v]) => `${k}=${v}`);
+export type KeyValue = { key: string; value: string };
+
+/** `key=value` pills sorted by key, `*_id` keys last, then by value; a key repeats once per value. */
+export function kvTags(tags: Record<string, string> | KeyValue[]): string[] {
+	const pairs = Array.isArray(tags) ? tags : Object.entries(tags).map(([key, value]) => ({ key, value }));
+	return pairs
+		.toSorted(
+			(a, b) =>
+				Number(isIdTag(a.key)) - Number(isIdTag(b.key)) || a.key.localeCompare(b.key) || a.value.localeCompare(b.value)
+		)
+		.map((t) => `${t.key}=${t.value}`);
+}
+
+/**
+ * A sample's tag pills. When the sample carries exactly the query's tags, they fold into one
+ * "base tags" pill and only its `*_id` tags are listed; otherwise every tag is listed.
+ */
+export function sampleTags(
+	tags: Record<string, string>,
+	baseTags: KeyValue[]
+): { matchesBase: boolean; tags: string[] } {
+	const entries = Object.entries(tags);
+	const own = entries.filter(([key]) => !isIdTag(key));
+	const matchesBase =
+		baseTags.length > 0 &&
+		own.length === baseTags.length &&
+		own.every(([key, value]) => baseTags.some((t) => t.key === key && t.value === value));
+	const listed = matchesBase ? Object.fromEntries(entries.filter(([key]) => isIdTag(key))) : tags;
+	return { matchesBase, tags: kvTags(listed) };
 }
 
 /** A bits-ui Command filter: the picker lists match by substring, not bits-ui's default fuzzy score. */

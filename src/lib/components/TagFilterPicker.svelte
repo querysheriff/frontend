@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { Command } from 'bits-ui';
+	import { timestampFromDate } from '@bufbuild/protobuf/wkt';
 	import { CheckIcon, ChevronLeftIcon, SearchIcon } from '@lucide/svelte';
 	import { statementClient } from '$lib/connect';
 	import { ctx } from '$lib/state.svelte';
@@ -39,7 +40,15 @@
 	const keyRows = $derived(keys.data ?? []);
 	const valueRows = $derived(values.data ?? []);
 
-	const scope = () => ({ serverName: ctx.server, databaseName: ctx.db });
+	const scope = () => {
+		const { from, to } = ctx.timeRange();
+		return {
+			serverName: ctx.server,
+			databaseName: ctx.db,
+			from: timestampFromDate(from),
+			to: timestampFromDate(to)
+		};
+	};
 
 	$effect(() => {
 		if (step !== 'key') return;

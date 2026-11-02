@@ -284,6 +284,29 @@ export declare type ListStatementsResponse = Message<"querysheriff.v1.ListStatem
 export declare const ListStatementsResponseSchema: GenMessage<ListStatementsResponse>;
 
 /**
+ * Tag is one key=value pair; a statement repeats a key for each value its samples carried.
+ *
+ * @generated from message querysheriff.v1.Tag
+ */
+export declare type Tag = Message<"querysheriff.v1.Tag"> & {
+  /**
+   * @generated from field: string key = 1;
+   */
+  key: string;
+
+  /**
+   * @generated from field: string value = 2;
+   */
+  value: string;
+};
+
+/**
+ * Describes the message querysheriff.v1.Tag.
+ * Use `create(TagSchema)` to create a new message.
+ */
+export declare const TagSchema: GenMessage<Tag>;
+
+/**
  * @generated from message querysheriff.v1.StatementStat
  */
 export declare type StatementStat = Message<"querysheriff.v1.StatementStat"> & {
@@ -303,9 +326,9 @@ export declare type StatementStat = Message<"querysheriff.v1.StatementStat"> & {
   userName: string;
 
   /**
-   * @generated from field: map<string, string> tags = 4;
+   * @generated from field: repeated querysheriff.v1.Tag tags = 4;
    */
-  tags: { [key: string]: string };
+  tags: Tag[];
 
   /**
    * @generated from field: int64 calls = 5;
@@ -365,17 +388,12 @@ export declare type GetStatementResponse = Message<"querysheriff.v1.GetStatement
   query: string;
 
   /**
-   * @generated from field: map<string, string> tags = 2;
-   */
-  tags: { [key: string]: string };
-
-  /**
-   * @generated from field: string server_name = 3;
+   * @generated from field: string server_name = 2;
    */
   serverName: string;
 
   /**
-   * @generated from field: string database_name = 4;
+   * @generated from field: string database_name = 3;
    */
   databaseName: string;
 };
@@ -385,6 +403,58 @@ export declare type GetStatementResponse = Message<"querysheriff.v1.GetStatement
  * Use `create(GetStatementResponseSchema)` to create a new message.
  */
 export declare const GetStatementResponseSchema: GenMessage<GetStatementResponse>;
+
+/**
+ * @generated from message querysheriff.v1.GetStatementTagsRequest
+ */
+export declare type GetStatementTagsRequest = Message<"querysheriff.v1.GetStatementTagsRequest"> & {
+  /**
+   * @generated from field: string server_name = 1;
+   */
+  serverName: string;
+
+  /**
+   * @generated from field: string database_name = 2;
+   */
+  databaseName: string;
+
+  /**
+   * @generated from field: uint64 statement_id = 3;
+   */
+  statementId: bigint;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp from = 4;
+   */
+  from?: Timestamp | undefined;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp to = 5;
+   */
+  to?: Timestamp | undefined;
+};
+
+/**
+ * Describes the message querysheriff.v1.GetStatementTagsRequest.
+ * Use `create(GetStatementTagsRequestSchema)` to create a new message.
+ */
+export declare const GetStatementTagsRequestSchema: GenMessage<GetStatementTagsRequest>;
+
+/**
+ * @generated from message querysheriff.v1.GetStatementTagsResponse
+ */
+export declare type GetStatementTagsResponse = Message<"querysheriff.v1.GetStatementTagsResponse"> & {
+  /**
+   * @generated from field: repeated querysheriff.v1.Tag tags = 1;
+   */
+  tags: Tag[];
+};
+
+/**
+ * Describes the message querysheriff.v1.GetStatementTagsResponse.
+ * Use `create(GetStatementTagsResponseSchema)` to create a new message.
+ */
+export declare const GetStatementTagsResponseSchema: GenMessage<GetStatementTagsResponse>;
 
 /**
  * @generated from message querysheriff.v1.GetStatementSeriesRequest
@@ -683,6 +753,16 @@ export declare type ListTagKeysRequest = Message<"querysheriff.v1.ListTagKeysReq
    * @generated from field: string database_name = 2;
    */
   databaseName: string;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp from = 3;
+   */
+  from?: Timestamp | undefined;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp to = 4;
+   */
+  to?: Timestamp | undefined;
 };
 
 /**
@@ -746,6 +826,16 @@ export declare type ListTagValuesRequest = Message<"querysheriff.v1.ListTagValue
    * @generated from field: string key = 3;
    */
   key: string;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp from = 4;
+   */
+  from?: Timestamp | undefined;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp to = 5;
+   */
+  to?: Timestamp | undefined;
 };
 
 /**
@@ -951,6 +1041,14 @@ export declare const StatementService: GenService<{
     methodKind: "unary";
     input: typeof GetStatementRequestSchema;
     output: typeof GetStatementResponseSchema;
+  },
+  /**
+   * @generated from rpc querysheriff.v1.StatementService.GetStatementTags
+   */
+  getStatementTags: {
+    methodKind: "unary";
+    input: typeof GetStatementTagsRequestSchema;
+    output: typeof GetStatementTagsResponseSchema;
   },
   /**
    * @generated from rpc querysheriff.v1.StatementService.GetStatementSeries

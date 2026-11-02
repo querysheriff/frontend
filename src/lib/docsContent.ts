@@ -81,7 +81,7 @@ const docContent: Record<string, DocEntry> = {
 				body: [
 					'One row per normalized query that ran during the selected time range.',
 					'Normalized means values are replaced with placeholders. For example, `id = 10` and `id = 25` become `id = $1`, so PostgreSQL can group them together.',
-					'Tags from the latest captured sample are shown on the normalized query.',
+					'Tags come from the samples captured in the selected time range. A key shows every value it had, and `*_id` tags stay on the samples only.',
 					{
 						list: [
 							'**Query**: normalized SQL',

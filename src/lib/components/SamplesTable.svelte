@@ -2,7 +2,7 @@
 	import { timestampDate } from '@bufbuild/protobuf/wkt';
 	import { ArrowUpIcon, ExternalLinkIcon } from '@lucide/svelte';
 	import { SampleSortColumn, type StatementSample } from '$lib/gen/querysheriff/v1/statement_pb';
-	import { fmtDuration, fmtTs, kvTags, runDurationColor } from '$lib/format';
+	import { fmtDuration, fmtTs, runDurationColor, sampleTags, type KeyValue } from '$lib/format';
 	import { Tooltip } from 'bits-ui';
 	import type { SqlTether } from '$lib/components/SqlPopover.svelte';
 	import LoadingOverlay from '$lib/components/LoadingOverlay.svelte';
@@ -22,7 +22,7 @@
 		sort: Sort<SampleSortColumn>;
 		sql: SqlTether;
 		statementId: string;
-		baseTags: Record<string, string>;
+		baseTags: KeyValue[];
 		loading?: boolean;
 	} = $props();
 
@@ -34,12 +34,6 @@
 		{ label: 'Plan', align: 'left', cls: 'w-[7rem]' },
 		{ label: 'Duration', column: SampleSortColumn.DURATION, align: 'right', cls: 'w-[6.875rem]' }
 	];
-
-	const hasBaseTags = $derived(Object.keys(baseTags).length > 0);
-
-	// Samples carry the base tags too, so show only what differs from the list shown at the top.
-	const extraTags = (tags: Record<string, string>): string[] =>
-		kvTags(Object.fromEntries(Object.entries(tags).filter(([k, v]) => baseTags[k] !== v)));
 </script>
 
 <div class="relative overflow-x-auto">
@@ -53,7 +47,7 @@
 		</thead>
 		<tbody>
 			{#each samples as s (s.id)}
-				{@const extra = extraTags(s.tags)}
+				{@const pills = sampleTags(s.tags, baseTags)}
 				<tr class="hover:bg-hover-soft">
 					<td
 						class="hidden border-b border-line-soft px-4 py-3 align-top font-mono text-sm leading-[20px] whitespace-nowrap text-ink/75 sm:table-cell"
@@ -67,17 +61,17 @@
 							class="inline-block max-w-full cursor-default overflow-hidden border-0 bg-transparent p-0 text-left align-top font-mono text-sm leading-[20px] text-ellipsis whitespace-nowrap text-ink transition-colors hover:text-command focus-visible:text-command focus-visible:outline-none"
 							>{s.preview}</Tooltip.Trigger
 						>
-						{#if hasBaseTags || extra.length > 0}
+						{#if pills.matchesBase || pills.tags.length > 0}
 							<TagRow class="mt-1">
-								{#if hasBaseTags}
+								{#if pills.matchesBase}
 									<span
-										title="Also carries the base tags shown at the top"
+										title="Carries exactly the tags shown at the top"
 										class="inline-flex items-center gap-1 border border-line px-1.5 py-px font-mono text-xs whitespace-nowrap text-ink-muted"
 									>
 										<ArrowUpIcon class="size-2.5" />base tags
 									</span>
 								{/if}
-								{#each extra as t (t)}
+								{#each pills.tags as t (t)}
 									<Tag text={t} title={t} />
 								{/each}
 							</TagRow>

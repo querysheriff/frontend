@@ -18,6 +18,7 @@ import {
 	fmtTs,
 	kvTags,
 	runDurationColor,
+	sampleTags,
 	truncate
 } from './format';
 
@@ -130,6 +131,46 @@ test('kvTags sorts alphabetically with *_id keys last', () => {
 		'order_id=2',
 		'user_id=1'
 	]);
+});
+
+test('kvTags lists every value of a repeated key, sorted', () => {
+	const tags = [
+		{ key: 'op', value: 'B' },
+		{ key: 'app', value: 'web' },
+		{ key: 'op', value: 'A' }
+	];
+	expect(kvTags(tags)).toEqual(['app=web', 'op=A', 'op=B']);
+	expect(tags[0].value).toBe('B');
+});
+
+describe('sampleTags', () => {
+	const base = [
+		{ key: 'app', value: 'web' },
+		{ key: 'op', value: 'A' }
+	];
+
+	test('a sample with exactly the base tags folds them and lists only *_id tags', () => {
+		expect(sampleTags({ op: 'A', app: 'web', process_id: '7' }, base)).toEqual({
+			matchesBase: true,
+			tags: ['process_id=7']
+		});
+	});
+
+	test('a key with more values than the sample carries lists every sample tag', () => {
+		const both = [...base, { key: 'op', value: 'B' }];
+		expect(sampleTags({ op: 'A', app: 'web', process_id: '7' }, both)).toEqual({
+			matchesBase: false,
+			tags: ['app=web', 'op=A', 'process_id=7']
+		});
+	});
+
+	test('a sample missing a base key lists its own tags', () => {
+		expect(sampleTags({ app: 'web' }, base)).toEqual({ matchesBase: false, tags: ['app=web'] });
+	});
+
+	test('no base tags means no fold', () => {
+		expect(sampleTags({ process_id: '7' }, [])).toEqual({ matchesBase: false, tags: ['process_id=7'] });
+	});
 });
 
 describe('containsFilter', () => {

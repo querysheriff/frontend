@@ -21,8 +21,8 @@
 
 	const preview = "SELECT u.id, u.name, u.email FROM users u WHERE u.bio = 'hi there' AND u.status = 'active'";
 	const samples = [
-		{ id: 1n, durationMs: 6.01, hasPlan: true, tags: { endpoint: '/user/1', request: '1' } },
-		{ id: 2n, durationMs: 1700, hasPlan: true, tags: { endpoint: '/user/2', request: '2' } },
+		{ id: 1n, durationMs: 6.01, hasPlan: true, tags: { app: 'web', request_id: '1' } },
+		{ id: 2n, durationMs: 1700, hasPlan: true, tags: { app: 'web', request_id: '2' } },
 		{ id: 3n, durationMs: 12_000, hasPlan: false }
 	].map((init, i) =>
 		create(StatementSampleSchema, {
@@ -32,7 +32,8 @@
 		})
 	);
 
-	const baseTags = { app: 'web' };
+	const baseTags = [{ key: 'app', value: 'web' }];
+	const mixedTags = [...baseTags, { key: 'app', value: 'api' }];
 
 	const fullQuery = async () => preview.replace(/ (FROM|WHERE)/g, '\n$1');
 
@@ -48,10 +49,19 @@
 	{/snippet}
 </Story>
 
+<Story name="Several values per key">
+	{#snippet template()}
+		<div class="border border-line-card bg-card">
+			<SamplesTable {samples} bind:sort {sql} statementId="1" baseTags={mixedTags} />
+		</div>
+		<SqlPopover tether={sql} load={fullQuery} />
+	{/snippet}
+</Story>
+
 <Story name="Empty">
 	{#snippet template()}
 		<div class="border border-line-card bg-card">
-			<SamplesTable samples={[]} bind:sort {sql} statementId="1" baseTags={{}} />
+			<SamplesTable samples={[]} bind:sort {sql} statementId="1" baseTags={[]} />
 		</div>
 	{/snippet}
 </Story>

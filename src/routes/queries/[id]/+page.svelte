@@ -6,7 +6,8 @@
 		SampleSortColumn,
 		type GetStatementResponse,
 		type GetStatementSeriesResponse,
-		type StatementSample
+		type StatementSample,
+		type Tag as QueryTag
 	} from '$lib/gen/querysheriff/v1/statement_pb';
 	import { statementClient } from '$lib/connect';
 	import { ctx, serversState } from '$lib/state.svelte';
@@ -35,6 +36,7 @@
 
 	const meta = new Loader<GetStatementResponse>();
 	const series = new Loader<GetStatementSeriesResponse>();
+	const statementTags = new Loader<QueryTag[]>();
 	const samples = new PagedLoader<StatementSample>((s) => s.id);
 
 	const sql = Tooltip.createTether<SqlPayload>();
@@ -71,6 +73,16 @@
 
 	$effect(() => {
 		const statement = meta.data;
+		if (!statement) return statementTags.reset(meta.loading, metaError);
+		const request = scope(statement);
+		return statementTags.load(
+			(signal) => statementClient.getStatementTags(request, { signal }).then((res) => res.tags),
+			{ keepData: true }
+		);
+	});
+
+	$effect(() => {
+		const statement = meta.data;
 		if (!statement) return samples.reset(meta.loading, metaError);
 		const request = {
 			...scope(statement),
@@ -98,7 +110,8 @@
 		};
 	});
 
-	const baseTags = $derived(meta.data?.tags ?? {});
+	// Tags of the samples captured in the range, so they match the samples table below.
+	const baseTags = $derived(statementTags.data ?? []);
 	const tags = $derived(kvTags(baseTags));
 
 	const bucketMs = $derived(Number(series.data?.bucketMs ?? 0n));

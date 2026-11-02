@@ -29,7 +29,12 @@
 			rows: 8609n,
 			pctIo: 10.1,
 			pctTime: 17.4,
-			tags: { service: 'checkout-api', env: 'production' }
+			tags: [
+				{ key: 'service', value: 'checkout-api' },
+				{ key: 'env', value: 'production' },
+				{ key: 'gql_operation', value: 'OrderList' },
+				{ key: 'gql_operation', value: 'OrderSearch' }
+			]
 		},
 		{
 			id: 2n,
