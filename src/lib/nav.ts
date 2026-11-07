@@ -9,6 +9,14 @@ import {
 	UsersIcon
 } from '@lucide/svelte';
 
+// Set when the dashboard is served under a path prefix, like the landing page's demo at /demo.
+const ROOT: string = import.meta.env.VITE_APP_ROOT ?? '';
+
+/** A dashboard path with the prefix it is served under. */
+export const route = (path: string): string => ROOT + path;
+
+const unprefixed = (pathname: string): string => (pathname.startsWith(ROOT) ? pathname.slice(ROOT.length) : pathname);
+
 type NavItem = { label: string; href: string; description: string; icon: Component<{ class?: string }> };
 
 export const navItems: NavItem[] = [
@@ -66,9 +74,10 @@ const queryDetail = {
 };
 
 export function screenFor(pathname: string): { title: string; description: string } {
-	if (pathname.startsWith('/queries/')) return queryDetail;
-	const item = [...navItems, ...adminItems].find((i) => pathname.startsWith(i.href)) ?? navItems[0];
+	const path = unprefixed(pathname);
+	if (path.startsWith('/queries/')) return queryDetail;
+	const item = [...navItems, ...adminItems].find((i) => path.startsWith(i.href)) ?? navItems[0];
 	return { title: item.label, description: item.description };
 }
 
-export const isNavActive = (item: NavItem, pathname: string): boolean => pathname.startsWith(item.href);
+export const isNavActive = (item: NavItem, pathname: string): boolean => unprefixed(pathname).startsWith(item.href);

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { route } from '$lib/nav';
 	import { StatementSortColumn, type StatementStat } from '$lib/gen/querysheriff/v1/statement_pb';
 	import { avgDurationColor, fmtCount, fmtDuration, kvTags } from '$lib/format';
 	import { Tooltip } from 'bits-ui';
@@ -60,7 +61,7 @@
 						<div class="min-w-0">
 							<!-- The link stretches over the row, so hover anchors on the query text instead. -->
 							<a
-								href="/queries/{q.id}"
+								href={route(`/queries/${q.id}`)}
 								onfocus={(e) => e.currentTarget.matches(':focus-visible') && sql.open(`sql-${q.id}`)}
 								onblur={() => sql.close()}
 								class="group/link inline-block max-w-full align-top after:absolute after:inset-0 focus-visible:outline-none"
@@ -88,7 +89,7 @@
 						class="hidden border-b border-line-soft px-4 py-3 align-top font-mono text-md leading-[20px] text-ink sm:table-cell"
 					>
 						<a
-							href="/queries/{q.id}"
+							href={route(`/queries/${q.id}`)}
 							title={q.userName}
 							tabindex="-1"
 							class="relative z-[1] block truncate focus-visible:outline-none">{q.userName}</a

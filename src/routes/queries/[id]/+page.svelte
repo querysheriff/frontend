@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { route } from '$lib/nav';
 	import { ArrowLeftIcon } from '@lucide/svelte';
 	import { page } from '$app/state';
 	import { timestampFromDate } from '@bufbuild/protobuf/wkt';
@@ -129,7 +130,7 @@
 </script>
 
 <a
-	href="/queries"
+	href={route('/queries')}
 	class="mb-5 inline-flex items-center gap-2 font-mono text-sm font-semibold text-command hover:underline"
 >
 	<ArrowLeftIcon class="size-3.5" /><span>Back</span>

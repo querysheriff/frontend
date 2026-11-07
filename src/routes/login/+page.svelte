@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { route } from '$lib/nav';
 	import { MailIcon, LockIcon, ArrowRightIcon } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
 	import { asset } from '$app/paths';
@@ -13,7 +14,7 @@
 	let submitting = $state(false);
 
 	$effect(() => {
-		if (session.loaded && session.isAuthenticated) goto('/queries', { replaceState: true });
+		if (session.loaded && session.isAuthenticated) goto(route('/queries'), { replaceState: true });
 	});
 
 	async function submit(e: SubmitEvent) {

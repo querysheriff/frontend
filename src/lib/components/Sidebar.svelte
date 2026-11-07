@@ -6,7 +6,7 @@
 	import { page } from '$app/state';
 	import { afterNavigate } from '$app/navigation';
 	import { errMsg } from '$lib/format';
-	import { navItems, adminItems, isNavActive } from '$lib/nav';
+	import { navItems, adminItems, isNavActive, route } from '$lib/nav';
 	import { session } from '$lib/session.svelte';
 	import { sidebar } from '$lib/sidebar.svelte';
 
@@ -51,7 +51,7 @@
 
 	<nav class="flex flex-col gap-0.5 px-2 py-2.5">
 		{#each session.isSuperAdmin ? [...navItems, ...adminItems] : navItems as item (item.href)}
-			<a href={item.href} title={item.label} class={navClass(isNavActive(item, page.url.pathname))}>
+			<a href={route(item.href)} title={item.label} class={navClass(isNavActive(item, page.url.pathname))}>
 				<!-- 1px up: geometrically centred, the icons read low next to the labels. -->
 				<item.icon class="size-4 flex-none -translate-y-px" />
 				<span class="font-sans text-lg leading-6 font-semibold">{item.label}</span>

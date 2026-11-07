@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { route } from '$lib/nav';
 	import { untrack, type Snippet } from 'svelte';
 	import { afterNavigate, goto, pushState, replaceState } from '$app/navigation';
 	import { page } from '$app/state';
@@ -33,8 +34,8 @@
 
 	$effect(() => {
 		if (!session.loaded) return;
-		if (!session.isAuthenticated) goto('/login', { replaceState: true });
-		else if (requireSuperAdmin && !session.isSuperAdmin) goto('/queries', { replaceState: true });
+		if (!session.isAuthenticated) goto(route('/login'), { replaceState: true });
+		else if (requireSuperAdmin && !session.isSuperAdmin) goto(route('/queries'), { replaceState: true });
 	});
 
 	$effect(() => {

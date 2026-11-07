@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { route } from '$lib/nav';
 	import { ChevronDownIcon, ChevronRightIcon, ExternalLinkIcon } from '@lucide/svelte';
 	import { timestampDate } from '@bufbuild/protobuf/wkt';
 	import type { LogRecord } from '$lib/gen/querysheriff/v1/log_pb';
@@ -192,12 +193,12 @@
 											>
 											{#if sample.statementId}
 												<a
-													href="/queries/{sample.statementId}"
+													href={route(`/queries/${sample.statementId}`)}
 													class="font-sans text-xs font-semibold text-command hover:underline">Open query</a
 												>
 												{#if sample.hasPlan}
 													<a
-														href="/queries/{sample.statementId}/plan/{sample.id}"
+														href={route(`/queries/${sample.statementId}/plan/${sample.id}`)}
 														target="_blank"
 														rel="noopener"
 														class="inline-flex items-center gap-1.5 font-sans text-xs font-semibold text-command hover:underline"

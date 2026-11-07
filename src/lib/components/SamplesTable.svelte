@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { route } from '$lib/nav';
 	import { timestampDate } from '@bufbuild/protobuf/wkt';
 	import { ArrowUpIcon, ExternalLinkIcon } from '@lucide/svelte';
 	import { SampleSortColumn, type StatementSample } from '$lib/gen/querysheriff/v1/statement_pb';
@@ -80,7 +81,7 @@
 					<td class="border-b border-line-soft px-4 py-3 align-top">
 						{#if s.hasPlan}
 							<a
-								href="/queries/{statementId}/plan/{s.id}"
+								href={route(`/queries/${statementId}/plan/${s.id}`)}
 								target="_blank"
 								rel="noopener"
 								class="inline-flex items-center gap-1.5 align-top font-mono text-sm leading-[20px] font-semibold whitespace-nowrap text-command hover:underline"
